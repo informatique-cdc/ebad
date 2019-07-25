@@ -1,0 +1,388 @@
+package fr.icdc.ebad.service;
+
+import com.querydsl.core.types.Predicate;
+import fr.icdc.ebad.config.Constants;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.LogBatch;
+import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.QBatch;
+import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.repository.BatchRepository;
+import fr.icdc.ebad.repository.LogBatchRepository;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * Created by DTROUILLET on 12/03/2018.
+ */
+@RunWith(SpringRunner.class)
+@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
+@SpringBootTest
+public class BatchServiceTest {
+    @MockBean
+    private ShellService shellService;
+
+    @MockBean
+    private EnvironnementService environnementService;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private LogBatchRepository logBatchRepository;
+
+    @MockBean
+    private BatchRepository batchRepository;
+
+    @MockBean private NotificationService notificationService;
+
+    @Autowired
+    private BatchService batchService;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void runBatch() throws Exception {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        String commandExpected = "/home/app1/shell/Itest.ksh 20180201 toto ";
+
+        User user = new User();
+        user.setId(1L);
+
+
+        Batch batch = new Batch();
+        batch.setPath("test.ksh");
+        batch.setName("testName");
+        batch.setId(1L);
+        batch.setParams("${DATE_TRAITEMENT} toto");
+
+        Norme norme = new Norme();
+        norme.setName("norme 1");
+        norme.setPathShell("shell/");
+        norme.setCommandLine("/bin/bash $1");
+
+        Application application = new Application();
+        application.setId(1L);
+        application.setDateParametrePattern("yyyyMMdd");
+        application.setCode("AA1");
+
+        Environnement environnementIntegration = new Environnement();
+        environnementIntegration.setId(1L);
+        environnementIntegration.setPrefix("I");
+        environnementIntegration.setApplication(application);
+        environnementIntegration.setHomePath("/home/app1");
+        environnementIntegration.setNorme(norme);
+        environnementIntegration.setName("testEnv");
+
+        RetourBatch retourBatch = new RetourBatch();
+        retourBatch.setReturnCode(5);
+
+
+        LogBatch logBatchExpected = new LogBatch();
+        logBatchExpected.setId(1L);
+        when(environnementService.getDateTraiement(
+                eq(environnementIntegration.getId()))
+        ).thenReturn(simpleDateFormat.parse("01/02/2018"));
+
+        when(shellService.runCommand(
+                eq(environnementIntegration), eq(commandExpected))
+        ).thenReturn(retourBatch);
+
+        when(userService.getUserWithAuthorities()).thenReturn(user);
+
+        when(logBatchRepository.save(
+                argThat(logBatch -> {
+                            try {
+                                return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
+                                        && logBatch.getBatch().getId().equals(batch.getId())
+                                        && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
+                                        && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getReturnCode() == retourBatch.getReturnCode();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            return false;
+                        }
+                )
+        )).thenReturn(logBatchExpected);
+
+        doNothing().when(notificationService).createNotification(any());
+
+        batchService.runBatch(batch,environnementIntegration);
+
+        verify(environnementService,times(1)).getDateTraiement(
+                argThat(environnement -> environnementIntegration.getId().equals(environnement))
+        );
+
+        verify(shellService,times(1)).runCommand(
+                argThat(environnement -> environnement.getId().equals(environnementIntegration.getId())
+                ), eq(commandExpected)
+        );
+
+        verify(userService,times(1)).getUserWithAuthorities();
+        verify(logBatchRepository,times(1)).save(
+                argThat(logBatch -> {
+                            try {
+                                return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
+                                        && logBatch.getBatch().getId().equals(batch.getId())
+                                        && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
+                                        && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getReturnCode() == retourBatch.getReturnCode();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            return false;
+                        }
+                )
+        );
+
+        verify(notificationService,times(1)).createNotification(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
+    }
+
+    @Test
+    public void runBatch2() throws Exception {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        String commandExpected = "/home/app1/shell/Itest.ksh 20180201 toto ";
+
+        User user = new User();
+        user.setId(1L);
+
+
+        Batch batch = new Batch();
+        batch.setPath("test.ksh");
+        batch.setName("testName");
+        batch.setId(1L);
+        batch.setParams("${DATE_TRAITEMENT} toto");
+
+        Norme norme = new Norme();
+        norme.setName("norme 1");
+        norme.setPathShell("shell/");
+        norme.setCommandLine("/bin/bash $1");
+
+        Application application = new Application();
+        application.setId(1L);
+        application.setDateParametrePattern("yyyyMMdd");
+        application.setCode("AA1");
+
+        Environnement environnementIntegration = new Environnement();
+        environnementIntegration.setId(1L);
+        environnementIntegration.setPrefix("I");
+        environnementIntegration.setApplication(application);
+        environnementIntegration.setHomePath("/home/app1");
+        environnementIntegration.setNorme(norme);
+        environnementIntegration.setName("testEnv");
+
+        RetourBatch retourBatch = new RetourBatch();
+        retourBatch.setReturnCode(5);
+
+
+        LogBatch logBatchExpected = new LogBatch();
+        logBatchExpected.setId(1L);
+        when(environnementService.getDateTraiement(
+                eq(environnementIntegration.getId()))
+        ).thenReturn(simpleDateFormat.parse("01/02/2018"));
+
+        when(shellService.runCommand(
+                eq(environnementIntegration), eq(commandExpected))
+        ).thenReturn(retourBatch);
+
+        when(userService.getUserWithAuthorities()).thenReturn(user);
+
+        when(logBatchRepository.save(
+                argThat(logBatch -> {
+                            try {
+                                return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
+                                        && logBatch.getBatch().getId().equals(batch.getId())
+                                        && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
+                                        && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getReturnCode() == retourBatch.getReturnCode();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            return false;
+                        }
+                )
+        )).thenReturn(logBatchExpected);
+
+        doNothing().when(notificationService).createNotification(any());
+
+        when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
+        when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
+
+        batchService.runBatch(batch.getId(), environnementIntegration.getId(), batch.getParams());
+
+        verify(environnementService, times(1)).getDateTraiement(
+                argThat(environnement -> environnementIntegration.getId().equals(environnement))
+        );
+
+        verify(shellService, times(1)).runCommand(
+                argThat(environnement -> environnement.getId().equals(environnementIntegration.getId())
+                ), eq(commandExpected)
+        );
+
+        verify(userService, times(1)).getUserWithAuthorities();
+        verify(logBatchRepository, times(1)).save(
+                argThat(logBatch -> {
+                            try {
+                                return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
+                                        && logBatch.getBatch().getId().equals(batch.getId())
+                                        && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
+                                        && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getReturnCode() == retourBatch.getReturnCode();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            return false;
+                        }
+                )
+        );
+
+        verify(notificationService, times(1)).createNotification(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
+    }
+
+
+    @Test
+    public void removeBatchsWithoutEnvironnement() {
+        List<Batch> batchList = new ArrayList<>();
+        Batch batch1 = new Batch();
+        batch1.setId(1L);
+        batchList.add(batch1);
+
+        Batch batch2 = new Batch();
+        batch2.setId(2L);
+        batchList.add(batch2);
+
+        List<LogBatch> logBatches1 = new ArrayList<>();
+        LogBatch logBatch1 = new LogBatch();
+        logBatch1.setId(1L);
+        logBatches1.add(logBatch1);
+
+        List<LogBatch> logBatches2 = new ArrayList<>();
+
+        when(batchRepository.findBatchWithoutEnvironnement()).thenReturn(batchList);
+
+        batchService.removeBatchsWithoutEnvironnement();
+
+        verify(logBatchRepository).deleteAllByBatchId(eq(1L));
+        verify(logBatchRepository).deleteAllByBatchId(eq(2L));
+
+        verify(batchRepository).delete(batch1);
+        verify(batchRepository).delete(batch2);
+
+    }
+
+    @Test
+    public void testGetAllBatchWithPredicate() {
+        List<Batch> batchList = new ArrayList<>();
+        Batch batch1 = new Batch();
+        batch1.setId(1L);
+        batchList.add(batch1);
+
+        Batch batch2 = new Batch();
+        batch2.setId(2L);
+        batchList.add(batch2);
+        Predicate predicate = QBatch.batch.id.ne(3L);
+        when(batchRepository.findAll(eq(predicate))).thenReturn(batchList);
+
+        List<Batch> results = batchService.getAllBatchWithPredicate(predicate);
+
+        assertEquals(batchList.size(), results.size());
+        assertTrue(results.contains(batch1));
+        assertTrue(results.contains(batch2));
+    }
+
+    @Test
+    public void testGetAllBatchFromEnvironmentAsPage() {
+        List<Batch> batchList = new ArrayList<>();
+        Batch batch1 = new Batch();
+        batch1.setId(1L);
+        batchList.add(batch1);
+
+        Batch batch2 = new Batch();
+        batch2.setId(2L);
+        batchList.add(batch2);
+
+        Page<Batch> batchPage = new PageImpl<>(batchList, Pageable.unpaged(), 2L);
+
+        when(batchRepository.findBatchFromEnvironnement(any(Pageable.class), eq(1L))).thenReturn(batchPage);
+
+        Page<Batch> result = batchService.getAllBatchFromEnvironmentAsPage(1L, Pageable.unpaged());
+
+        assertEquals(batchPage, result);
+        assertEquals(batchList, result.getContent());
+        assertEquals(batchList.size(), result.getContent().size());
+    }
+
+    @Test
+    public void testSaveBatch() {
+        Batch batch = new Batch();
+        batch.setId(1L);
+
+        when(batchRepository.save(eq(batch))).thenReturn(batch);
+
+        Batch result = batchService.saveBatch(batch);
+
+        verify(batchRepository).save(eq(batch));
+        assertEquals(batch, result);
+    }
+
+    @Test
+    public void testGetBatch() {
+        Batch batch = new Batch();
+        batch.setId(1L);
+
+        when(batchRepository.getOne(eq(1L))).thenReturn(batch);
+        Batch result = batchService.getBatch(1L);
+
+        assertEquals(batch, result);
+    }
+
+    @Test
+    public void testDeleteBatchById() {
+        batchService.deleteBatch(1L);
+        verify(batchRepository).deleteById(eq(1L));
+    }
+
+    @Test
+    public void deleteBatch() {
+        Batch batch = new Batch();
+        batch.setId(1L);
+
+        batchService.deleteBatch(batch);
+
+        verify(batchRepository).delete(eq(batch));
+    }
+}

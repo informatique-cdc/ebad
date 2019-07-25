@@ -1,0 +1,25 @@
+
+
+EEEEEEEEEEEEEEEEEEEEEEBBBBBBBBBBBBBBBBB               AAA               DDDDDDDDDDDDD
+E::::::::::::::::::::EB::::::::::::::::B             A:::A              D::::::::::::DDD
+E::::::::::::::::::::EB::::::BBBBBB:::::B           A:::::A             D:::::::::::::::DD
+EE::::::EEEEEEEEE::::EBB:::::B     B:::::B         A:::::::A            DDD:::::DDDDD:::::D
+  E:::::E       EEEEEE  B::::B     B:::::B        A:::::::::A             D:::::D    D:::::D
+  E:::::E               B::::B     B:::::B       A:::::A:::::A            D:::::D     D:::::D
+  E::::::EEEEEEEEEE     B::::BBBBBB:::::B       A:::::A A:::::A           D:::::D     D:::::D
+  E:::::::::::::::E     B:::::::::::::BB       A:::::A   A:::::A          D:::::D     D:::::D
+  E:::::::::::::::E     B::::BBBBBB:::::B     A:::::A     A:::::A         D:::::D     D:::::D
+  E::::::EEEEEEEEEE     B::::B     B:::::B   A:::::AAAAAAAAA:::::A        D:::::D     D:::::D
+  E:::::E               B::::B     B:::::B  A:::::::::::::::::::::A       D:::::D     D:::::D
+  E:::::E       EEEEEE  B::::B     B:::::B A:::::AAAAAAAAAAAAA:::::A      D:::::D    D:::::D
+EE::::::EEEEEEEE:::::EBB:::::BBBBBB::::::BA:::::A             A:::::A   DDD:::::DDDDD:::::D
+E::::::::::::::::::::EB:::::::::::::::::BA:::::A               A:::::A  D:::::::::::::::DD
+E::::::::::::::::::::EB::::::::::::::::BA:::::A                 A:::::A D::::::::::::DDD
+EEEEEEEEEEEEEEEEEEEEEEBBBBBBBBBBBBBBBBBAAAAAAA                   AAAAAAADDDDDDDDDDDDD           BY INFORMATIQUE CDC
+
+
+
+
+
+
+

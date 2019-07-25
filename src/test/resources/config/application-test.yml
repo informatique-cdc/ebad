@@ -1,0 +1,50 @@
+server:
+    port: 10344
+    address: localhost
+
+async:
+    corePoolSize: 2
+    maxPoolSize: 50
+    queueCapacity: 10000
+spring:
+    profiles:
+        active: test
+    datasource:
+        dataSourceClassName: org.h2.jdbcx.JdbcDataSource
+        url: jdbc:h2:mem:ebad;DB_CLOSE_DELAY=-1
+        databaseName:
+        serverName:
+        username:
+        password:
+
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        database: H2
+        openInView: false
+        show_sql: true
+        generate-ddl: false
+        hibernate:
+               ddl-auto: create-drop
+               naming:
+                 physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        properties:
+            hibernate.cache.use_second_level_cache: false
+            hibernate.cache.use_query_cache: false
+            hibernate.generate_statistics: true
+            #hibernate.hbm2ddl.auto: validate
+    main:
+      allow-bean-definition-overriding: true
+metrics:
+    jmx.enabled: false
+
+ebad:
+    security:
+        authentication:
+            jwt:
+                secret: test
+                # Token is valid 24 hours
+                token-validity-in-seconds: 86400
+                token-validity-in-seconds-for-remember-me: 2592000
+    ssh:
+        login: ebad
+        private_key_path: src/test/resources/key

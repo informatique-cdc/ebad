@@ -1,0 +1,64 @@
+server:
+  port: 10300
+  servlet:
+    context-path: /ebad
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+      file-size-threshold: 0
+  main:
+    allow-bean-definition-overriding: true
+    jpa:
+      properties:
+        hibernate:
+          enable_lazy_load_no_trans: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ebad?stringtype=unspecified
+    username: postgres
+    password:
+    data:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: POSTGRESQL
+    openInView: false
+    show_sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate.cache.use_second_level_cache: true
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: true
+      hibernate.cache.ehcache.missing: create
+      hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+      hibernate.jdbc.time_zone: Europe/Paris
+      hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+
+ebad:
+  security:
+    authentication:
+      jwt:
+        secret: my-secret-token-to-change-in-production
+        # Token is valid 24 hours
+        token-validity-in-seconds: 86400
+        token-validity-in-seconds-for-remember-me: 2592000
+  ssh:
+    login: ebad
+    private_key_path: /path/to/key
+
+management:
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+security:
+  basic:
+    enabled: false
