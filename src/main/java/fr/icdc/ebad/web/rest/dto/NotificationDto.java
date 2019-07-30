@@ -9,5 +9,4 @@ public class NotificationDto {
     private String content;
     private DateTime createdDate = DateTime.now();
     private boolean read = false;
-    private UserDto receiver;
 }
