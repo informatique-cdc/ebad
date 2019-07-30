@@ -56,7 +56,7 @@ public class BatchService {
     }
 
 
-    @Transactional(readOnly = true)
+    @Transactional
     public RetourBatch runBatch(Long batchId, Long environnementId, String params) throws JSchException, IOException, EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
         batch.setParams(params);
