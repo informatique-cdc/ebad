@@ -33,8 +33,8 @@ public class Application {
     /**
      * Main method, used to run the application.
      *
-     * @param args
-     * @throws UnknownHostException
+     * @param args all main args
+     * @throws UnknownHostException exception
      */
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(Application.class);
@@ -44,7 +44,6 @@ public class Application {
         APPLICATION_LOGGER.info("Access URLs:\n----------------------------------------------------------\n\t" +
                 "Local: \t\thttp://127.0.0.1:{}\n\t" +
                 "External: \thttp://{}:{}\n----------------------------------------------------------", env.getProperty("server.port"), InetAddress.getLocalHost().getHostAddress(), env.getProperty("server.port"));
-
     }
 
     /**
@@ -72,7 +71,9 @@ public class Application {
         if (env.getActiveProfiles().length == 0) {
         	APPLICATION_LOGGER.warn("No Spring profile configured, running with default configuration");
         } else {
-        	APPLICATION_LOGGER.info("Running with Spring profile(s) : {}", Arrays.toString(env.getActiveProfiles()));
+            if (APPLICATION_LOGGER.isInfoEnabled()) {
+                APPLICATION_LOGGER.info("Running with Spring profile(s) : {}", Arrays.toString(env.getActiveProfiles()));
+            }
         }
     }
 }
