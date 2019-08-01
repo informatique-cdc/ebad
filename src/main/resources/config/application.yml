@@ -4,6 +4,9 @@ server:
     context-path: /ebad
 
 spring:
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
   servlet:
     multipart:
       max-file-size: 1024MB

@@ -7,6 +7,8 @@ import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,10 +26,12 @@ import java.util.List;
 public class DirectoryService {
     private final DirectoryRepository directoryRepository;
     private final ShellService shellService;
+    private final MessageSource messageSource;
 
-    public DirectoryService(DirectoryRepository directoryRepository, ShellService shellService) {
+    public DirectoryService(DirectoryRepository directoryRepository, ShellService shellService, MessageSource messageSource) {
         this.directoryRepository = directoryRepository;
         this.shellService = shellService;
+        this.messageSource = messageSource;
     }
 
     @Transactional
@@ -38,7 +42,8 @@ public class DirectoryService {
             List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory);
             files.stream().filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename())).forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime())));
         } catch (SftpException | JSchException e) {
-            throw new EbadServiceException("Impossible de lister les fichiers sur le serveur distant du répertoire " + directory.getName(), e);
+            String[] params = new String[]{directory.getName()};
+            throw new EbadServiceException(messageSource.getMessage("error.ebad.directory.notread", params, LocaleContextHolder.getLocale()), e);
         }
         return filesDtoList;
     }
@@ -47,7 +52,7 @@ public class DirectoryService {
     public void removeFile(FilesDto filesDTO) throws EbadServiceException {
         Directory directory = directoryRepository.getOne(filesDTO.getDirectory().getId());
         if (!directory.isCanWrite()) {
-            throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
+            throw new IllegalAccessError(messageSource.getMessage("error.ebad.permission-denied", null, LocaleContextHolder.getLocale()));
         }
 
         try {
@@ -70,7 +75,7 @@ public class DirectoryService {
 
     public void uploadFile(InputStream stream, FilesDto filesDTO) throws EbadServiceException {
         if (filesDTO.getDirectory() == null) {
-            throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
+            throw new IllegalAccessError(messageSource.getMessage("error.ebad.permission-denied", null, LocaleContextHolder.getLocale()));
         }
 
         try {

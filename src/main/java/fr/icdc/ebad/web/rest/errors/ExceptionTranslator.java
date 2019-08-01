@@ -5,6 +5,8 @@ import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -38,7 +40,13 @@ public class ExceptionTranslator implements ProblemHandling {
 	private static final String VIOLATIONS_KEY = "violations";
 	private static final String PATH_KEY = "path";
 
-	/**
+    private final MessageSource messageSource;
+
+    public ExceptionTranslator(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
+    /**
      * Post-process Problem payload to add the message key for front-end if needed
      */
     @Override
@@ -85,7 +93,7 @@ public class ExceptionTranslator implements ProblemHandling {
 
         Problem problem = Problem.builder()
             .withType(ErrorConstants.CONSTRAINT_VIOLATION_TYPE)
-            .withTitle("Method argument not valid")
+                .withTitle(messageSource.getMessage("error.argument.invalid", null, LocaleContextHolder.getLocale()))
             .withStatus(defaultConstraintViolationStatus())
             .with(MESSAGE_KEY, ErrorConstants.ERR_VALIDATION)
             .with(FIELD_ERRORS_KEY, fieldErrors)
