@@ -43,7 +43,7 @@ public class DirectoryService {
             files.stream().filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename())).forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime())));
         } catch (SftpException | JSchException e) {
             String[] params = new String[]{directory.getName()};
-            throw new EbadServiceException(messageSource.getMessage("error.ebad.directory.notread", params, LocaleContextHolder.getLocale()), e);
+            throw new EbadServiceException(messageSource.getMessage("error.ebad.directory.notlist", params, LocaleContextHolder.getLocale()), e);
         }
         return filesDtoList;
     }
@@ -58,7 +58,8 @@ public class DirectoryService {
         try {
             shellService.removeFile(directory, filesDTO.getName());
         } catch (SftpException | JSchException e) {
-            throw new EbadServiceException("Impossible de supprimer le fichier " + filesDTO.getName());
+            String[] params = new String[]{filesDTO.getName()};
+            throw new EbadServiceException(messageSource.getMessage("error.ebad.directory.notdeleted", params, LocaleContextHolder.getLocale()));
         }
     }
 
@@ -68,8 +69,8 @@ public class DirectoryService {
         try {
             return shellService.getFile(directory, filesDTO.getName());
         } catch (SftpException | JSchException | IOException e) {
-            throw new EbadServiceException("Impossible de lire le fichier " + filesDTO.getName());
-
+            String[] params = new String[]{filesDTO.getName()};
+            throw new EbadServiceException(messageSource.getMessage("error.ebad.directory.notread", params, LocaleContextHolder.getLocale()), e);
         }
     }
 
@@ -81,7 +82,8 @@ public class DirectoryService {
         try {
             shellService.uploadFile(filesDTO.getDirectory(), stream, filesDTO.getName());
         } catch (SftpException | JSchException e) {
-            throw new EbadServiceException("Erreur lors de l'écriture d'un fichier du dossiers " + filesDTO.getDirectory().getName());
+            String[] params = new String[]{filesDTO.getName()};
+            throw new EbadServiceException(messageSource.getMessage("error.ebad.directory.notwrite", params, LocaleContextHolder.getLocale()), e);
         }
     }
 
