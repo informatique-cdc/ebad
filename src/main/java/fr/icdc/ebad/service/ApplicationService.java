@@ -26,13 +26,13 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
     private final EnvironnementService environnementService;
-    private final EnvironnementConnectorPlugin environnementConnectorPlugin;
+    private final Optional<EnvironnementConnectorPlugin> optionalEnvironnementConnectorPlugin;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, EnvironnementConnectorPlugin environnementConnectorPlugin) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, Optional<EnvironnementConnectorPlugin> optionalEnvironnementConnectorPlugin) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
         this.environnementService = environnementService;
-        this.environnementConnectorPlugin = environnementConnectorPlugin;
+        this.optionalEnvironnementConnectorPlugin = optionalEnvironnementConnectorPlugin;
     }
 
     @Transactional(readOnly = true)
@@ -96,6 +96,7 @@ public class ApplicationService {
     @Transactional
     public List<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
         Application application = this.getApplication(applicationId).orElseThrow(() -> new EbadServiceException("Aucune application trouvée"));
+        EnvironnementConnectorPlugin environnementConnectorPlugin = optionalEnvironnementConnectorPlugin.orElseThrow(() -> new EbadServiceException("Aucun plugin correspondant trouvé"));
         return environnementConnectorPlugin.discoverFromApp(application.getCode()).stream().map(
                 environnementDiscoverDto -> {
                     return Environnement.builder()
