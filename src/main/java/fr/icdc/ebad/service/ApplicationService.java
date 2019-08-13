@@ -2,10 +2,13 @@ package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +26,13 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
     private final EnvironnementService environnementService;
+    private final EnvironnementConnectorPlugin environnementConnectorPlugin;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, EnvironnementConnectorPlugin environnementConnectorPlugin) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
         this.environnementService = environnementService;
+        this.environnementConnectorPlugin = environnementConnectorPlugin;
     }
 
     @Transactional(readOnly = true)
@@ -54,10 +59,6 @@ public class ApplicationService {
         typeFichierRepository.deleteByApplication(application);
         application.getEnvironnements().forEach(environnement -> environnementService.deleteEnvironnement(environnement, true));
         applicationRepository.delete(application);
-        //FIXME DTROUILLET A CHANGER POUR LA NOUVELLE GESTION DES ROLES
-
-        // Optional<Authority> authority = authorityRepository.findById(Constants.ROLE_MODO + "_" + appId);
-        // authority.ifPresent(authorityRepository::delete);
     }
 
     @Transactional
@@ -89,5 +90,22 @@ public class ApplicationService {
             }
         }
         return users;
+    }
+
+    //FIXME DETERMINE NORME
+    @Transactional
+    public List<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
+        Application application = this.getApplication(applicationId).orElseThrow(() -> new EbadServiceException("Aucune application trouvée"));
+        return environnementConnectorPlugin.discoverFromApp(application.getCode()).stream().map(
+                environnementDiscoverDto -> {
+                    return Environnement.builder()
+                            .application(application)
+                            .host(environnementDiscoverDto.getHost())
+                            .homePath(environnementDiscoverDto.getHost())
+                            .login(environnementDiscoverDto.getLogin())
+                            .name(environnementDiscoverDto.getName())
+                            .prefix(environnementDiscoverDto.getPrefix())
+                            .build();
+                }).collect(Collectors.toList());
     }
 }
