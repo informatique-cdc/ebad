@@ -13,10 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -26,13 +23,13 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
     private final EnvironnementService environnementService;
-    private final Optional<EnvironnementConnectorPlugin> optionalEnvironnementConnectorPlugin;
+    private final List<EnvironnementConnectorPlugin> environnementConnectorPluginList;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, Optional<EnvironnementConnectorPlugin> optionalEnvironnementConnectorPlugin) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<EnvironnementConnectorPlugin> environnementConnectorPluginList) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
         this.environnementService = environnementService;
-        this.optionalEnvironnementConnectorPlugin = optionalEnvironnementConnectorPlugin;
+        this.environnementConnectorPluginList = environnementConnectorPluginList;
     }
 
     @Transactional(readOnly = true)
@@ -92,21 +89,23 @@ public class ApplicationService {
         return users;
     }
 
-    //FIXME DETERMINE NORME
+    //FIXME DETERMINE NORME FROM KIND OS OR GET DIRECTLY NORME FROM PLUGIN
     @Transactional
     public List<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
         Application application = this.getApplication(applicationId).orElseThrow(() -> new EbadServiceException("Aucune application trouvée"));
-        EnvironnementConnectorPlugin environnementConnectorPlugin = optionalEnvironnementConnectorPlugin.orElseThrow(() -> new EbadServiceException("Aucun plugin correspondant trouvé"));
-        return environnementConnectorPlugin.discoverFromApp(application.getCode()).stream().map(
-                environnementDiscoverDto -> {
-                    return Environnement.builder()
+        List<Environnement> environnements = new ArrayList<>();
+
+        for(EnvironnementConnectorPlugin environnementConnectorPlugin : environnementConnectorPluginList) {
+            environnements.addAll(environnementConnectorPlugin.discoverFromApp(application.getCode()).stream().map(
+                    environnementDiscoverDto -> Environnement.builder()
                             .application(application)
                             .host(environnementDiscoverDto.getHost())
-                            .homePath(environnementDiscoverDto.getHost())
+                            .homePath(environnementDiscoverDto.getHome())
                             .login(environnementDiscoverDto.getLogin())
                             .name(environnementDiscoverDto.getName())
                             .prefix(environnementDiscoverDto.getPrefix())
-                            .build();
-                }).collect(Collectors.toList());
+                            .build()).collect(Collectors.toList()));
+        }
+        return environnements;
     }
 }
