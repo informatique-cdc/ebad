@@ -104,6 +104,7 @@ public class ApplicationService {
                             .login(environnementDiscoverDto.getLogin())
                             .name(environnementDiscoverDto.getName())
                             .prefix(environnementDiscoverDto.getPrefix())
+                            //.norme()
                             .build()).collect(Collectors.toList()));
         }
         return environnements;
