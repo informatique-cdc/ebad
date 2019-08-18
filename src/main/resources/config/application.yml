@@ -19,7 +19,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/ebad?stringtype=unspecified
     username: postgres
     password:
-    data:
+    initialization-mode: always
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: POSTGRESQL
