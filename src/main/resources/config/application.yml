@@ -15,16 +15,11 @@ spring:
       properties:
         hibernate:
           enable_lazy_load_no_trans: true
-  datasource:
-    url: jdbc:postgresql://localhost:5432/ebad?stringtype=unspecified
-    username: postgres
-    password:
-    initialization-mode: always
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: POSTGRESQL
     openInView: false
-    show_sql: true
+    show_sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update
@@ -38,19 +33,6 @@ spring:
       hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
       hibernate.jdbc.time_zone: Europe/Paris
       hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
-
-ebad:
-  security:
-    authentication:
-      jwt:
-        secret: my-secret-token-to-change-in-production
-        # Token is valid 24 hours
-        token-validity-in-seconds: 86400
-        token-validity-in-seconds-for-remember-me: 2592000
-  ssh:
-    login: ebad
-    private_key_path: /path/to/key
-
 management:
   endpoint:
     health:

@@ -50,7 +50,7 @@ Replace <xxx> with your values.
 
 In case you want use JWT (standalone mode) run with "jwt" Spring profile 
 ```
-java -jar <downloaded-release>.jar --spring.profiles.active=jwt --spring.config.location=<path-to-your-application.yml>
+java -jar <downloaded-release>.jar --spring.profiles.active=jwt --spring.config.additional-location=<path-to-your-application.yml>
 ```
 
 By default this application run on port 10300 and context ebad : http://localhost:10300/ebad
