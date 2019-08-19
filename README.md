@@ -1,7 +1,7 @@
 # EBAD
 [![Build Status](https://travis-ci.org/informatique-cdc/ebad.svg?branch=master)](https://travis-ci.org/informatique-cdc/ebad)
-![Codecov](https://img.shields.io/codecov/c/github/informatique-cdc/ebad)
-![GitHub Releases](https://img.shields.io/github/downloads/informatique-cdc/ebad/latest/total)
+[![Codecov](https://img.shields.io/codecov/c/github/informatique-cdc/ebad)](https://codecov.io/gh/informatique-cdc/ebad)
+[![GitHub Releases](https://img.shields.io/github/downloads/informatique-cdc/ebad/latest/total)](https://github.com/informatique-cdc/ebad/releases/latest)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=informatique-cdc_ebad&metric=alert_status)](https://sonarcloud.io/dashboard?id=informatique-cdc_ebad)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=informatique-cdc_ebad&metric=bugs)](https://sonarcloud.io/dashboard?id=informatique-cdc_ebad)
