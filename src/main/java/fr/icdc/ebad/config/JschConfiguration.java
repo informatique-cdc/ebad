@@ -6,6 +6,9 @@ import fr.icdc.ebad.config.properties.EbadProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @Configuration
 public class JschConfiguration {
     private final EbadProperties ebadProperties;
@@ -17,7 +20,9 @@ public class JschConfiguration {
     @Bean
     public JSch jsch() throws JSchException {
         JSch jsch = new JSch();
-        jsch.addIdentity(ebadProperties.getSsh().getPrivateKeyPath(), ebadProperties.getSsh().getPrivateKeyPassphrase());
+        if(null != ebadProperties.getSsh().getPrivateKeyPath() && Files.exists(Paths.get(ebadProperties.getSsh().getPrivateKeyPath()))) {
+            jsch.addIdentity(ebadProperties.getSsh().getPrivateKeyPath(), ebadProperties.getSsh().getPrivateKeyPassphrase());
+        }
         return jsch;
     }
 }
