@@ -41,17 +41,18 @@ public class ShellService {
     private static final String PATH_SEPARATOR = "/";
 
     private final EbadProperties ebadProperties;
+    private final JSch jsch;
 
-    public ShellService(EbadProperties ebadProperties) {
+    public ShellService(EbadProperties ebadProperties, JSch jsch) {
         this.ebadProperties = ebadProperties;
+        this.jsch = jsch;
     }
 
 
     public RetourBatch runCommand(Environnement environnement, String command) throws JSchException, IOException {
         LOGGER.debug("run command {}", command);
         Long start = System.currentTimeMillis();
-        JSch jsch = new JSch();
-        jsch.addIdentity(ebadProperties.getSsh().getPrivateKeyPath(), ebadProperties.getSsh().getPrivateKeyPassphrase());
+
         Session session = null;
         ChannelExec channelExec = null;
         try {
@@ -107,8 +108,6 @@ public class ShellService {
     }
 
     public List<ChannelSftp.LsEntry> getListFiles(Directory directory) throws JSchException, SftpException {
-        JSch jsch = new JSch();
-        jsch.addIdentity(ebadProperties.getSsh().getPrivateKeyPath(), ebadProperties.getSsh().getPrivateKeyPassphrase());
         Session session = null;
         ChannelSftp channelSftp = null;
         try {
@@ -139,8 +138,6 @@ public class ShellService {
     }
 
     public void removeFile(Directory directory, String filename) throws JSchException, SftpException {
-        JSch jsch = new JSch();
-        jsch.addIdentity(ebadProperties.getSsh().getPrivateKeyPath(), ebadProperties.getSsh().getPrivateKeyPassphrase());
         Session session = null;
         ChannelSftp channelSftp = null;
         try {
@@ -169,9 +166,6 @@ public class ShellService {
     }
 
     public InputStream getFile(Directory directory, String filename) throws JSchException, SftpException, IOException {
-        JSch jsch = new JSch();
-        jsch.addIdentity(ebadProperties.getSsh().getPrivateKeyPath(), ebadProperties.getSsh().getPrivateKeyPassphrase());
-
         Session session = null;
         ChannelSftp channelSftp = null;
 
@@ -208,9 +202,6 @@ public class ShellService {
     }
 
     public void uploadFile(Directory directory, InputStream inputStream, String filename) throws JSchException, SftpException {
-        JSch jsch = new JSch();
-        jsch.addIdentity(ebadProperties.getSsh().getPrivateKeyPath(), ebadProperties.getSsh().getPrivateKeyPassphrase());
-
         Session session = null;
         ChannelSftp channelSftp = null;
 
