@@ -1,4 +1,5 @@
 # EBAD
+[![Build Status](https://travis-ci.org/informatique-cdc/ebad.svg?branch=master)](https://travis-ci.org/informatique-cdc/ebad)
 
 EBAD is a project to run your batchs on remote server from a central place.
 
