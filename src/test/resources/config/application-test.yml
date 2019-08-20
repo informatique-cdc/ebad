@@ -33,7 +33,7 @@ spring:
             #hibernate.hbm2ddl.auto: validate
     main:
       allow-bean-definition-overriding: true
-      banner-mode: off
+      banner-mode: "off"
 metrics:
     jmx.enabled: false
 
