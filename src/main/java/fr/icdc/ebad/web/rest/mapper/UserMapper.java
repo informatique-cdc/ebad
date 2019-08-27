@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 public class UserMapper implements OrikaMapperFactoryConfigurer {
     @Override
     public void configure(MapperFactory orikaMapperFactory) {
-        orikaMapperFactory.classMap(User.class, UserDto.class)
-                .byDefault()
-                .register();
         orikaMapperFactory.classMap(UserDto.class, User.class)
                 .byDefault()
                 .exclude("applications")
