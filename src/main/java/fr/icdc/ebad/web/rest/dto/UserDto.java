@@ -26,6 +26,7 @@ public class UserDto extends AbstractAuditingDto {
     private String langKey;
     private String activationKey;
     private Set<AuthorityDto> authorities = new HashSet<>();
+    private Set<UsageApplicationSimpleDto> usageApplications = new HashSet<>();
 
     @JsonSerialize
     @JsonDeserialize
