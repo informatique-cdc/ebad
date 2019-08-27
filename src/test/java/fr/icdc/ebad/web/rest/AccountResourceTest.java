@@ -12,7 +12,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,8 +27,9 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Created by dtrouillet on 20/08/2019.
@@ -135,5 +135,56 @@ public class AccountResourceTest {
                 .andExpect(jsonPath("$.lastName",is("testln")))
                 .andExpect(jsonPath("$.langKey",is("FR_fr")))
         ;
+    }
+
+    @Test
+    public void csrfTest() throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/csrf");
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
+    }
+
+    @Test
+    public void passwordErrorMinSizeTest() throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("a");
+
+        restMvc.perform(builder)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void passwordErrorMaxSizeTest() throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("abcekdjsfghdfkjghdfkjghdfkgjhdfgkjdhfgkdfjghzeuoifgvbdkfjvbzusiohfsdkjfhsziouefhaizuefhizseuhfsdiufhazdfhsdfhsdjfhsdfhosduhfsuidhfizuegfsiudfsoidfoeidfhdofhsdfuoh");
+
+        restMvc.perform(builder)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void passwordErrorEmptyTest() throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("");
+
+        restMvc.perform(builder)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void passwordErrorNullTest() throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password");
+
+        restMvc.perform(builder)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void passwordTest() throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("newPassword");
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk());
+
+        verify(userService).changePassword(eq("newPassword"));
     }
 }
