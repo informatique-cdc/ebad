@@ -52,8 +52,7 @@ public class AccountResource {
      * @param key key
      * @return account
      */
-    @GetMapping(value = "/activate",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/activate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<String> activateAccount(@RequestParam(value = "key") String key) {
         return Optional.ofNullable(userService.activateRegistration(key)).map(user -> new ResponseEntity<String>(HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
@@ -65,8 +64,7 @@ public class AccountResource {
      * @param request the http request
      * @return user login
      */
-    @GetMapping(value = "/authenticate",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public String isAuthenticated(HttpServletRequest request) {
         LOGGER.debug("REST request to check if the current user is authenticated");
@@ -78,8 +76,7 @@ public class AccountResource {
      *
      * @return current user
      */
-    @GetMapping(value = "/account",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<UserAccountDto> getAccount() throws EbadServiceException {
         return Optional.ofNullable(userService.getUserWithAuthorities()).map(user -> new ResponseEntity<>(new UserAccountDto(user.getLogin(), null, user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey(), user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toCollection(LinkedList::new))), HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
@@ -96,8 +93,7 @@ public class AccountResource {
      * @param userDTO the new user
      * @return current user
      */
-    @PostMapping(value = "/account",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> saveAccount(@RequestBody UserAccountDto userDTO) {
         return userRepository.findOneByLogin(userDTO.getLogin()).filter(u -> u.getLogin().equals(SecurityUtils.getCurrentLogin())).map(u -> {
@@ -113,8 +109,7 @@ public class AccountResource {
      * @param password the new password
      * @return current user
      */
-    @PostMapping(value = "/account/change_password",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/account/change_password", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> changePassword(@RequestBody String password) {
         if (StringUtils.isEmpty(password) || password.length() < SIZE_MIN_PASSWORD || password.length() > SIZE_MAX_PASSWORD) {
