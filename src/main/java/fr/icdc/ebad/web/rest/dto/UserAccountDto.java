@@ -1,11 +1,16 @@
 package fr.icdc.ebad.web.rest.dto;
 
+import lombok.Getter;
+import lombok.ToString;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
 
+@Getter
+@ToString
 public class UserAccountDto {
 
     @Pattern(regexp = "^[a-z0-9]*$")
@@ -48,43 +53,4 @@ public class UserAccountDto {
         this.roles = roles;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getLangKey() {
-        return langKey;
-    }
-
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    @Override
-    public String toString() {
-        return "UserAccountDto{" +
-        "login='" + login + '\'' +
-        ", firstName='" + firstName + '\'' +
-        ", lastName='" + lastName + '\'' +
-        ", email='" + email + '\'' +
-        ", langKey='" + langKey + '\'' +
-        ", roles=" + roles +
-        '}';
-    }
 }

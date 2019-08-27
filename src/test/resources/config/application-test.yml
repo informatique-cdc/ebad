@@ -1,7 +1,6 @@
 server:
     port: 10344
     address: localhost
-
 async:
     corePoolSize: 2
     maxPoolSize: 50
@@ -21,7 +20,7 @@ spring:
         database-platform: org.hibernate.dialect.H2Dialect
         database: H2
         openInView: false
-        show_sql: true
+        show_sql: false
         generate-ddl: false
         hibernate:
                ddl-auto: create-drop
@@ -34,6 +33,7 @@ spring:
             #hibernate.hbm2ddl.auto: validate
     main:
       allow-bean-definition-overriding: true
+      banner-mode: "off"
 metrics:
     jmx.enabled: false
 
