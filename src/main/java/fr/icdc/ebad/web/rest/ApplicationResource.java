@@ -5,7 +5,7 @@ import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.ApplicationService;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
-import fr.icdc.ebad.web.rest.dto.UserDto;
+import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
 import io.micrometer.core.annotation.Timed;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
@@ -125,9 +125,9 @@ public class ApplicationResource {
     @GetMapping(value = "/application/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#id,principal)")
-    public Set<UserDto> getUsersFromApplication(@PathVariable Long id) {
+    public Set<UserSimpleDto> getUsersFromApplication(@PathVariable Long id) {
         LOGGER.debug("REST request to get all users from Application");
-        return mapper.mapAsSet(applicationService.getUsers(id), UserDto.class);
+        return mapper.mapAsSet(applicationService.getUsers(id), UserSimpleDto.class);
     }
 
     /**
@@ -136,8 +136,8 @@ public class ApplicationResource {
     @GetMapping(value = "/application/moderators/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#id,principal)")
-    public Set<UserDto> getModeratorsFromApplication(@PathVariable Long id) {
+    public Set<UserSimpleDto> getModeratorsFromApplication(@PathVariable Long id) {
         LOGGER.debug("REST request to get all users from Application");
-        return mapper.mapAsSet(applicationService.getManagers(id), UserDto.class);
+        return mapper.mapAsSet(applicationService.getManagers(id), UserSimpleDto.class);
     }
 }

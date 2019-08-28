@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,7 +89,6 @@ public class UserJWTControllerTest {
         when(tokenProvider.createToken(any(), anyBoolean())).thenReturn("thisawesometoken");
 
         restMvc.perform(builder)
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.login", is("testlogin")))
                 .andExpect(jsonPath("$.password").doesNotExist())
