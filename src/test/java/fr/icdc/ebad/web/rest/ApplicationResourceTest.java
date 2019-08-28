@@ -1,11 +1,14 @@
 package fr.icdc.ebad.web.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.service.ApplicationService;
+import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,6 +32,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,11 +56,15 @@ public class ApplicationResourceTest {
 
     private MockMvc restMvc;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         this.restMvc = MockMvcBuilders.standaloneSetup(applicationResource).build();
+        objectMapper.registerModule(new JavaTimeModule());
     }
+
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
@@ -153,7 +162,42 @@ public class ApplicationResourceTest {
     }
 
     @Test
-    public void createApplication() {
+    @WithMockUser(roles = "ADMIN")
+    public void createApplication() throws Exception {
+        ApplicationDto applicationDto = new ApplicationDto();
+        applicationDto.setCode("AA0");
+        applicationDto.setDateFichierPattern("yyyyMMdd");
+        applicationDto.setDateParametrePattern("ddMMyyyy");
+        applicationDto.setName("MyApp");
+
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
+                .put("/api/application/gestion")
+                .content(objectMapper.writeValueAsString(applicationDto))
+                .contentType(MediaType.APPLICATION_JSON_UTF8);
+
+
+        Application application = Application.builder()
+                .id(1L)
+                .code("AA0")
+                .dateFichierPattern("yyyyMMdd")
+                .dateParametrePattern("ddMMyyyy")
+                .name("MyApp")
+                .build();
+
+        when(applicationService.saveApplication(argThat((argApp ->
+                argApp.getCode().equals("AA0") &&
+                        argApp.getDateFichierPattern().equals("yyyyMMdd") &&
+                        argApp.getDateParametrePattern().equals("ddMMyyyy") &&
+                        argApp.getName().equals("MyApp")
+        )))).thenReturn(application);
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code", is("AA0")))
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.dateFichierPattern", is("yyyyMMdd")))
+                .andExpect(jsonPath("$.dateParametrePattern", is("ddMMyyyy")))
+                .andExpect(jsonPath("$.name", is("MyApp")));
     }
 
     @Test
