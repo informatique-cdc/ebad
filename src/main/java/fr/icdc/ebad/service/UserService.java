@@ -32,8 +32,8 @@ import java.util.Set;
 @Transactional
 public class UserService {
 
-    public static final int NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS = 30;
-    public static final String FIELD_LOGIN_USER = "login";
+    private static final int NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS = 30;
+    private static final String FIELD_LOGIN_USER = "login";
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
@@ -136,7 +136,7 @@ public class UserService {
         }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public User changeAutorisationApplication(AuthorityApplicationDTO authorityDTO) {
         Optional<User> userOptional = userRepository.findOneByLoginUser(authorityDTO.getLoginUser());
         if (!userOptional.isPresent()) {
@@ -242,7 +242,7 @@ public class UserService {
         userToUpdate.setFirstName(firstName);
         userToUpdate.setLastName(lastName);
 
-        return updateUser(userToUpdate);
+        return userRepository.save(userToUpdate);
     }
 
     public User changeRoles(String loginUser, boolean roleAdmin, boolean roleUser) throws EbadServiceException {
