@@ -1,0 +1,16 @@
+language: java
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+cache:
+  directories:
+    - $HOME/.m2
+jdk:
+  - openjdk8
+addons:
+  sonarcloud:
+    organization: "informatique-cdc"
+    token:
+      secure: "BPzsEwqbhxZTpxkU7SpgDjywsUVJpS3mARdR2v7bCf34rQL6eSFUAoYxDLQhlufz4qVqbqFvB9ujvAdRLyQeb9B27Ctl/vRvjWIqEN4jYStpg5CB/z4TzagZ+tJEnkOAwYXo/S4ETpT9JQSbLh2IE0RtT9JyQxnwrKTtiB5UcTjSSxk899fvUNtB0FlbpuK6juNZxSYKj9YBCa9LxJhprMacCE/1zZQahgkLhFuTwRDwumfeyPHZZg2NUp19iOarbj2KIio0OKQJEZe3HLh2p7xgNoEH7d2Rh5dwLD1aqLV4LgAeuMmaQU+ynnFpwKbxrFJQvP4H+0KVhvL2bmHZ/JHtbNz2dQU2vs8XSxYwQM0FkPQ1+BN8UXmHucco6Po6Afa2sVcBDkzVEtHkDEDfZj4N8XvT/VLG5tnjfx1a0eTWELK802nh4JMM4c6FMcklMR4ZjBHBfJh8QgCCdjXIdLHYD9CvTWuqu/TTlIuME5KYBnPVOg0NjnUGUKEFWYwM3p8m4GDl3LKBBx1bppt+eNe+cb3gdlSDlrbi3GhNHB8o3LaA8SmEmYZY8F+mA9ibB4NUKHiSHI2Wzci33RFgmX9MViFXW4JF64HfmJJ4oQqa9yZ4y2NLEpBOAPL/WUcOe3eP7vYJ22Fl8yPlqsdPwNuahRsFjkIVu2UX/yQXRB4="
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=informatique-cdc_ebad -B

@@ -61,5 +61,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select user from User user left join  user.usageApplications usageApplication left join usageApplication.application application left join application.environnements environnement where environnement.id = :env and user.login = :login and usageApplication.canManage = true")
     User findManagerFromEnv(@Param("env") Long env, @Param("login") String login);
 
+    @EntityGraph(attributePaths = {"authorities", "usageApplications"})
     Optional<User> findOneById(Long id);
 }
