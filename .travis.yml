@@ -6,6 +6,8 @@ cache:
     - $HOME/.m2
 jdk:
   - openjdk8
+before_install:
+  - cp .travis.settings.xml $HOME/.m2/settings.xml
 addons:
   sonarcloud:
     organization: "informatique-cdc"

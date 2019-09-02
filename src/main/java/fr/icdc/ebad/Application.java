@@ -3,9 +3,12 @@ package fr.icdc.ebad;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,6 +28,7 @@ public class Application {
     private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(Application.class);
 
     private final Environment env;
+    private static ConfigurableApplicationContext applicationContext;
 
     public Application(Environment env) {
         this.env = env;
@@ -39,12 +43,25 @@ public class Application {
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(Application.class);
 
-
-        Environment env = app.run(args).getEnvironment();
+        applicationContext = app.run(args);
+        Environment env = applicationContext.getEnvironment();
         APPLICATION_LOGGER.info("Access URLs:\n----------------------------------------------------------\n\t" +
                 "Local: \t\thttp://127.0.0.1:{}\n\t" +
                 "External: \thttp://{}:{}\n----------------------------------------------------------", env.getProperty("server.port"), InetAddress.getLocalHost().getHostAddress(), env.getProperty("server.port"));
     }
+
+    public static void restart() {
+        ApplicationArguments args = applicationContext.getBean(ApplicationArguments.class);
+
+        Thread thread = new Thread(() -> {
+            applicationContext.close();
+            applicationContext = SpringApplication.run(Application.class, args.getSourceArgs());
+        });
+
+        thread.setDaemon(false);
+        thread.start();
+    }
+
 
     /**
      * Initializes application.
