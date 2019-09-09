@@ -33,6 +33,7 @@ spring:
       hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
       hibernate.jdbc.time_zone: Europe/Paris
       hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+      hibernate.cache.ehcache.missing_cache_strategy: create
 management:
   endpoint:
     health:
