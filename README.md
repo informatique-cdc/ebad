@@ -68,8 +68,34 @@ Then, your back is running, after this run [ebad-front](http://github.com/inform
 The user created is admin / admin .
 
 #### Authentication OAUTH2
-Authentication OAUTH2 getting started is comming soon.
+If you use OAUTH2 authentication edit you application.yml file 
+```
+security:
+  oauth2:
+    resource:
+      user-info-uri: <URL-USER-INFO>
+      prefer-token-info: true
+      jwt:
+        key-value: <JWT-KEY-VALUE>
+    client:
+      client-id: <CLIENT-ID>
+      client-secret: <CLIENT-SECRET>
 
+ebad:
+  security:
+    mapping-user:
+      authorities: <AUTHORITIES_USER_INFO_FIELD>
+      login: sub
+      firstname: <FIRSTNAME_USER_INFO_FIELD>
+      lastname: <LASTNAME_USER_INFO_FIELD>
+      email: <EMAIL_USER_INFO_FIELD>
+```
+Replace <xxx> with your values.
+
+Then run this commandline
+```
+java -jar <downloaded-release>.jar --spring.config.additional-location=<path-to-your-application.yml>
+```
 
 
 ## Getting Started Development
