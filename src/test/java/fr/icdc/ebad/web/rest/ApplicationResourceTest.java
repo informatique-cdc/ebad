@@ -26,7 +26,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -209,10 +211,48 @@ public class ApplicationResourceTest {
     }
 
     @Test
-    public void getUsersFromApplication() {
+    @WithMockUser(roles = "ADMIN")
+    public void getUsersFromApplication() throws Exception {
+        Set<User> users = new HashSet<>();
+        User user1 = User.builder().id(1L).login("test1").build();
+        users.add(user1);
+        User user2 = User.builder().id(2L).login("test2").build();
+        users.add(user2);
+        when(applicationService.getUsers(eq(1L))).thenReturn(users);
+
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
+                .get("/api/application/users/1");
+
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[0].login", is("test1")))
+                .andExpect(jsonPath("$[1].login", is("test2")));
     }
 
     @Test
-    public void getModeratorsFromApplication() {
+    @WithMockUser(roles = "ADMIN")
+    public void getModeratorsFromApplication() throws Exception {
+        Set<User> users = new HashSet<>();
+        User user1 = User.builder().id(1L).login("test1").build();
+        users.add(user1);
+        User user2 = User.builder().id(2L).login("test2").build();
+        users.add(user2);
+        when(applicationService.getManagers(eq(1L))).thenReturn(users);
+
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
+                .get("/api/application/moderators/1");
+
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[0].login", is("test1")))
+                .andExpect(jsonPath("$[1].login", is("test2")));
     }
 }
