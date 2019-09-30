@@ -5,31 +5,49 @@ import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
+import fr.icdc.ebad.repository.EnvironnementRepository;
+import fr.icdc.ebad.repository.NormeRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import ma.glasnost.orika.MapperFacade;
+import org.pf4j.PluginException;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.terracotta.modules.ehcache.ToolkitInstanceFactoryImpl.LOGGER;
+
 @Service
+@DependsOn("springPluginManager")
 public class ApplicationService {
     private static final String FIELD_NAME_APPLICATION = "name";
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
     private final EnvironnementService environnementService;
     private final List<EnvironnementConnectorPlugin> environnementConnectorPluginList;
+    private final MapperFacade mapper;
+    private final NormeRepository normeRepository;
+    private final EnvironnementRepository environnementRepository;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<EnvironnementConnectorPlugin> environnementConnectorPluginList) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, MapperFacade mapper, NormeRepository normeRepository, EnvironnementRepository environnementRepository) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
         this.environnementService = environnementService;
         this.environnementConnectorPluginList = environnementConnectorPluginList;
+        this.mapper = mapper;
+        this.normeRepository = normeRepository;
+        this.environnementRepository = environnementRepository;
     }
 
     @Transactional(readOnly = true)
@@ -61,6 +79,12 @@ public class ApplicationService {
     @Transactional
     public Application saveApplication(Application application) {
         Application applicationResult = applicationRepository.save(application);
+        try {
+            Set<Environnement> environnementsImported = importEnvironments(applicationResult.getId());
+            environnementRepository.saveAll(environnementsImported);
+        } catch (EbadServiceException e) {
+            LOGGER.error("Impossible d'importer les environnements", e);
+        }
         applicationResult.getEnvironnements();
         return application;
     }
@@ -89,23 +113,23 @@ public class ApplicationService {
         return users;
     }
 
-    //FIXME DETERMINE NORME FROM KIND OS OR GET DIRECTLY NORME FROM PLUGIN
     @Transactional
-    public List<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
+    public Set<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
         Application application = this.getApplication(applicationId).orElseThrow(() -> new EbadServiceException("Aucune application trouvée"));
-        List<Environnement> environnements = new ArrayList<>();
+        Set<Environnement> environnements = new HashSet<>();
+        List<NormeDiscoverDto> normeDiscoverDtos = mapper.mapAsList(normeRepository.findAll(), NormeDiscoverDto.class);
 
-        for(EnvironnementConnectorPlugin environnementConnectorPlugin : environnementConnectorPluginList) {
-            environnements.addAll(environnementConnectorPlugin.discoverFromApp(application.getCode()).stream().map(
-                    environnementDiscoverDto -> Environnement.builder()
-                            .application(application)
-                            .host(environnementDiscoverDto.getHost())
-                            .homePath(environnementDiscoverDto.getHome())
-                            .login(environnementDiscoverDto.getLogin())
-                            .name(environnementDiscoverDto.getName())
-                            .prefix(environnementDiscoverDto.getPrefix())
-                            //.norme()
-                            .build()).collect(Collectors.toList()));
+        try {
+            for (EnvironnementConnectorPlugin environnementConnectorPlugin : environnementConnectorPluginList) {
+                List<Environnement> environnementList = mapper.mapAsList(environnementConnectorPlugin.discoverFromApp(application.getCode(), normeDiscoverDtos), Environnement.class);
+                for (Environnement environnement : environnementList) {
+                    environnement.setApplication(application);
+                }
+                environnements.addAll(environnementList);
+            }
+        } catch (PluginException e) {
+            LOGGER.error("Une erreur est survenue lors de l'import des environnements : {}", e.getMessage(), e);
+            environnements = new HashSet<>();
         }
         return environnements;
     }

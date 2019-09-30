@@ -14,7 +14,7 @@ public class PluginConfiguration {
     }
 
     @Bean
-    public SpringPluginManager pluginManager() {
+    public SpringPluginManager springPluginManager() {
         SpringPluginManager pluginManager = new SpringPluginManager();
         pluginManager.setApplicationContext(context);
         return pluginManager;

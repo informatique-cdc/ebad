@@ -10,15 +10,13 @@ import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
-import fr.icdc.ebad.repository.AuthorityRepository;
-import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pf4j.PluginException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -29,8 +27,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -208,7 +210,7 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void testImportEnvironments() throws EbadServiceException {
+    public void testImportEnvironments() throws EbadServiceException, PluginException {
         Application application = Application.builder().code("myapp").build();
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(application));
 
@@ -223,8 +225,9 @@ public class ApplicationServiceTest {
                 .build();
         environnementDiscoverDtos.add(environnementDiscoverDto1);
 
-        when(environnementConnectorPlugin.discoverFromApp(eq("myapp"))).thenReturn(environnementDiscoverDtos);
-        List<Environnement> results = applicationService.importEnvironments(1L);
+        when(environnementConnectorPlugin.discoverFromApp(eq("myapp"), anyList())).thenReturn(environnementDiscoverDtos);
+        Set<Environnement> resultsSet = applicationService.importEnvironments(1L);
+        List<Environnement> results = new ArrayList<>(resultsSet);
 
         assertNotNull(results);
         assertEquals(1, results.size());

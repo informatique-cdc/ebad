@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.Application;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
@@ -8,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,7 +26,7 @@ public class PluginService {
         for (PluginWrapper plugin : springPluginManager.getPlugins()) {
             try {
                 if (!environnementConnectorPlugins.isEmpty())
-                    environnementConnectorPlugins.get(0).discoverFromApp("test");
+                    environnementConnectorPlugins.get(0).discoverFromApp("test", new ArrayList<>());
             } catch (Exception e) {
                 LOGGER.error("erreur");
             }
@@ -36,7 +36,7 @@ public class PluginService {
             //Application.restart();
             try {
                 if (!environnementConnectorPlugins.isEmpty())
-                    environnementConnectorPlugins.get(0).discoverFromApp("test");
+                    environnementConnectorPlugins.get(0).discoverFromApp("test", new ArrayList<>());
             } catch (Exception e) {
                 LOGGER.error("erreur");
             }
