@@ -11,7 +11,7 @@
 
 EBAD is a project to run your batchs on remote server from a central place.
 
-## Getting Started Usage
+## Getting Started
 These instructions womm get you a working application.
 
 ### Configuration
@@ -98,7 +98,7 @@ java -jar <downloaded-release>.jar --spring.config.additional-location=<path-to-
 ```
 
 
-## Getting Started Development
+## Build project
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
