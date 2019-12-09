@@ -1,4 +1,4 @@
-package fr.icdc.ebad.config.apidoc;
+/*package fr.icdc.ebad.config.apidoc;
 
 import fr.icdc.ebad.config.Constants;
 import org.springframework.context.annotation.Bean;
@@ -24,3 +24,4 @@ public class SwaggerConfiguration {
                 .build();
     }
 }
+*/

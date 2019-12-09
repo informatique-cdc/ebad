@@ -14,6 +14,8 @@ import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
 import org.pf4j.PluginException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -26,11 +28,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.terracotta.modules.ehcache.ToolkitInstanceFactoryImpl.LOGGER;
+
 
 @Service
 @DependsOn("springPluginManager")
 public class ApplicationService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
     private static final String FIELD_NAME_APPLICATION = "name";
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
