@@ -71,7 +71,7 @@ public class ApplicationResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void getAll() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/application");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/applications");
 
         List<Application> applications = new ArrayList<>();
         Application application1 = new Application();
@@ -96,7 +96,7 @@ public class ApplicationResourceTest {
     @Test
     @WithMockUser(roles = {"MODO"}, username = "dtrouillet")
     public void getAllWrite() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/application/write");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/applications/write");
 
         List<Application> applications = new ArrayList<>();
         Application application1 = new Application();
@@ -120,7 +120,7 @@ public class ApplicationResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void getAllManage() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/application/gestion");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/applications/gestion");
 
         List<Application> applications = new ArrayList<>();
         Application application1 = new Application();
@@ -144,7 +144,7 @@ public class ApplicationResourceTest {
     @Test
     @WithMockUser(roles = {"USER"})
     public void getAllManage2() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/application/gestion");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/applications/gestion");
 
         List<Application> applications = new ArrayList<>();
         Application application1 = new Application();
@@ -173,7 +173,7 @@ public class ApplicationResourceTest {
         applicationDto.setName("MyApp");
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
-                .put("/api/application/gestion")
+                .put("/applications/gestion")
                 .content(objectMapper.writeValueAsString(applicationDto))
                 .contentType(MediaType.APPLICATION_JSON_UTF8);
 
@@ -221,7 +221,7 @@ public class ApplicationResourceTest {
         when(applicationService.getUsers(eq(1L))).thenReturn(users);
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
-                .get("/api/application/users/1");
+                .get("/applications/users/1");
 
 
         restMvc.perform(builder)
@@ -244,7 +244,7 @@ public class ApplicationResourceTest {
         when(applicationService.getManagers(eq(1L))).thenReturn(users);
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
-                .get("/api/application/moderators/1");
+                .get("/applications/moderators/1");
 
 
         restMvc.perform(builder)

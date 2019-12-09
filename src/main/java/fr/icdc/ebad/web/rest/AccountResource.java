@@ -7,6 +7,7 @@ import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.UserAccountDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
  * REST controller for managing the current user's account.
  */
 @RestController
-@RequestMapping("/api")
+//@RequestMapping("/api")
+@Tag(name = "Account", description = "the account API")
 public class AccountResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountResource.class);

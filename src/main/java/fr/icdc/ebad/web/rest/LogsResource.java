@@ -4,6 +4,7 @@ import fr.icdc.ebad.service.LogBatchService;
 import fr.icdc.ebad.web.rest.dto.LogBatchDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for view and managing Log Level at runtime.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/logs")
+@Tag(name = "Log", description = "the log API")
 public class LogsResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogsResource.class);
 
@@ -32,7 +34,7 @@ public class LogsResource {
         this.logBatchService = logBatchService;
     }
 
-    @GetMapping(value = "/logs/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Page<LogBatchDto> getAllLog(@RequestParam(value = "page", required = false) Integer offset,
@@ -42,7 +44,7 @@ public class LogsResource {
                 .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
     }
 
-    @GetMapping(value = "/logs/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
     public Page<LogBatchDto> getAllLogFromEnv(@PathVariable Long env,
@@ -53,7 +55,7 @@ public class LogsResource {
                 .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
     }
 
-    @GetMapping(value = "/logs/{env}/{batch}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{env}/{batch}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
     public Page<LogBatchDto> getAllLogFromEnvBatch(@PathVariable Long env,

@@ -5,6 +5,7 @@ import fr.icdc.ebad.service.NormeService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.NormeDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/normes")
+@RequestMapping("/norms")
+@Tag(name = "Norms", description = "the norm API")
 public class NormeResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NormeResource.class);
