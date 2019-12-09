@@ -108,7 +108,7 @@ public class BatchResource {
     @PostMapping(value = "/delete/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
-    public ResponseEntity<Batch> removeBatch(@RequestBody BatchDto batchDto) {
+    public ResponseEntity removeBatch(@RequestBody BatchDto batchDto) {
         LOGGER.debug("REST request to remove a  batch");
         batchService.deleteBatch(batchDto.getId());
         return new ResponseEntity<>(HttpStatus.OK);
