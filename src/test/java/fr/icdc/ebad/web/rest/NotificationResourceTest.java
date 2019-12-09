@@ -32,7 +32,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -73,7 +72,7 @@ public class NotificationResourceTest {
 
         when(notificationRepository.findByReceiverLoginAndReadFalse(any(Sort.class),eq("user"))).thenReturn(notificationList);
 
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/notifications");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/notifications");
         restMvc.perform(builder)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -104,7 +103,7 @@ public class NotificationResourceTest {
         when(notificationRepository.findByReceiverLoginAndReadFalse(any(Sort.class),eq("user"))).thenReturn(notificationList);
         when(notificationRepository.save(any())).thenReturn(null);
 
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch("/api/notifications");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch("/notifications");
         restMvc.perform(builder)
                 .andExpect(status().isOk());
 

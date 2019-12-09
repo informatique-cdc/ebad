@@ -58,7 +58,7 @@ public class AccountResourceTest {
     @Test
     public void activateTest() throws Exception {
         String key = "codeactivation";
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/activate").param("key", key);
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/activate").param("key", key);
 
         when(userService.activateRegistration(eq(key))).thenReturn(Optional.of(new User()));
 
@@ -72,7 +72,7 @@ public class AccountResourceTest {
     @Test
     public void activateWithErrorTest() throws Exception {
         String key = "codeactivation";
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/activate").param("key", key);
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/activate").param("key", key);
 
         when(userService.activateRegistration(eq(key))).thenReturn(Optional.empty());
 
@@ -85,7 +85,7 @@ public class AccountResourceTest {
 
     @Test
     public void authenticateTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/authenticate").with(request -> {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/authenticate").with(request -> {
             request.setRemoteUser("testuser");
             return request;
         });
@@ -97,7 +97,7 @@ public class AccountResourceTest {
 
     @Test
     public void authenticateNoUserTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/authenticate");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/authenticate");
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -106,7 +106,7 @@ public class AccountResourceTest {
 
     @Test
     public void accountTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/account");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/account");
 
         Set<Authority> authorities = new HashSet<>();
         authorities.add(new Authority("ROLE_USER", new HashSet<>()));
@@ -139,7 +139,7 @@ public class AccountResourceTest {
 
     @Test
     public void csrfTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/csrf");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/csrf");
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -148,7 +148,7 @@ public class AccountResourceTest {
 
     @Test
     public void passwordErrorMinSizeTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("a");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/account/change_password").content("a");
 
         restMvc.perform(builder)
                 .andExpect(status().isBadRequest());
@@ -156,7 +156,7 @@ public class AccountResourceTest {
 
     @Test
     public void passwordErrorMaxSizeTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("abcekdjsfghdfkjghdfkjghdfkgjhdfgkjdhfgkdfjghzeuoifgvbdkfjvbzusiohfsdkjfhsziouefhaizuefhizseuhfsdiufhazdfhsdfhsdjfhsdfhosduhfsuidhfizuegfsiudfsoidfoeidfhdofhsdfuoh");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/account/change_password").content("abcekdjsfghdfkjghdfkjghdfkgjhdfgkjdhfgkdfjghzeuoifgvbdkfjvbzusiohfsdkjfhsziouefhaizuefhizseuhfsdiufhazdfhsdfhsdjfhsdfhosduhfsuidhfizuegfsiudfsoidfoeidfhdofhsdfuoh");
 
         restMvc.perform(builder)
                 .andExpect(status().isBadRequest());
@@ -164,7 +164,7 @@ public class AccountResourceTest {
 
     @Test
     public void passwordErrorEmptyTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/account/change_password").content("");
 
         restMvc.perform(builder)
                 .andExpect(status().isBadRequest());
@@ -172,7 +172,7 @@ public class AccountResourceTest {
 
     @Test
     public void passwordErrorNullTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/account/change_password");
 
         restMvc.perform(builder)
                 .andExpect(status().isBadRequest());
@@ -180,7 +180,7 @@ public class AccountResourceTest {
 
     @Test
     public void passwordTest() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/account/change_password").content("newPassword");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/account/change_password").content("newPassword");
 
         restMvc.perform(builder)
                 .andExpect(status().isOk());

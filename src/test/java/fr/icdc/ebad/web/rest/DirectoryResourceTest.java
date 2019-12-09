@@ -25,7 +25,6 @@ import java.util.Collections;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -55,15 +54,14 @@ public class DirectoryResourceTest {
     @Test
     @WithMockUser(roles = {"USER","ADMIN"})
     public void getFilesFromDirectory() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/directories/files/1");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/directories/files/1");
 
         FilesDto filesDTO = new FilesDto();
         filesDTO.setName("toto");
         when(directoryService.listAllFiles(eq(1L))).thenReturn(Collections.singletonList(filesDTO));
         when(permissionDirectory.canRead(eq(1L),any(UserDetails.class))).thenReturn(true);
         restMvc.perform(builder)
-                .andExpect(status().isOk())
-                .andDo(print());
+                .andExpect(status().isOk());
     }
 
 }

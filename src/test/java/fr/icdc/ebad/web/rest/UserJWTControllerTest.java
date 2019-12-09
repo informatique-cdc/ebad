@@ -65,7 +65,7 @@ public class UserJWTControllerTest {
         loginDto.setPassword("password");
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
-                .post("/api/authenticate")
+                .post("/authenticate")
                 .content(new ObjectMapper().writeValueAsString(loginDto))
                 .contentType(MediaType.APPLICATION_JSON_UTF8);
 

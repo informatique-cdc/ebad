@@ -59,7 +59,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void getAll() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/actualites");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/news");
 
         List<Actualite> actualites = new ArrayList<>();
         Actualite actualite1 = new Actualite();
@@ -83,7 +83,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"USER"})
     public void getAllNonDraft() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/actualites/public");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/news/public");
 
         List<Actualite> actualites = new ArrayList<>();
         Actualite actualite1 = new Actualite();
@@ -107,7 +107,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"USER"})
     public void getOne() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/actualites/1");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/news/1");
 
         Actualite actualite1 = new Actualite();
         actualite1.setId(1L);
@@ -123,7 +123,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void save() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put("/api/actualites");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put("/news");
 
         Actualite actualite1 = new Actualite();
         actualite1.setTitle("test");
@@ -146,7 +146,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void saveError() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put("/api/actualites");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put("/news");
 
         Actualite actualite1 = new Actualite();
         actualite1.setId(1L);
@@ -168,7 +168,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void delete() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete("/api/actualites/1");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete("/news/1");
 
         doNothing().when(actualiteService).deleteActualite(argThat(actualite -> actualite.getId() == 1L));
 
@@ -182,7 +182,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void update() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch("/api/actualites");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch("/news");
 
         Actualite actualite1 = new Actualite();
         actualite1.setId(1L);
@@ -206,7 +206,7 @@ public class ActualiteResourceTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void updateError() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch("/api/actualites");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch("/news");
 
         Actualite actualite1 = new Actualite();
         actualite1.setTitle("test");
