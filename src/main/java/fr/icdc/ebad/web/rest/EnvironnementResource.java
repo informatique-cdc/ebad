@@ -8,6 +8,7 @@ import fr.icdc.ebad.web.rest.dto.EnvironnementCreationDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementInfoDTO;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/environments")
+@Tag(name = "Environment", description = "the environment API")
 public class EnvironnementResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironnementResource.class);
@@ -50,7 +52,7 @@ public class EnvironnementResource {
     /**
      * GET  /environnement to get all environnements.
      */
-    @GetMapping(value = "/environnement", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
     public List<Environnement> getAll() {
@@ -64,7 +66,7 @@ public class EnvironnementResource {
      * GET  /environnement/info/{env} to get info of environnement.
      */
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal) or @permissionEnvironnement.canWrite(#env, principal)")
-    @GetMapping(value = "/environnement/info/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/info/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public EnvironnementInfoDTO getInfo(@PathVariable Long env) {
         LOGGER.debug("REST request to get info environnement");
@@ -77,7 +79,7 @@ public class EnvironnementResource {
      * GET  /environnement/{env} to get oneenvironnement.
      */
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal) or @permissionEnvironnement.canWrite(#env, principal)")
-    @GetMapping(value = "/environnement/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<EnvironnementDto> get(@PathVariable Long env) {
         LOGGER.debug("REST request to get one environnement {}", env);
@@ -87,7 +89,7 @@ public class EnvironnementResource {
     }
 
     @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal)")
-    @GetMapping(value = "/environnement/purgeLog/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/purgeLog/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> purgeLog(@PathVariable Long env) {
         LOGGER.debug("REST request to purge log");
         environnementService.purgerLogs(env);
@@ -95,7 +97,7 @@ public class EnvironnementResource {
     }
 
     @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal)")
-    @GetMapping(value = "/environnement/purgeArchive/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/purgeArchive/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> purgeArchive(@PathVariable Long env) {
         LOGGER.debug("REST request to purge log");
         environnementService.purgerArchive(env);
@@ -106,7 +108,7 @@ public class EnvironnementResource {
      * POST  /environnement/info/{env} to change date traitement of environnement.
      */
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
-    @GetMapping(value = "/environnement/dateTraitement/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/dateTraitement/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<String> changeDateTraitement(@PathVariable Long env, @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date dateTraitement) {
         LOGGER.debug("REST request to set new date traitement of environnement");
@@ -119,7 +121,7 @@ public class EnvironnementResource {
     /**
      * PUT  /environnement to add a new environnement
      */
-    @PutMapping(value = "/environnement", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canWrite(#env.application, principal)")
     public ResponseEntity<EnvironnementDto> addEnvironnement(@RequestBody EnvironnementCreationDto env) {
@@ -134,7 +136,7 @@ public class EnvironnementResource {
     /**
      * PATCH  /environnement to update an environnement
      */
-    @PatchMapping(value = "/environnement", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal)")
     public ResponseEntity<EnvironnementDto> updateEnvironnement(@RequestBody EnvironnementDto env) {
@@ -146,7 +148,7 @@ public class EnvironnementResource {
     /**
      * DELETE  /environnement to delete environnement.
      */
-    @DeleteMapping(value = "/environnement", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canWrite(#idEnv, principal)")
     public ResponseEntity<Void> deleteEnvironnement(@RequestParam Long idEnv) {

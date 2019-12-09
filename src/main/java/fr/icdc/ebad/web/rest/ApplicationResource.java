@@ -7,6 +7,7 @@ import fr.icdc.ebad.service.ApplicationService;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,8 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/applications")
+@Tag(name = "Application", description = "the application API")
 public class ApplicationResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationResource.class);
@@ -45,7 +47,7 @@ public class ApplicationResource {
     /**
      * GET  /application to get all applications.
      */
-    @GetMapping(value = "/application", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
     @PostFilter("@permissionApplication.canRead(filterObject,principal)")
@@ -57,7 +59,7 @@ public class ApplicationResource {
     /**
      * GET  /application to get all applications.
      */
-    @GetMapping(value = "/application/write", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/write", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
     @PostFilter("@permissionApplication.canWrite(filterObject,principal)")
@@ -69,7 +71,7 @@ public class ApplicationResource {
     /**
      * GET  /application to get all applications.
      */
-    @GetMapping(value = "/application/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
     @PostFilter("@permissionApplication.canManage(filterObject,principal)")
@@ -82,7 +84,7 @@ public class ApplicationResource {
     /**
      * PUT  /application to create new application.
      */
-    @PutMapping(value = "/application/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#applicationDto,principal)")
     public ApplicationDto createApplication(@RequestBody ApplicationDto applicationDto) {
@@ -95,7 +97,7 @@ public class ApplicationResource {
     /**
      * PATCH  /application/gestion to update application.
      */
-    @PatchMapping(value = "/application/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#applicationDto,principal)")
     public ApplicationDto updateApplication(@RequestBody ApplicationDto applicationDto) {
@@ -110,7 +112,7 @@ public class ApplicationResource {
     /**
      * DELETE  /application/gestion to delete application.
      */
-    @DeleteMapping(value = "/application/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#appId,principal)")
     public ResponseEntity<Void> removeApplication(@RequestParam Long appId) {
@@ -122,7 +124,7 @@ public class ApplicationResource {
     /**
      * GET  /application/users to get all users from applications.
      */
-    @GetMapping(value = "/application/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#id,principal)")
     public Set<UserSimpleDto> getUsersFromApplication(@PathVariable Long id) {
@@ -133,7 +135,7 @@ public class ApplicationResource {
     /**
      * GET  /application/moderators to get all moderators from applications.
      */
-    @GetMapping(value = "/application/moderators/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/moderators/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#id,principal)")
     public Set<UserSimpleDto> getModeratorsFromApplication(@PathVariable Long id) {

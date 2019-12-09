@@ -64,7 +64,7 @@ public class NormeResourceTest {
         normeList.add(norme1);
         normeList.add(norme2);
 
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/normes");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms");
 
         when(normeRepository.findAll(any(Sort.class))).thenReturn(normeList);
 

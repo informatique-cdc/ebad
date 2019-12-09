@@ -9,6 +9,7 @@ import fr.icdc.ebad.web.rest.dto.RolesDTO;
 import fr.icdc.ebad.web.rest.dto.UserAccountDto;
 import fr.icdc.ebad.web.rest.dto.UserDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,8 @@ import java.util.Optional;
  * REST controller for managing users.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/users")
+@Tag(name = "User", description = "the user API")
 public class UserResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
@@ -46,7 +48,7 @@ public class UserResource {
         this.mapper = mapper;
     }
 
-    @GetMapping("/user")
+    @GetMapping("/current")
     @PreAuthorize("isAuthenticated()")
     @Timed
     public ResponseEntity<User> currentUser() throws EbadServiceException {
@@ -57,7 +59,7 @@ public class UserResource {
     /**
      * GET  /users to get all users.
      */
-    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     //TODO dtrouillet mettre en place une pagination
@@ -70,7 +72,7 @@ public class UserResource {
     /*
     * GET  /users/:login to get the "login" user.
     */
-    @GetMapping(value = "/users/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> getUser(@PathVariable String login) {
@@ -82,7 +84,7 @@ public class UserResource {
     /**
      * GET  /users/:login to get the "login" user.
      */
-    @GetMapping(value = "/users/activate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/activate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> activateAccount(@RequestParam(value = "key") String key) {
@@ -94,7 +96,7 @@ public class UserResource {
     /**
      * GET  /users/:login to get the "login" user.
      */
-    @GetMapping(value = "/users/inactivate/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/inactivate/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> inactivateAccount(@PathVariable String login) {
@@ -105,7 +107,7 @@ public class UserResource {
     /**
      * PUT  /users to save new user.
      */
-    @PutMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> saveUser(@Valid @RequestBody UserAccountDto userDto) throws EbadServiceException {
@@ -117,7 +119,7 @@ public class UserResource {
     /**
      * PATCH  /users to save  user.
      */
-    @PatchMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) throws EbadServiceException {
@@ -130,7 +132,7 @@ public class UserResource {
     /**
      * PATCH  /users/roles to change roles of user.
      */
-    @PatchMapping(value = "/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/roles", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> changeRoles(@RequestBody RolesDTO roles) throws EbadServiceException {
@@ -142,7 +144,7 @@ public class UserResource {
     /**
      * PATCH  /users/application to add or remove application of user.
      */
-    @PatchMapping(value = "/users/application", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/application", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> changeApplicationAuthority(@RequestBody AuthorityApplicationDTO authorityApplicationDTO) {
