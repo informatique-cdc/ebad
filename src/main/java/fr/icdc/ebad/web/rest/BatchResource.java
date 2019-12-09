@@ -9,6 +9,7 @@ import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/batchs")
+@Tag(name = "Batch", description = "the batch API")
 public class BatchResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchResource.class);
@@ -51,7 +53,7 @@ public class BatchResource {
     /**
      * GET  /batchs to get all batch with predicate.
      */
-    @GetMapping(value = "/batchs", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PostFilter("@permissionEnvironnement.canReadEnvironnements(filterObject.environnements, principal) or @permissionEnvironnement.canWriteEnvironnements(filterObject.environnements, principal)")
     public List<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate) {
@@ -62,7 +64,7 @@ public class BatchResource {
     /**
      * GET  /batchs/env/:env to get all batch from env.
      */
-    @GetMapping(value = "/batchs/env/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/env/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal) or @permissionEnvironnement.canWrite(#env, principal)")
     public ResponseEntity<List<BatchDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long env) throws URISyntaxException {
@@ -76,7 +78,7 @@ public class BatchResource {
      * GET  /batchs/run/:id to run batch
      */
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
-    @GetMapping(value = "/batchs/run/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/run/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<RetourBatch> runBatch(@PathVariable Long id, @RequestParam(value = "param", required = false) String param, @RequestParam Long env) throws EbadServiceException {
         LOGGER.debug("REST request to run batch");
@@ -91,7 +93,7 @@ public class BatchResource {
     /**
      * PUT  /batchs to add a new batch
      */
-    @PutMapping(value = "/batchs", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
     public ResponseEntity<BatchDto> addBatch(@RequestBody BatchDto batchDto) {
@@ -103,7 +105,7 @@ public class BatchResource {
     /**
      * POST  /batchs/delete to delete a batch
      */
-    @PostMapping(value = "/batchs/delete/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/delete/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
     public ResponseEntity<Batch> removeBatch(@RequestBody BatchDto batchDto) {
@@ -116,7 +118,7 @@ public class BatchResource {
     /**
      * PATCH  /batchs to update a batch
      */
-    @PatchMapping(value = "/batchs", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
     public ResponseEntity<BatchDto> updateBatch(@RequestBody BatchDto batchDto) {

@@ -6,6 +6,7 @@ import fr.icdc.ebad.service.ActualiteService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.ActualiteDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/actualites")
+@RequestMapping("/news")
+@Tag(name = "New", description = "the new API")
 public class ActualiteResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActualiteResource.class);

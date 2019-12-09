@@ -1,7 +1,6 @@
 package fr.icdc.ebad.config.jwt;
 
 import com.google.common.collect.Lists;
-import fr.icdc.ebad.security.AuthoritiesConstants;
 import fr.icdc.ebad.security.jwt.JWTConfigurer;
 import fr.icdc.ebad.security.jwt.TokenProvider;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -87,18 +86,18 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/register").permitAll()
-                .antMatchers("/api/actualites/public").permitAll()
-                .antMatchers("/api/activate").permitAll()
-                .antMatchers("/api/authenticate").permitAll()
-                .antMatchers("/api/account/reset-password/init").permitAll()
-                .antMatchers("/api/account/reset-password/finish").permitAll()
-                .antMatchers("/api/csrf").permitAll()
-                .antMatchers("/api/**").authenticated()
+                .antMatchers("/register").permitAll()
+                .antMatchers("/actualites/public").permitAll()
+                .antMatchers("/activate").permitAll()
+                .antMatchers("/authenticate").permitAll()
+                .antMatchers("/account/reset-password/init").permitAll()
+                .antMatchers("/account/reset-password/finish").permitAll()
+                .antMatchers("/csrf").permitAll()
                 .antMatchers("/actuator/**").permitAll()
-                .antMatchers("/v2/api-docs/**").permitAll()
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/v3/api-docs/**").permitAll()
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
-                .antMatchers("/swagger-ui/index.html").hasAuthority(AuthoritiesConstants.ADMIN)
+                .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .cors()

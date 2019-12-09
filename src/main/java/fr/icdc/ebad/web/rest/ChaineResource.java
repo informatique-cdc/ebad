@@ -10,6 +10,7 @@ import fr.icdc.ebad.web.rest.dto.ChaineDto;
 import fr.icdc.ebad.web.rest.dto.ChaineSimpleDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/chaines")
+@RequestMapping("/chaines")
+@Tag(name = "Chaines", description = "the chaines API")
 public class ChaineResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChaineResource.class);
