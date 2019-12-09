@@ -70,7 +70,7 @@ public class BatchResource {
     public ResponseEntity<List<BatchDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long env) throws URISyntaxException {
         LOGGER.debug("REST request to get all Batchs from environnement {}", env);
         Page<Batch> page = batchService.getAllBatchFromEnvironmentAsPage(env, PaginationUtil.generatePageRequest(offset, limit));
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/batchs/env/" + env, offset, limit);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/batchs/env/" + env, offset, limit);
         return new ResponseEntity<>(mapper.mapAsList(page.getContent(), BatchDto.class), headers, HttpStatus.OK);
     }
 

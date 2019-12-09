@@ -55,7 +55,7 @@ public class DirectoryResourceTest {
     @Test
     @WithMockUser(roles = {"USER","ADMIN"})
     public void getFilesFromDirectory() throws Exception {
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/api/directories/files/1");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/directories/files/1");
 
         FilesDto filesDTO = new FilesDto();
         filesDTO.setName("toto");

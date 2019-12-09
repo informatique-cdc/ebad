@@ -58,7 +58,7 @@ public class DirectoryResource {
     public ResponseEntity<List<DirectoryDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long env) throws URISyntaxException {
         LOGGER.debug("REST request to get all Directory from environnement {}", env);
         Page<Directory> page = directoryService.findDirectoryFromEnvironnement(env, PaginationUtil.generatePageRequest(offset, limit));
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/chaines/env/" + env, offset, limit);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/chaines/env/" + env, offset, limit);
         return new ResponseEntity<>(mapper.mapAsList(page.getContent(), DirectoryDto.class), headers, HttpStatus.OK);
     }
 

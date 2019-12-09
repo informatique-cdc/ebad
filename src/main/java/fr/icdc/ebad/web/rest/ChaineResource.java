@@ -59,7 +59,7 @@ public class ChaineResource {
         LOGGER.debug("REST request to get all Chaines from environnement {}", env);
         Environnement environnement = Environnement.builder().id(env).build();
         Page<Chaine> page = chaineService.getAllChaineFromEnvironmentWithPageable(environnement, PaginationUtil.generatePageRequest(offset, limit));
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/chaines/env/" + env, offset, limit);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/chaines/env/" + env, offset, limit);
         return new ResponseEntity<>(mapper.mapAsList(page.getContent(), ChaineDto.class), headers, HttpStatus.OK);
     }
 

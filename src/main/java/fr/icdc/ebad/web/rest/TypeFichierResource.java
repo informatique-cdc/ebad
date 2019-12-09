@@ -53,7 +53,7 @@ public class TypeFichierResource {
     public ResponseEntity<List<TypeFichierDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long app) throws URISyntaxException {
         LOGGER.debug("REST request to get all TypeFichier from application {}", app);
         Page<TypeFichier> pageTypeFichier = typeFichierService.getTypeFichierFromApplication(PaginationUtil.generatePageRequest(offset, limit), app);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(pageTypeFichier, "/api/typefichier/application/" + app, offset, limit);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(pageTypeFichier, "/typefichier/application/" + app, offset, limit);
 
         Page<TypeFichierDto> pageTypeFichierDto = pageTypeFichier.map(typeFichier ->
                 mapper.map(typeFichier, TypeFichierDto.class)
