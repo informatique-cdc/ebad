@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -164,6 +165,21 @@ public class EnvironnementServiceTest {
 
         verify(shellService).runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"));
         assertTrue(result);
+    }
+
+    @Test
+    public void testChangeDateTraiementError() throws IOException, JSchException {
+        RetourBatch retourBatch = new RetourBatch();
+        retourBatch.setReturnCode(0);
+
+        Norme norme = Norme.builder().ctrlMDate("date.tr").build();
+        Application application = Application.builder().id(1L).build();
+        Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
+        when(shellService.runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenThrow(new JSchException());
+        when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
+
+        boolean result = environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
+        assertFalse(result);
     }
 
     @Test

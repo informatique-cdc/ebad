@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Service
@@ -21,26 +21,11 @@ public class PluginService {
         this.environnementConnectorPlugins = environnementConnectorPlugins;
     }
 
+    @PostConstruct
     public void listAllPlugins() {
-        LOGGER.error("listAllPlugins");
+        LOGGER.info("THE FOLLOWING PLUGINS ARE LOADED");
         for (PluginWrapper plugin : springPluginManager.getPlugins()) {
-            try {
-                if (!environnementConnectorPlugins.isEmpty())
-                    environnementConnectorPlugins.get(0).discoverFromApp("test", new ArrayList<>());
-            } catch (Exception e) {
-                LOGGER.error("erreur");
-            }
-            LOGGER.error("Plugin {} {}", plugin.getPluginId(), plugin.getPluginState());
-            plugin.getPluginManager().stopPlugin(plugin.getPluginId());
-            springPluginManager.disablePlugin(plugin.getPluginId());
-            //Application.restart();
-            try {
-                if (!environnementConnectorPlugins.isEmpty())
-                    environnementConnectorPlugins.get(0).discoverFromApp("test", new ArrayList<>());
-            } catch (Exception e) {
-                LOGGER.error("erreur");
-            }
+            LOGGER.info("Plugin {} {}", plugin.getPluginId(), plugin.getPluginState());
         }
-        System.out.println("XXXXX");
     }
 }
