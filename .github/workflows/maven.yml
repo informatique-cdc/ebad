@@ -14,7 +14,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package org.jacoco:jacoco-maven-plugin:prepare-agent --file pom.xml
 
     - uses: actions/checkout@master
     - uses: codecov/codecov-action@v1

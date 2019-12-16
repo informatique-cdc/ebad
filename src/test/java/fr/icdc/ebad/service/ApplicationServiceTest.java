@@ -10,6 +10,7 @@ import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pf4j.PluginDependency;
@@ -279,5 +280,40 @@ public class ApplicationServiceTest {
                         && app.getCode().equals(applicationDiscoverDto2.getCode())
                         && app.getExternalId().equals(applicationDiscoverDto2.getId())
         ));
+    }
+
+    @Test
+    public void testUpdateApplication() throws EbadServiceException {
+        Application oldApplication = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application newApplication = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(oldApplication));
+        when(applicationRepository.save(eq(newApplication))).thenReturn(newApplication);
+        Application result = applicationService.updateApplication(newApplication);
+
+        verify(applicationRepository).save(argThat((app) ->
+                app.getId().equals(newApplication.getId())
+                        && app.getCode().equals(newApplication.getCode())
+                        && app.getName().equals(newApplication.getName())
+                        && app.getDateParametrePattern().equals(newApplication.getDateParametrePattern())
+                        && app.getDateFichierPattern().equals(newApplication.getDateFichierPattern())
+        ));
+
+        assertEquals(newApplication.getId(), result.getId());
+        assertEquals(newApplication.getCode(), result.getCode());
+        assertEquals(newApplication.getName(), result.getName());
+        assertEquals(newApplication.getDateParametrePattern(), result.getDateParametrePattern());
+        assertEquals(newApplication.getDateFichierPattern(), result.getDateFichierPattern());
     }
 }
