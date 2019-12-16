@@ -43,6 +43,12 @@ public class Application extends AbstractAuditingEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "external_id")
+    private String externalId;
+
+    @Column(name = "plugin_id")
+    private String pluginId;
+
     @NotNull
     @Size(min = 1, max = 50)
     @Column(length = 50, unique = true, nullable = false)
