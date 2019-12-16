@@ -2,21 +2,20 @@ package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
-import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
-import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
+import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
+import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
-import fr.icdc.ebad.repository.EnvironnementRepository;
-import fr.icdc.ebad.repository.NormeRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import ma.glasnost.orika.MapperFacade;
 import org.pf4j.PluginException;
+import org.pf4j.PluginWrapper;
+import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 
-
 @Service
 @DependsOn("springPluginManager")
 public class ApplicationService {
@@ -38,20 +36,17 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
     private final EnvironnementService environnementService;
-    private final List<EnvironnementConnectorPlugin> environnementConnectorPluginList;
-    private final MapperFacade mapper;
-    private final NormeRepository normeRepository;
-    private final EnvironnementRepository environnementRepository;
+    private final List<ApplicationConnectorPlugin> applicationConnectorPlugins;
+    private final SpringPluginManager springPluginManager;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, MapperFacade mapper, NormeRepository normeRepository, EnvironnementRepository environnementRepository) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<ApplicationConnectorPlugin> applicationConnectorPlugins, SpringPluginManager springPluginManager) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
         this.environnementService = environnementService;
-        this.environnementConnectorPluginList = environnementConnectorPluginList;
-        this.mapper = mapper;
-        this.normeRepository = normeRepository;
-        this.environnementRepository = environnementRepository;
+        this.applicationConnectorPlugins = applicationConnectorPlugins;
+        this.springPluginManager = springPluginManager;
     }
+
 
     @Transactional(readOnly = true)
     public List<Application> getAllApplications() {
@@ -82,12 +77,6 @@ public class ApplicationService {
     @Transactional
     public Application saveApplication(Application application) {
         Application applicationResult = applicationRepository.save(application);
-        try {
-            Set<Environnement> environnementsImported = importEnvironments(applicationResult.getId());
-            environnementRepository.saveAll(environnementsImported);
-        } catch (EbadServiceException e) {
-            LOGGER.error("Impossible d'importer les environnements", e);
-        }
         applicationResult.getEnvironnements();
         return application;
     }
@@ -116,24 +105,53 @@ public class ApplicationService {
         return users;
     }
 
-    @Transactional
-    public Set<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
-        Application application = this.getApplication(applicationId).orElseThrow(() -> new EbadServiceException("Aucune application trouvée"));
-        Set<Environnement> environnements = new HashSet<>();
-        List<NormeDiscoverDto> normeDiscoverDtos = mapper.mapAsList(normeRepository.findAll(), NormeDiscoverDto.class);
 
-        try {
-            for (EnvironnementConnectorPlugin environnementConnectorPlugin : environnementConnectorPluginList) {
-                List<Environnement> environnementList = mapper.mapAsList(environnementConnectorPlugin.discoverFromApp(application.getCode(), normeDiscoverDtos), Environnement.class);
-                for (Environnement environnement : environnementList) {
-                    environnement.setApplication(application);
+    @Transactional
+    public String importApp() {
+        StringBuilder result = new StringBuilder();
+        for (ApplicationConnectorPlugin applicationConnectorPlugin : applicationConnectorPlugins) {
+            PluginWrapper pluginWrapper = springPluginManager.whichPlugin(applicationConnectorPlugin.getClass());
+            String pluginId = pluginWrapper.getPluginId();
+            LOGGER.info("PluginWrapper = {}", pluginId);
+            try {
+                List<ApplicationDiscoverDto> applicationDiscoverDtoList = applicationConnectorPlugin.discoverApp();
+                for (ApplicationDiscoverDto applicationDiscoverDto : applicationDiscoverDtoList) {
+                    if (applicationDiscoverDto.getCode().length() != 3) {
+                        continue;
+                    }
+                    Application application = applicationRepository
+                            .findAllByExternalIdAndPluginId(applicationDiscoverDto.getId(), pluginId)
+                            .orElse(new Application());
+                    application.setName(applicationDiscoverDto.getName());
+                    application.setCode(applicationDiscoverDto.getCode());
+                    application.setDateParametrePattern("yyyyMMdd");
+                    application.setDateFichierPattern("yyyyMMdd");
+                    application.setExternalId(applicationDiscoverDto.getId().toString());
+                    application.setPluginId(pluginId);
+                    try {
+                        applicationRepository.save(application);
+                        LOGGER.debug("application imported {}", applicationDiscoverDto);
+                        result.append("application imported ").append(applicationDiscoverDto).append("\n");
+                    } catch (DataIntegrityViolationException e) {
+                        LOGGER.debug("error when try to import application {}", applicationDiscoverDto);
+                        result.append("error when try to import application ").append(applicationDiscoverDto).append("\n");
+                    }
                 }
-                environnements.addAll(environnementList);
+            } catch (PluginException e) {
+                LOGGER.error("error when import applications", e);
+                result.append("error when import applications with plugin ").append(pluginId).append("\n");
             }
-        } catch (PluginException e) {
-            LOGGER.error("Une erreur est survenue lors de l'import des environnements : {}", e.getMessage(), e);
-            environnements = new HashSet<>();
         }
-        return environnements;
+        return result.toString();
+    }
+
+    @Transactional
+    public Application updateApplication(Application application) throws EbadServiceException {
+        Application oldApplication = getApplication(application.getId()).orElseThrow(EbadServiceException::new);
+        Set<UsageApplication> usageApplications = oldApplication.getUsageApplications();
+        application.setUsageApplications(usageApplications);
+        application.setExternalId(oldApplication.getExternalId());
+        application.setPluginId(oldApplication.getPluginId());
+        return saveApplication(application);
     }
 }

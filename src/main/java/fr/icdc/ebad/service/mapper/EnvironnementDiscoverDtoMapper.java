@@ -12,6 +12,7 @@ public class EnvironnementDiscoverDtoMapper implements OrikaMapperFactoryConfigu
     public void configure(MapperFactory orikaMapperFactory) {
         orikaMapperFactory.classMap(EnvironnementDiscoverDto.class, Environnement.class)
                 .field("home", "homePath")
+                .exclude("id")
                 .byDefault()
                 .register();
     }

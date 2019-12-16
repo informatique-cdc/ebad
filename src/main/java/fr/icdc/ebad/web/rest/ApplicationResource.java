@@ -1,9 +1,9 @@
 package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.ApplicationService;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
 import io.micrometer.core.annotation.Timed;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +55,14 @@ public class ApplicationResource {
     public List<ApplicationDto> getAll() {
         LOGGER.debug("REST request to get all Application - Read");
         return mapper.mapAsList(applicationService.getAllApplications(), ApplicationDto.class);
+    }
+
+    @PostMapping(value = "/import-all", produces = MediaType.TEXT_PLAIN_VALUE)
+    @Timed
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public String importAll() {
+        LOGGER.debug("REST request to import all Application ");
+        return applicationService.importApp();
     }
 
     /**
@@ -100,13 +109,11 @@ public class ApplicationResource {
     @PatchMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canManage(#applicationDto,principal)")
-    public ApplicationDto updateApplication(@RequestBody ApplicationDto applicationDto) {
+    public ApplicationDto updateApplication(@RequestBody ApplicationDto applicationDto) throws EbadServiceException {
         LOGGER.debug("REST request to update Application");
-        Set<UsageApplication> usageApplications = applicationService.getApplication(applicationDto.getId()).orElseGet(Application::new).getUsageApplications();
         Application application = mapper.map(applicationDto, Application.class);
-        application.setUsageApplications(usageApplications);
-        Application application1 = applicationService.saveApplication(application);
-        return mapper.map(application1, ApplicationDto.class);
+        Application applicationSaved = applicationService.updateApplication(application);
+        return mapper.map(applicationSaved, ApplicationDto.class);
     }
 
     /**
