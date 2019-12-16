@@ -7,10 +7,16 @@ import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.QApplication;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
-import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
+import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
+import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pf4j.PluginDependency;
+import org.pf4j.PluginDescriptor;
+import org.pf4j.PluginException;
+import org.pf4j.PluginWrapper;
+import org.pf4j.spring.SpringPluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,6 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -38,17 +45,17 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles(Constants.SPRING_PROFILE_TEST)
 @SpringBootTest
 public class ApplicationServiceTest {
-    @MockBean
-    private ApplicationRepository applicationRepository;
-
-    @MockBean
-    private EnvironnementService environnementService;
-
-    @MockBean
-    private EnvironnementConnectorPlugin environnementConnectorPlugin;
-
     @Autowired
     ApplicationService applicationService;
+    @MockBean
+    private ApplicationRepository applicationRepository;
+    @MockBean
+    private EnvironnementService environnementService;
+    @MockBean
+    private ApplicationConnectorPlugin applicationConnectorPlugin;
+    @MockBean
+    private SpringPluginManager springPluginManager;
+
     @Test
     public void deleteApplication() {
         Environnement environnement1 = new Environnement();
@@ -66,16 +73,16 @@ public class ApplicationServiceTest {
         application.setEnvironnements(environnementSet);
 
         when(applicationRepository.getOne(eq(9L))).thenReturn(application);
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1),eq(true));
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2),eq(true));
+        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1), eq(true));
+        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2), eq(true));
         doNothing().when(applicationRepository).delete(eq(application));
 
         applicationService.deleteApplication(9L);
 
-        verify(applicationRepository,times(1)).getOne(eq(9L));
-        verify(environnementService,times(1)).deleteEnvironnement(eq(environnement1),eq(true));
-        verify(environnementService,times(1)).deleteEnvironnement(eq(environnement2),eq(true));
-        verify(applicationRepository,times(1)).delete(eq(application));
+        verify(applicationRepository, times(1)).getOne(eq(9L));
+        verify(environnementService, times(1)).deleteEnvironnement(eq(environnement1), eq(true));
+        verify(environnementService, times(1)).deleteEnvironnement(eq(environnement2), eq(true));
+        verify(applicationRepository, times(1)).delete(eq(application));
     }
 
     @Test
@@ -111,7 +118,7 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void setSaveApplication() {
+    public void testSaveApplication() {
         Application application = new Application();
         application.setId(1L);
 
@@ -198,41 +205,79 @@ public class ApplicationServiceTest {
         assertTrue(results.contains(user3));
     }
 
-//    @Test(expected = EbadServiceException.class)
-//    public void testImportEnvironmentsError() throws EbadServiceException {
-//        when(applicationRepository.findById(eq(1L))).thenReturn(Optional.empty());
-//        applicationService.importEnvironments(1L);
-//    }
+    @Test
+    public void testImportApp() throws PluginException {
+        List<ApplicationDiscoverDto> applicationDiscoverDtoList = new ArrayList<>();
+        ApplicationDiscoverDto applicationDiscoverDto1 = ApplicationDiscoverDto.builder()
+                .code("aa2")
+                .id("2")
+                .name("appa")
+                .build();
+        ApplicationDiscoverDto applicationDiscoverDto2 = ApplicationDiscoverDto.builder()
+                .code("aa3")
+                .id("3")
+                .name("appa3")
+                .build();
 
-//    @Test
-//    public void testImportEnvironments() throws EbadServiceException, PluginException {
-//        Application application = Application.builder().code("myapp").build();
-//        when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(application));
-//
-//        List<EnvironnementDiscoverDto> environnementDiscoverDtos = new ArrayList<>();
-//        EnvironnementDiscoverDto environnementDiscoverDto1 = EnvironnementDiscoverDto.builder().code("1")
-//                .home("/home")
-//                .host("localhost")
-//                .prefix("I")
-//                .kindOs(EnvironnementDiscoverDto.OsKind.UNIX)
-//                .login("root")
-//                .name("LocalTest")
-//                .build();
-//        environnementDiscoverDtos.add(environnementDiscoverDto1);
-//
-//        when(environnementConnectorPlugin.discoverFromApp(eq("myapp"), anyList())).thenReturn(environnementDiscoverDtos);
-//        Set<Environnement> resultsSet = applicationService.importEnvironments(1L);
-//        List<Environnement> results = new ArrayList<>(resultsSet);
-//
-//        assertNotNull(results);
-//        assertEquals(1, results.size());
-//        assertEquals("LocalTest", results.get(0).getName());
-//        assertEquals("/home", results.get(0).getHomePath());
-//        assertEquals("localhost", results.get(0).getHost());
-//        assertEquals("root", results.get(0).getLogin());
-//        assertEquals("I", results.get(0).getPrefix());
-//        //assertEquals("norme", results.get(0).getNorma());
-//
-//
-//    }
+        applicationDiscoverDtoList.add(applicationDiscoverDto1);
+        applicationDiscoverDtoList.add(applicationDiscoverDto2);
+
+        PluginDescriptor pluginDescriptor = new PluginDescriptor() {
+            @Override
+            public String getPluginId() {
+                return "import-plugin";
+            }
+
+            @Override
+            public String getPluginDescription() {
+                return null;
+            }
+
+            @Override
+            public String getPluginClass() {
+                return null;
+            }
+
+            @Override
+            public String getVersion() {
+                return null;
+            }
+
+            @Override
+            public String getRequires() {
+                return null;
+            }
+
+            @Override
+            public String getProvider() {
+                return null;
+            }
+
+            @Override
+            public String getLicense() {
+                return null;
+            }
+
+            @Override
+            public List<PluginDependency> getDependencies() {
+                return null;
+            }
+        };
+        PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
+        when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
+
+        when(applicationRepository.findAllByExternalIdAndPluginId(eq("2"), eq("import-plugin"))).thenReturn(Optional.empty());
+        when(applicationConnectorPlugin.discoverApp()).thenReturn(applicationDiscoverDtoList);
+        applicationService.importApp();
+        verify(applicationRepository).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto1.getName())
+                        && app.getCode().equals(applicationDiscoverDto1.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto1.getId())
+        ));
+        verify(applicationRepository).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto2.getName())
+                        && app.getCode().equals(applicationDiscoverDto2.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto2.getId())
+        ));
+    }
 }

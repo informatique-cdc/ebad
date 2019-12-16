@@ -126,7 +126,7 @@ public class ApplicationService {
                     application.setCode(applicationDiscoverDto.getCode());
                     application.setDateParametrePattern("yyyyMMdd");
                     application.setDateFichierPattern("yyyyMMdd");
-                    application.setExternalId(applicationDiscoverDto.getId().toString());
+                    application.setExternalId(applicationDiscoverDto.getId());
                     application.setPluginId(pluginId);
                     try {
                         applicationRepository.save(application);
