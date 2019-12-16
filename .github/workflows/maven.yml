@@ -7,14 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Cache Maven Repo
+          id: cache-maven-repo
+          uses: actions/cache@v1
+          with:
+            path: /home/runner/.m2/repository
+            key: ${{ runner.os }}-maven-repo
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
       - name: Build with Maven
         run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent package --file pom.xml
-      - name: Code corverage
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: target/jacoco.exec
