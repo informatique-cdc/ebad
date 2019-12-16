@@ -14,18 +14,18 @@ jobs:
       - name: Build with Maven
         run: mvn -B package org.jacoco:jacoco-maven-plugin:prepare-agent --file pom.xml
       - name: Upload corverage
-          uses: actions/upload-artifact@v1
-          with:
-            name: coverage
-            path: target/coverage.exec
+        uses: actions/upload-artifact@v1
+        with:
+          name: coverage
+          path: target/coverage.exec
   coverage:
     runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Download coverage
-          uses: actions/download-artifact@v1
-          with:
-            name: coverage
+        uses: actions/download-artifact@v1
+        with:
+          name: coverage
       - uses: actions/checkout@master
       - uses: codecov/codecov-action@v1
         with:
