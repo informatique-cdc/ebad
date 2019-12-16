@@ -1,0 +1,39 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <activeProfiles>
+        <activeProfile>bintray</activeProfile>
+    </activeProfiles>
+
+    <profiles>
+        <profile>
+            <id>bintray</id>
+            <repositories>
+                <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </repository>
+                <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>bintray-informatique-cdc-informatique-cdc</id>
+                    <name>bintray</name>
+                    <url>https://dl.bintray.com/informatique-cdc/informatique-cdc</url>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <servers>
+        <server>
+            <id>bintray-informatique-cdc</id>
+            <username>${env.DEPLOY_USERNAME}</username>
+            <password>${env.DEPLOY_TOKEN}</password>
+        </server>
+    </servers>
+</settings>

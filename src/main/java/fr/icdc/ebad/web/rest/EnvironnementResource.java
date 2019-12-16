@@ -3,6 +3,7 @@ package fr.icdc.ebad.web.rest;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.service.EnvironnementService;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.EnvironnementCreationDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementDto;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -159,5 +161,22 @@ public class EnvironnementResource {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "/import/application/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+//    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
+//    @PostFilter("@permissionApplication.canRead(filterObject,principal)")
+    public List<EnvironnementDto> importEnvApp(@PathVariable Long id) throws EbadServiceException {
+        LOGGER.debug("REST request to import all env for app {} ", id);
+        return mapper.mapAsList(environnementService.importEnvironments(id), EnvironnementDto.class);
+    }
+
+    @PostMapping(value = "/import-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<EnvironnementDto> importAll() throws EbadServiceException {
+        LOGGER.debug("REST request to import all Environments ");
+        return mapper.mapAsList(environnementService.importEnvironments(), EnvironnementDto.class);
     }
 }

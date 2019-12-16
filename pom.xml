@@ -53,6 +53,8 @@
         <spring-security-oauth2.version>2.2.4.RELEASE</spring-security-oauth2.version>
         <usertype-core.version>6.0.1.GA</usertype-core.version>
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
+        <pf4j-spring.version>0.5.0</pf4j-spring.version>
+        <pf4j.version>2.5.0</pf4j.version>
 
         <git.user />
         <git.password />
@@ -197,10 +199,7 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -351,6 +350,27 @@
             <groupId>com.amashchenko.maven.plugin</groupId>
             <artifactId>gitflow-maven-plugin</artifactId>
             <version>1.12.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>google-collect</artifactId>
+                    <groupId>com.google.code.google-collections</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j-spring</artifactId>
+            <version>${pf4j-spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.icdc.ebad</groupId>
+            <artifactId>ebad-plugin</artifactId>
+            <version>1.0.3</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -484,4 +504,10 @@
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>bintray</id>
+            <url>https://dl.bintray.com/informatique-cdc/informatique-cdc</url>
+        </repository>
+    </repositories>
 </project>

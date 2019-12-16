@@ -43,4 +43,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     })
     @Override
     Application save(Application application);
+
+    Optional<Application> findAllByExternalIdAndPluginId(String externalId, String pluginId);
 }
