@@ -3,7 +3,6 @@ package fr.icdc.ebad;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -48,19 +47,6 @@ public class Application {
                 "Local: \t\thttp://127.0.0.1:{}\n\t" +
                 "External: \thttp://{}:{}\n----------------------------------------------------------", env.getProperty("server.port"), InetAddress.getLocalHost().getHostAddress(), env.getProperty("server.port"));
     }
-
-    public static void restart() {
-        ApplicationArguments args = applicationContext.getBean(ApplicationArguments.class);
-
-        Thread thread = new Thread(() -> {
-            applicationContext.close();
-            applicationContext = SpringApplication.run(Application.class, args.getSourceArgs());
-        });
-
-        thread.setDaemon(false);
-        thread.start();
-    }
-
 
     /**
      * Initializes application.
