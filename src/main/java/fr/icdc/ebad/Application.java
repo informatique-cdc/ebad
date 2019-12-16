@@ -26,7 +26,6 @@ public class Application {
     private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(Application.class);
 
     private final Environment env;
-    private static ConfigurableApplicationContext applicationContext;
 
     public Application(Environment env) {
         this.env = env;
@@ -41,7 +40,7 @@ public class Application {
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(Application.class);
 
-        applicationContext = app.run(args);
+        ConfigurableApplicationContext applicationContext = app.run(args);
         Environment env = applicationContext.getEnvironment();
         APPLICATION_LOGGER.info("Access URLs:\n----------------------------------------------------------\n\t" +
                 "Local: \t\thttp://127.0.0.1:{}\n\t" +
