@@ -87,7 +87,7 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/register").permitAll()
-                .antMatchers("/actualites/public").permitAll()
+                .antMatchers("/news/public").permitAll()
                 .antMatchers("/activate").permitAll()
                 .antMatchers("/authenticate").permitAll()
                 .antMatchers("/account/reset-password/init").permitAll()
