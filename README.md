@@ -32,6 +32,7 @@ for example :
 ```
 java -jar <downloaded-release>.jar --spring.profiles.active=jwt,init-database --spring.config.additional-location=<path-to-your-application.yml>
 ```
+Remember to remove it for next application start
 
 #### SSH Connection
 For the ssh connection edit this values :
