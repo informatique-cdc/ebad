@@ -83,7 +83,7 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/csrf").permitAll()
-                .antMatchers("/actualites/public").permitAll()
+                .antMatchers("/news/public").permitAll()
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/v2/api-docs/**").permitAll()
                 .antMatchers("/v3/api-docs/**").permitAll()
