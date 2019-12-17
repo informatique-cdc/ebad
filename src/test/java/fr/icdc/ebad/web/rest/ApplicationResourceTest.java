@@ -16,6 +16,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -32,6 +34,7 @@ import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -63,7 +66,9 @@ public class ApplicationResourceTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        this.restMvc = MockMvcBuilders.standaloneSetup(applicationResource).build();
+        this.restMvc = MockMvcBuilders.standaloneSetup(applicationResource)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build();
         objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -81,8 +86,9 @@ public class ApplicationResourceTest {
         Application application2 = new Application();
         application2.setId(2L);
         applications.add(application2);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
 
-        when(applicationService.getAllApplications()).thenReturn(applications);
+        when(applicationService.getAllApplications(any())).thenReturn(applicationPage);
         when(userRepository.findUserFromApplication(anyLong(), anyString())).thenReturn(new User());
 
         restMvc.perform(builder)
@@ -107,7 +113,9 @@ public class ApplicationResourceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        when(applicationService.getAllApplications()).thenReturn(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+
+        when(applicationService.getAllApplications(any())).thenReturn(applicationPage);
         when(userRepository.findManagerFromApplication(eq(1L), eq("dtrouillet"))).thenReturn(new User());
 
         restMvc.perform(builder)
@@ -131,8 +139,9 @@ public class ApplicationResourceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        when(applicationService.getAllApplications()).thenReturn(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
 
+        when(applicationService.getAllApplications(any())).thenReturn(applicationPage);
         restMvc.perform(builder)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -155,7 +164,9 @@ public class ApplicationResourceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        when(applicationService.getAllApplications()).thenReturn(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+
+        when(applicationService.getAllApplications(any())).thenReturn(applicationPage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -202,13 +213,6 @@ public class ApplicationResourceTest {
                 .andExpect(jsonPath("$.name", is("MyApp")));
     }
 
-    @Test
-    public void updateApplication() {
-    }
-
-    @Test
-    public void removeApplication() {
-    }
 
     @Test
     @WithMockUser(roles = "ADMIN")

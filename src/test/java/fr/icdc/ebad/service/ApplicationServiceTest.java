@@ -21,7 +21,10 @@ import org.pf4j.spring.SpringPluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -97,13 +100,16 @@ public class ApplicationServiceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        when(applicationRepository.findAll(any(Sort.class))).thenReturn(applications);
+        Pageable pageable = PageRequest.of(0, 2);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
 
-        List<Application> result = applicationService.getAllApplications();
+        when(applicationRepository.findAll(eq(pageable))).thenReturn(applicationPage);
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(application1));
-        assertTrue(result.contains(application2));
+        Page<Application> result = applicationService.getAllApplications(pageable);
+
+        assertEquals(2, result.getContent().size());
+        assertTrue(result.getContent().contains(application1));
+        assertTrue(result.getContent().contains(application2));
     }
 
     @Test

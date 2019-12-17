@@ -30,9 +30,23 @@ public class PaginationUtil {
 
     public static final String PER_PAGE = "&per_page=";
 
+    public static final int DEFAULT_PAGE = 0;
+    public static final int MIN_PAGE = 0;
+    public static final int DEFAULT_SIZE = 20;
+    public static final int MAX_SIZE = 10000;
+
     private PaginationUtil() {
     }
 
+    public static Pageable generatePageRequestOrDefault(Pageable pageable) {
+        if (pageable != null) {
+            return pageable;
+        }
+        return PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE);
+    }
+
+
+    @Deprecated
     public static Pageable generatePageRequest(Integer pOffset, Integer pLimit) {
         Integer offset = pOffset;
         Integer limit = pLimit;
@@ -46,7 +60,7 @@ public class PaginationUtil {
     }
 
     public static <T> HttpHeaders generatePaginationHttpHeaders(Page<T> page, String baseUrl, Integer pOffset, Integer pLimit)
-        throws URISyntaxException {
+            throws URISyntaxException {
         Integer offset = pOffset;
         Integer limit = pLimit;
         if (pOffset == null || pOffset < MIN_OFFSET) {
@@ -60,16 +74,16 @@ public class PaginationUtil {
         String link = "";
         if (offset < page.getTotalPages()) {
             link = "<" + (new URI(baseUrl + PAGE + (offset + 1) + PER_PAGE + limit)).toString()
-                + ">; rel=\"next\",";
+                    + ">; rel=\"next\",";
         }
         if (offset > 1) {
             link += "<" + (new URI(baseUrl + PAGE + (offset - 1) + PER_PAGE + limit)).toString()
-                + ">; rel=\"prev\",";
+                    + ">; rel=\"prev\",";
         }
         link += "<" + (new URI(baseUrl + PAGE + page.getTotalPages() + PER_PAGE + limit)).toString()
-            + ">; rel=\"last\"," +
-            "<" + (new URI(baseUrl + PAGE + 1 + PER_PAGE + limit)).toString()
-            + ">; rel=\"first\"";
+                + ">; rel=\"last\"," +
+                "<" + (new URI(baseUrl + PAGE + 1 + PER_PAGE + limit)).toString()
+                + ">; rel=\"first\"";
         headers.add(HttpHeaders.LINK, link);
         return headers;
     }

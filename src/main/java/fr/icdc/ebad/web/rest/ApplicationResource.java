@@ -6,15 +6,17 @@ import fr.icdc.ebad.service.ApplicationService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
+import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.security.Principal;
 import java.util.Set;
 
 @RestController
@@ -51,10 +53,10 @@ public class ApplicationResource {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
-    @PostFilter("@permissionApplication.canRead(filterObject,principal)")
-    public List<ApplicationDto> getAll() {
+    public Page<ApplicationDto> getAll(Pageable pageable, Principal principal) {
         LOGGER.debug("REST request to get all Application - Read");
-        return mapper.mapAsList(applicationService.getAllApplications(), ApplicationDto.class);
+        return applicationService.getAllApplicationsUsed(PaginationUtil.generatePageRequestOrDefault(pageable), principal.getName())
+                .map(application -> mapper.map(application, ApplicationDto.class));
     }
 
     @PostMapping(value = "/import-all", produces = MediaType.TEXT_PLAIN_VALUE)
@@ -71,10 +73,11 @@ public class ApplicationResource {
     @GetMapping(value = "/write", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
-    @PostFilter("@permissionApplication.canWrite(filterObject,principal)")
-    public List<ApplicationDto> getAllWrite() {
+    public Page<ApplicationDto> getAllWrite(Pageable pageable, Principal principal) {
         LOGGER.debug("REST request to get all Application - Write");
-        return mapper.mapAsList(applicationService.getAllApplications(), ApplicationDto.class);
+        return applicationService.getAllApplicationsManaged(
+                PaginationUtil.generatePageRequestOrDefault(pageable), principal.getName())
+                .map(application -> mapper.map(application, ApplicationDto.class));
     }
 
     /**
@@ -82,12 +85,11 @@ public class ApplicationResource {
      */
     @GetMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
-    @PostFilter("@permissionApplication.canManage(filterObject,principal)")
-    public List<ApplicationDto> getAllManage() {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public Page<ApplicationDto> getAllManage(Pageable pageable) {
         LOGGER.debug("REST request to get all Application - Write");
-        return mapper.mapAsList(applicationService.getAllApplications(), ApplicationDto.class);
-
+        return applicationService.getAllApplications(pageable)
+                .map(application -> mapper.map(application, ApplicationDto.class));
     }
 
     /**
