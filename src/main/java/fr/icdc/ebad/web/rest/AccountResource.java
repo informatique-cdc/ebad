@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
  * REST controller for managing the current user's account.
  */
 @RestController
-//@RequestMapping("/api")
 @Tag(name = "Account", description = "the account API")
 public class AccountResource {
 
