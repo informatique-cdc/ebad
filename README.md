@@ -27,12 +27,10 @@ spring:
 ```
 Replace <xxx> with your values.
 
-For initialize data (user and roles) add
-
+For initialize data (global settings, user and roles) activate spring profile "init-database"
+for example :
 ```
-spring:
-  datasource:
-    initialization-mode: always
+java -jar <downloaded-release>.jar --spring.profiles.active=jwt,init-database --spring.config.additional-location=<path-to-your-application.yml>
 ```
 
 #### SSH Connection
