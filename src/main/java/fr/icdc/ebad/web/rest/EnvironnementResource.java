@@ -165,8 +165,7 @@ public class EnvironnementResource {
 
     @PostMapping(value = "/import/application/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-//    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
-//    @PostFilter("@permissionApplication.canRead(filterObject,principal)")
+    @PreAuthorize("@permissionApplication.canWrite(#id, principal)")
     public List<EnvironnementDto> importEnvApp(@PathVariable Long id) throws EbadServiceException {
         LOGGER.debug("REST request to import all env for app {} ", id);
         return mapper.mapAsList(environnementService.importEnvironments(id), EnvironnementDto.class);
