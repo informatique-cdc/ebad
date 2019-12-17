@@ -14,6 +14,13 @@ import javax.validation.constraints.NotNull;
 public class EbadProperties {
     private EbadProperties.SecurityProperties security = new EbadProperties.SecurityProperties();
     private EbadProperties.SshProperties ssh = new EbadProperties.SshProperties();
+    private EbadProperties.PluginProperties plugin = new EbadProperties.PluginProperties();
+
+    @Getter
+    @Setter
+    public static class PluginProperties {
+        private String path = "plugins";
+    }
 
     @Getter
     @Setter

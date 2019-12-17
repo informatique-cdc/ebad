@@ -1,5 +1,5 @@
 server:
-  port: 10300
+  port: 10301
   servlet:
     context-path: /ebad
 
@@ -45,3 +45,6 @@ management:
 security:
   basic:
     enabled: false
+logging.level:
+  fr.icdc.ebad: debug
+  fr.icdc.ebad.plugin: info

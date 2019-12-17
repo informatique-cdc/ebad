@@ -1,11 +1,13 @@
 language: java
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+#after_success:
+#  - bash <(curl -s https://codecov.io/bash)
 cache:
   directories:
     - $HOME/.m2
 jdk:
   - openjdk8
+before_install:
+  - cp .travis.settings.xml $HOME/.m2/settings.xml
 addons:
   sonarcloud:
     organization: "informatique-cdc"

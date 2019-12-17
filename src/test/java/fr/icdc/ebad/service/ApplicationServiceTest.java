@@ -7,11 +7,17 @@ import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.QApplication;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
+import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
-import fr.icdc.ebad.repository.AuthorityRepository;
-import fr.icdc.ebad.repository.TypeFichierRepository;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pf4j.PluginDependency;
+import org.pf4j.PluginDescriptor;
+import org.pf4j.PluginException;
+import org.pf4j.PluginWrapper;
+import org.pf4j.spring.SpringPluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -39,17 +46,17 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles(Constants.SPRING_PROFILE_TEST)
 @SpringBootTest
 public class ApplicationServiceTest {
+    @Autowired
+    ApplicationService applicationService;
     @MockBean
     private ApplicationRepository applicationRepository;
     @MockBean
-    private AuthorityRepository authorityRepository;
-    @MockBean
-    private TypeFichierRepository typeFichierRepository;
-    @MockBean
     private EnvironnementService environnementService;
+    @MockBean
+    private ApplicationConnectorPlugin applicationConnectorPlugin;
+    @MockBean
+    private SpringPluginManager springPluginManager;
 
-    @Autowired
-    ApplicationService applicationService;
     @Test
     public void deleteApplication() {
         Environnement environnement1 = new Environnement();
@@ -67,16 +74,16 @@ public class ApplicationServiceTest {
         application.setEnvironnements(environnementSet);
 
         when(applicationRepository.getOne(eq(9L))).thenReturn(application);
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1),eq(true));
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2),eq(true));
+        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1), eq(true));
+        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2), eq(true));
         doNothing().when(applicationRepository).delete(eq(application));
 
         applicationService.deleteApplication(9L);
 
-        verify(applicationRepository,times(1)).getOne(eq(9L));
-        verify(environnementService,times(1)).deleteEnvironnement(eq(environnement1),eq(true));
-        verify(environnementService,times(1)).deleteEnvironnement(eq(environnement2),eq(true));
-        verify(applicationRepository,times(1)).delete(eq(application));
+        verify(applicationRepository, times(1)).getOne(eq(9L));
+        verify(environnementService, times(1)).deleteEnvironnement(eq(environnement1), eq(true));
+        verify(environnementService, times(1)).deleteEnvironnement(eq(environnement2), eq(true));
+        verify(applicationRepository, times(1)).delete(eq(application));
     }
 
     @Test
@@ -112,7 +119,7 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void setSaveApplication() {
+    public void testSaveApplication() {
         Application application = new Application();
         application.setId(1L);
 
@@ -197,5 +204,116 @@ public class ApplicationServiceTest {
 
         assertFalse(results.isEmpty());
         assertTrue(results.contains(user3));
+    }
+
+    @Test
+    public void testImportApp() throws PluginException {
+        List<ApplicationDiscoverDto> applicationDiscoverDtoList = new ArrayList<>();
+        ApplicationDiscoverDto applicationDiscoverDto1 = ApplicationDiscoverDto.builder()
+                .code("aa2")
+                .id("2")
+                .name("appa")
+                .build();
+        ApplicationDiscoverDto applicationDiscoverDto2 = ApplicationDiscoverDto.builder()
+                .code("aa3")
+                .id("3")
+                .name("appa3")
+                .build();
+
+        applicationDiscoverDtoList.add(applicationDiscoverDto1);
+        applicationDiscoverDtoList.add(applicationDiscoverDto2);
+
+        PluginDescriptor pluginDescriptor = new PluginDescriptor() {
+            @Override
+            public String getPluginId() {
+                return "import-plugin";
+            }
+
+            @Override
+            public String getPluginDescription() {
+                return null;
+            }
+
+            @Override
+            public String getPluginClass() {
+                return null;
+            }
+
+            @Override
+            public String getVersion() {
+                return null;
+            }
+
+            @Override
+            public String getRequires() {
+                return null;
+            }
+
+            @Override
+            public String getProvider() {
+                return null;
+            }
+
+            @Override
+            public String getLicense() {
+                return null;
+            }
+
+            @Override
+            public List<PluginDependency> getDependencies() {
+                return null;
+            }
+        };
+        PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
+        when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
+
+        when(applicationRepository.findAllByExternalIdAndPluginId(eq("2"), eq("import-plugin"))).thenReturn(Optional.empty());
+        when(applicationConnectorPlugin.discoverApp()).thenReturn(applicationDiscoverDtoList);
+        applicationService.importApp();
+        verify(applicationRepository).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto1.getName())
+                        && app.getCode().equals(applicationDiscoverDto1.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto1.getId())
+        ));
+        verify(applicationRepository).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto2.getName())
+                        && app.getCode().equals(applicationDiscoverDto2.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto2.getId())
+        ));
+    }
+
+    @Test
+    public void testUpdateApplication() throws EbadServiceException {
+        Application oldApplication = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application newApplication = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(oldApplication));
+        when(applicationRepository.save(eq(newApplication))).thenReturn(newApplication);
+        Application result = applicationService.updateApplication(newApplication);
+
+        verify(applicationRepository).save(argThat((app) ->
+                app.getId().equals(newApplication.getId())
+                        && app.getCode().equals(newApplication.getCode())
+                        && app.getName().equals(newApplication.getName())
+                        && app.getDateParametrePattern().equals(newApplication.getDateParametrePattern())
+                        && app.getDateFichierPattern().equals(newApplication.getDateFichierPattern())
+        ));
+
+        assertEquals(newApplication.getId(), result.getId());
+        assertEquals(newApplication.getCode(), result.getCode());
+        assertEquals(newApplication.getName(), result.getName());
+        assertEquals(newApplication.getDateParametrePattern(), result.getDateParametrePattern());
+        assertEquals(newApplication.getDateFichierPattern(), result.getDateFichierPattern());
     }
 }
