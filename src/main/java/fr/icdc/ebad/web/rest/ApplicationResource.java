@@ -59,7 +59,7 @@ public class ApplicationResource {
 
     @PostMapping(value = "/import-all", produces = MediaType.TEXT_PLAIN_VALUE)
     @Timed
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String importAll() {
         LOGGER.debug("REST request to import all Application ");
         return applicationService.importApp();
