@@ -30,7 +30,6 @@ import javax.validation.Valid;
  */
 @Profile("jwt")
 @RestController
-//@RequestMapping("/api")
 @Tag(name = "JWT", description = "the jwt authentication API")
 public class UserJWTController {
 
