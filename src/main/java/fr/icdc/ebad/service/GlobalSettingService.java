@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class GlobalSettingService {
@@ -18,10 +21,7 @@ public class GlobalSettingService {
         this.globalSettingRepository = globalSettingRepository;
     }
 
-    public GlobalSetting getGlobalSetting(String key) throws EbadServiceException {
-        return globalSettingRepository.findById(key).orElseThrow(EbadServiceException::new);
-    }
-
+    @Transactional
     public GlobalSetting saveGlobalSetting(String key, String value, String description, String label) throws EbadServiceException {
         if (globalSettingRepository.findById(key).isPresent()) {
             throw new EbadServiceException("Global Setting " + key + " already exist");
@@ -38,6 +38,7 @@ public class GlobalSettingService {
     }
 
     @CachePut("global_settings")
+    @Transactional
     public GlobalSetting setValue(String key, String value) throws EbadServiceException {
         GlobalSetting globalSetting = globalSettingRepository.findById(key).orElseThrow(EbadServiceException::new);
         globalSetting.setValue(value);
@@ -45,11 +46,16 @@ public class GlobalSettingService {
     }
 
     @Cacheable("global_settings")
-    public String getValue(String key) throws EbadServiceException {
+    @Transactional(readOnly = true)
+    public GlobalSetting getValue(String key) throws EbadServiceException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("get global setting {}", key);
         }
-        GlobalSetting globalSetting = globalSettingRepository.findById(key).orElseThrow(EbadServiceException::new);
-        return globalSetting.getValue();
+        return globalSettingRepository.findById(key).orElseThrow(EbadServiceException::new);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GlobalSetting> getAllGlobalSettings() {
+        return globalSettingRepository.findAll();
     }
 }
