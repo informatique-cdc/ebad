@@ -23,6 +23,7 @@ import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -208,6 +209,7 @@ public class EnvironnementService {
     }
 
     @Transactional
+    @PreAuthorize("@permissionServiceOpen.canImportEnvironment()")
     public Set<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
         Application application = applicationRepository.findById(applicationId).orElseThrow(() -> new EbadServiceException("No application with id " + applicationId));
         Set<Environnement> environnements = new HashSet<>();
@@ -250,6 +252,7 @@ public class EnvironnementService {
     }
 
     @Transactional
+    @PreAuthorize("@permissionServiceOpen.canImportEnvironment()")
     public List<Environnement> importEnvironments() throws EbadServiceException {
         List<Application> applicationList = applicationRepository.findAll();
         List<Environnement> environnementList = new ArrayList<>();

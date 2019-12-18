@@ -4,7 +4,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
-import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.repository.DirectoryRepository;
@@ -14,14 +13,12 @@ import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,15 +34,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class DirectoryServiceTest {
-    @MockBean
+    @Mock
     private DirectoryRepository directoryRepository;
-    @MockBean
+    @Mock
     private ShellService shellService;
-    @Autowired
+    @InjectMocks
     private DirectoryService directoryService;
 
     @Test
