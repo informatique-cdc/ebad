@@ -1,16 +1,13 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Actualite;
 import fr.icdc.ebad.repository.ActualiteRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +19,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
+@RunWith(MockitoJUnitRunner.class)
 public class ActualiteServiceTest {
-    @Autowired
+    @InjectMocks
     private ActualiteService actualiteService;
 
-    @MockBean
+    @Mock
     private ActualiteRepository actualiteRepository;
 
     @Test

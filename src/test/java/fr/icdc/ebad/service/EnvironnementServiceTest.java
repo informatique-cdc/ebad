@@ -1,7 +1,6 @@
 package fr.icdc.ebad.service;
 
 import com.jcraft.jsch.JSchException;
-import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Environnement;
@@ -18,21 +17,20 @@ import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.repository.NormeRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import ma.glasnost.orika.MapperFacade;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -43,9 +41,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -60,37 +60,39 @@ import static org.mockito.Mockito.when;
 /**
  * Created by dtrouillet on 10/02/2017.
  */
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class EnvironnementServiceTest {
-    @MockBean
+    @Mock
     private ShellService shellService;
-    @MockBean
+    @Mock
     private LogBatchRepository logBatchRepository;
-    @MockBean
+    @Mock
     private ChaineRepository chaineRepository;
-    @MockBean
+    @Mock
     private BatchRepository batchRepository;
-    @MockBean
+    @Mock
     private DirectoryRepository directoryRepository;
-    @MockBean
+    @Mock
     private EnvironnementRepository environnementRepository;
-    @MockBean
+    @Mock
     private ApplicationRepository applicationRepository;
-    @MockBean
+    @Mock
     private SpringPluginManager springPluginManager;
-    @MockBean
+    @Mock
     private NormeRepository normeRepository;
-    @MockBean
+    @Mock
     private EnvironnementConnectorPlugin environnementConnectorPlugin;
+    @Spy
+    private MapperFacade mapperFacade;
+    @Spy
+    private List<EnvironnementConnectorPlugin> environnementConnectorPluginList = new ArrayList<>();
 
-    @Autowired
+    @InjectMocks
     private EnvironnementService environnementService;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        environnementConnectorPluginList.add(environnementConnectorPlugin);
     }
 
     @Test
@@ -162,7 +164,6 @@ public class EnvironnementServiceTest {
 
         doNothing().when(logBatchRepository).deleteByEnvironnement(eq(environnement));
         doNothing().when(chaineRepository).deleteByEnvironnement(eq(environnement));
-        doNothing().when(batchRepository).deleteAll(eq(environnement.getBatchs()));
         doNothing().when(directoryRepository).deleteByEnvironnement(eq(environnement));
         doNothing().when(environnementRepository).delete(eq(environnement));
 
@@ -388,27 +389,33 @@ public class EnvironnementServiceTest {
                 && env.getLogin().equals(environnementDiscoverDto2.getLogin())
                 && env.getPluginId().equals("import-plugin")));
 
+
+        Environnement expectedEnv1 = Environnement.builder()
+                .externalId(environnementDiscoverDto1.getId())
+                .host(environnementDiscoverDto1.getHost())
+                .homePath(environnementDiscoverDto1.getHome())
+                .name(environnementDiscoverDto1.getName())
+                .prefix(environnementDiscoverDto1.getPrefix())
+                .login(environnementDiscoverDto1.getLogin())
+                .application(application)
+                .pluginId("import-plugin")
+                .build();
+
+        Environnement expectedEnv2 = Environnement.builder()
+                .externalId(environnementDiscoverDto2.getId())
+                .host(environnementDiscoverDto2.getHost())
+                .homePath(environnementDiscoverDto2.getHome())
+                .name(environnementDiscoverDto2.getName())
+                .prefix(environnementDiscoverDto2.getPrefix())
+                .login(environnementDiscoverDto2.getLogin())
+                .application(application)
+                .pluginId("import-plugin")
+                .build();
+
         List<Environnement> resultList = new ArrayList(result);
         assertEquals(2, resultList.size());
-
-        assertEquals(application, resultList.get(0).getApplication());
-        assertEquals(environnementDiscoverDto2.getHost(), resultList.get(0).getHost());
-        assertEquals(environnementDiscoverDto2.getHome(), resultList.get(0).getHomePath());
-        assertEquals(environnementDiscoverDto2.getName(), resultList.get(0).getName());
-        assertEquals(environnementDiscoverDto2.getPrefix(), resultList.get(0).getPrefix());
-        assertEquals(environnementDiscoverDto2.getId(), resultList.get(0).getExternalId());
-        assertEquals(environnementDiscoverDto2.getLogin(), resultList.get(0).getLogin());
-        assertEquals("import-plugin", resultList.get(0).getPluginId());
-
-        assertEquals(application, resultList.get(1).getApplication());
-        assertEquals(environnementDiscoverDto1.getHost(), resultList.get(1).getHost());
-        assertEquals(environnementDiscoverDto1.getHome(), resultList.get(1).getHomePath());
-        assertEquals(environnementDiscoverDto1.getName(), resultList.get(1).getName());
-        assertEquals(environnementDiscoverDto1.getPrefix(), resultList.get(1).getPrefix());
-        assertEquals(environnementDiscoverDto1.getId(), resultList.get(1).getExternalId());
-        assertEquals(environnementDiscoverDto1.getLogin(), resultList.get(1).getLogin());
-        assertEquals("import-plugin", resultList.get(1).getPluginId());
-
+        assertThat(resultList, hasItem(expectedEnv1));
+        assertThat(resultList, hasItem(expectedEnv2));
     }
 
     @Test
@@ -537,25 +544,31 @@ public class EnvironnementServiceTest {
                 && env.getLogin().equals(environnementDiscoverDto2.getLogin())
                 && env.getPluginId().equals("import-plugin")));
 
+        Environnement expectedEnv1 = Environnement.builder()
+                .externalId(environnementDiscoverDto1.getId())
+                .host(environnementDiscoverDto1.getHost())
+                .homePath(environnementDiscoverDto1.getHome())
+                .name(environnementDiscoverDto1.getName())
+                .prefix(environnementDiscoverDto1.getPrefix())
+                .login(environnementDiscoverDto1.getLogin())
+                .application(application)
+                .pluginId("import-plugin")
+                .build();
+
+        Environnement expectedEnv2 = Environnement.builder()
+                .externalId(environnementDiscoverDto2.getId())
+                .host(environnementDiscoverDto2.getHost())
+                .homePath(environnementDiscoverDto2.getHome())
+                .name(environnementDiscoverDto2.getName())
+                .prefix(environnementDiscoverDto2.getPrefix())
+                .login(environnementDiscoverDto2.getLogin())
+                .application(application)
+                .pluginId("import-plugin")
+                .build();
+
         assertEquals(2, resultList.size());
-
-        assertEquals(application, resultList.get(0).getApplication());
-        assertEquals(environnementDiscoverDto2.getHost(), resultList.get(0).getHost());
-        assertEquals(environnementDiscoverDto2.getHome(), resultList.get(0).getHomePath());
-        assertEquals(environnementDiscoverDto2.getName(), resultList.get(0).getName());
-        assertEquals(environnementDiscoverDto2.getPrefix(), resultList.get(0).getPrefix());
-        assertEquals(environnementDiscoverDto2.getId(), resultList.get(0).getExternalId());
-        assertEquals(environnementDiscoverDto2.getLogin(), resultList.get(0).getLogin());
-        assertEquals("import-plugin", resultList.get(0).getPluginId());
-
-        assertEquals(application, resultList.get(1).getApplication());
-        assertEquals(environnementDiscoverDto1.getHost(), resultList.get(1).getHost());
-        assertEquals(environnementDiscoverDto1.getHome(), resultList.get(1).getHomePath());
-        assertEquals(environnementDiscoverDto1.getName(), resultList.get(1).getName());
-        assertEquals(environnementDiscoverDto1.getPrefix(), resultList.get(1).getPrefix());
-        assertEquals(environnementDiscoverDto1.getId(), resultList.get(1).getExternalId());
-        assertEquals(environnementDiscoverDto1.getLogin(), resultList.get(1).getLogin());
-        assertEquals("import-plugin", resultList.get(1).getPluginId());
+        assertThat(resultList, hasItem(expectedEnv1));
+        assertThat(resultList, hasItem(expectedEnv2));
 
     }
 }
