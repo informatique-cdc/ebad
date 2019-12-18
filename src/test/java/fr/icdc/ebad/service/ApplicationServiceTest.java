@@ -354,4 +354,32 @@ public class ApplicationServiceTest {
 
         assertEquals(applicationPage, result);
     }
+
+    @Test
+    public void testGetAllApplicationsManaged() {
+        Application application1 = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application application2 = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        List<Application> applicationList = new ArrayList<>();
+        applicationList.add(application1);
+        applicationList.add(application2);
+
+        Page<Application> applicationPage = new PageImpl(applicationList);
+        when(applicationRepository.findAllManagedByUser(eq("test"), any())).thenReturn(applicationPage);
+
+        Page<Application> result = applicationService.getAllApplicationsManaged(PageRequest.of(0, 2), "test");
+
+        assertEquals(applicationPage, result);
+    }
 }
