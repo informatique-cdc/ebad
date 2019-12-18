@@ -1,20 +1,24 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.*;
-import fr.icdc.ebad.config.Constants;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpProgressMonitor;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import org.apache.commons.io.IOUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -30,20 +34,28 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@RunWith(SpringRunner.class)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class ShellServiceTest {
-    @Autowired
+    @InjectMocks
     private ShellService shellService;
-    @MockBean
+    @Mock
     private JSch jsch;
-    @MockBean
+    @Mock
     private Session session;
-    @MockBean
+    @Mock
     private ChannelExec channelExec;
-    @MockBean
+    @Mock
     private ChannelSftp channelSftp;
+    @Spy
+    private EbadProperties ebadProperties;
+
+    @Before
+    public void setup() {
+        EbadProperties.SshProperties sshProperties = ebadProperties.getSsh();
+        sshProperties.setPrivateKeyPath("/key");
+        sshProperties.setPrivateKeyPassphrase("test");
+        sshProperties.setLogin("ebad");
+    }
 
     @Test
     public void runCommand() throws Exception {
@@ -64,13 +76,6 @@ public class ShellServiceTest {
 
     @Test
     public void getListFiles() throws Exception {
-        EbadProperties.SshProperties sshProperties = new EbadProperties.SshProperties();
-        sshProperties.setPrivateKeyPath("/key");
-        sshProperties.setPrivateKeyPassphrase("test");
-        sshProperties.setLogin("ebad");
-
-
-        doNothing().when(jsch).addIdentity(eq("/key"), eq("test"));
         when(jsch.getSession(eq("ebad"), eq("localhost"), eq(22))).thenReturn(session);
         when(session.openChannel(eq("sftp"))).thenReturn(channelSftp);
 
@@ -89,12 +94,6 @@ public class ShellServiceTest {
 
     @Test
     public void removeFile() throws Exception {
-        EbadProperties.SshProperties sshProperties = new EbadProperties.SshProperties();
-        sshProperties.setPrivateKeyPath("/key");
-        sshProperties.setPrivateKeyPassphrase("test");
-        sshProperties.setLogin("ebad");
-
-        doNothing().when(jsch).addIdentity(eq("/key"), eq("test"));
         when(jsch.getSession(eq("ebad"), eq("localhost"), eq(22))).thenReturn(session);
         when(session.openChannel(eq("sftp"))).thenReturn(channelSftp);
 
@@ -112,17 +111,10 @@ public class ShellServiceTest {
 
     @Test
     public void getFile() throws Exception {
-        EbadProperties.SshProperties sshProperties = new EbadProperties.SshProperties();
-        sshProperties.setPrivateKeyPath("/key");
-        sshProperties.setPrivateKeyPassphrase("test");
-        sshProperties.setLogin("ebad");
-
-        doNothing().when(jsch).addIdentity(eq("/key"), eq("test"));
         when(jsch.getSession(eq("ebad"), eq("localhost"), eq(22))).thenReturn(session);
         when(session.openChannel(eq("sftp"))).thenReturn(channelSftp);
 
         Vector<ChannelSftp.LsEntry> lsEntries = createEntries();
-        when(channelSftp.ls(eq("/home/dir"))).thenReturn(lsEntries);
 
         Norme norme = Norme.builder().commandLine("/bin/bash $1").build();
         Environnement environnement = Environnement.builder().id(1L).host("localhost").norme(norme).homePath("/home").build();
@@ -142,17 +134,10 @@ public class ShellServiceTest {
 
     @Test
     public void uploadFile() throws Exception {
-        EbadProperties.SshProperties sshProperties = new EbadProperties.SshProperties();
-        sshProperties.setPrivateKeyPath("/key");
-        sshProperties.setPrivateKeyPassphrase("test");
-        sshProperties.setLogin("ebad");
-
-        doNothing().when(jsch).addIdentity(eq("/key"), eq("test"));
         when(jsch.getSession(eq("ebad"), eq("localhost"), eq(22))).thenReturn(session);
         when(session.openChannel(eq("sftp"))).thenReturn(channelSftp);
 
         Vector<ChannelSftp.LsEntry> lsEntries = createEntries();
-        when(channelSftp.ls(eq("/home/dir"))).thenReturn(lsEntries);
 
         Norme norme = Norme.builder().commandLine("/bin/bash $1").build();
         Environnement environnement = Environnement.builder().id(1L).host("localhost").norme(norme).homePath("/home").build();
@@ -179,16 +164,8 @@ public class ShellServiceTest {
     }
 
     private ChannelSftp.LsEntry createSingleEntry(String fileName, long size, int mTime, boolean directory) {
-
         SftpATTRS attributes = mock(SftpATTRS.class);
-        when(attributes.getSize()).thenReturn(size);
-        when(attributes.getMTime()).thenReturn(mTime);
-
         ChannelSftp.LsEntry entry = mock(ChannelSftp.LsEntry.class);
-        when(entry.getAttrs()).thenReturn(attributes);
-        when(entry.getFilename()).thenReturn(fileName);
-        when(entry.getAttrs().isDir()).thenReturn(directory);
-
         return entry;
     }
 }

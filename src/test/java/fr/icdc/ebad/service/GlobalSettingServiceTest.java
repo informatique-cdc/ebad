@@ -1,18 +1,13 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.GlobalSetting;
 import fr.icdc.ebad.repository.GlobalSettingRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,20 +19,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class GlobalSettingServiceTest {
-    @MockBean
+    @Mock
     private GlobalSettingRepository globalSettingRepository;
 
-    @Autowired
+    @InjectMocks
     private GlobalSettingService globalSettingService;
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void saveGlobalSetting() throws EbadServiceException {

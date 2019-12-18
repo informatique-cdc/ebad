@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,6 +108,7 @@ public class ApplicationService {
 
 
     @Transactional
+    @PreAuthorize("@permissionServiceOpen.canImportApplication()")
     public String importApp() {
         StringBuilder result = new StringBuilder();
         for (ApplicationConnectorPlugin applicationConnectorPlugin : applicationConnectorPlugins) {
