@@ -10,6 +10,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +25,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +57,20 @@ public class GlobalSettingResourceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.key", is("TEST_KEY")))
                 .andExpect(jsonPath("$.value", is("TEST_VALUE")));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void setValue() throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/global-settings/TEST_KEY").content("{\"value\":\"TEST_VALUE\"}").contentType(MediaType.APPLICATION_JSON_UTF8);
+        GlobalSetting globalSetting = new GlobalSetting("TEST_KEY", "TEST_VALUE", "TEST_LAVEL", "TEST_DESCRIPTION");
+        when(globalSettingService.setValue(eq("TEST_KEY"), eq("TEST_VALUE"))).thenReturn(globalSetting);
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.key", is("TEST_KEY")))
+                .andExpect(jsonPath("$.value", is("TEST_VALUE")));
+        verify(globalSettingService).setValue(eq("TEST_KEY"), eq("TEST_VALUE"));
+
     }
 
     @Test
