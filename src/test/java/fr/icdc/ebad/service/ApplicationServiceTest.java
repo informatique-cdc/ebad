@@ -23,16 +23,10 @@ import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -331,5 +325,33 @@ public class ApplicationServiceTest {
         assertEquals(newApplication.getName(), result.getName());
         assertEquals(newApplication.getDateParametrePattern(), result.getDateParametrePattern());
         assertEquals(newApplication.getDateFichierPattern(), result.getDateFichierPattern());
+    }
+
+    @Test
+    public void testGetAllApplicationUsed() {
+        Application application1 = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application application2 = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        List<Application> applicationList = new ArrayList<>();
+        applicationList.add(application1);
+        applicationList.add(application2);
+
+        Page<Application> applicationPage = new PageImpl(applicationList);
+        when(applicationRepository.findAllUsagedByUser(eq("test"), any())).thenReturn(applicationPage);
+
+        Page<Application> result = applicationService.getAllApplicationsUsed(PageRequest.of(0, 2), "test");
+
+        assertEquals(applicationPage, result);
     }
 }

@@ -18,7 +18,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -159,10 +158,12 @@ public class ApplicationService {
         return saveApplication(application);
     }
 
+    @Transactional(readOnly = true)
     public Page<Application> getAllApplicationsManaged(Pageable pageable, String username) {
         return applicationRepository.findAllManagedByUser(username, pageable);
     }
 
+    @Transactional(readOnly = true)
     public Page<Application> getAllApplicationsUsed(Pageable pageable, String username) {
         return applicationRepository.findAllUsagedByUser(username, pageable);
     }
