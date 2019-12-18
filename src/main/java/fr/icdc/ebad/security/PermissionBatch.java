@@ -1,8 +1,5 @@
 package fr.icdc.ebad.security;
 
-import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.config.Constants;
-import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
@@ -11,10 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Inject;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Created by dtrouillet on 01/09/2017.
