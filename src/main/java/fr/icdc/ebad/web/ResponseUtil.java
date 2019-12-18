@@ -1,12 +1,12 @@
 package fr.icdc.ebad.web;
 
-import java.util.Optional;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Optional;
+
 public final class ResponseUtil {
-	
+
     private ResponseUtil() {
         // noop
     }

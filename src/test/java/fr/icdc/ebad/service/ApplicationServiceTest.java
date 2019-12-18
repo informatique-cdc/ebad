@@ -1,7 +1,6 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.QApplication;
@@ -10,20 +9,21 @@ import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.ApplicationRepository;
+import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,25 +37,32 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class ApplicationServiceTest {
-    @Autowired
-    ApplicationService applicationService;
-    @MockBean
+    @InjectMocks
+    private ApplicationService applicationService;
+    @Mock
     private ApplicationRepository applicationRepository;
-    @MockBean
+    @Mock
     private EnvironnementService environnementService;
-    @MockBean
+    @Mock
     private ApplicationConnectorPlugin applicationConnectorPlugin;
-    @MockBean
+    @Mock
     private SpringPluginManager springPluginManager;
+    @Mock
+    private TypeFichierRepository typeFichierRepository;
+
+    @Spy
+    private List<ApplicationConnectorPlugin> applicationConnectorPlugins = new ArrayList<>();
+
+    @Before
+    public void setup() {
+        applicationConnectorPlugins.add(applicationConnectorPlugin);
+    }
 
     @Test
     public void deleteApplication() {
@@ -74,9 +81,9 @@ public class ApplicationServiceTest {
         application.setEnvironnements(environnementSet);
 
         when(applicationRepository.getOne(eq(9L))).thenReturn(application);
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1), eq(true));
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2), eq(true));
-        doNothing().when(applicationRepository).delete(eq(application));
+//        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1), eq(true));
+//        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2), eq(true));
+//        doNothing().when(applicationRepository).delete(eq(application));
 
         applicationService.deleteApplication(9L);
 

@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
@@ -8,11 +7,9 @@ import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.web.rest.dto.StatistiquesDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,20 +18,18 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class StatistiquesServiceTest {
-    @MockBean
+    @Mock
     private ApplicationRepository applicationRepository;
-    @MockBean
+    @Mock
     private BatchRepository batchRepository;
-    @MockBean
+    @Mock
     private LogBatchRepository logBatchRepository;
-    @MockBean
+    @Mock
     private UserRepository userRepository;
 
-    @Autowired
+    @InjectMocks
     private StatistiquesService statistiquesService;
 
     @Test
