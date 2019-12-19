@@ -23,6 +23,8 @@ import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -263,5 +265,9 @@ public class EnvironnementService {
             environnementList.addAll(environnements);
         }
         return environnementList;
+    }
+
+    public Page<Environnement> getEnvironmentFromApp(Long appId, Pageable pageable) {
+        return environnementRepository.findAllByApplication_Id(appId, pageable);
     }
 }

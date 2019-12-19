@@ -1,6 +1,8 @@
 package fr.icdc.ebad.repository;
 
 import fr.icdc.ebad.domain.Environnement;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +17,6 @@ public interface EnvironnementRepository extends JpaRepository<Environnement, Lo
     Environnement save(Environnement environnement);
 
     Optional<Environnement> findAllByExternalIdAndPluginId(String externalId, String pluginId);
+
+    Page<Environnement> findAllByApplication_Id(Long applicationId, Pageable pageable);
 }
