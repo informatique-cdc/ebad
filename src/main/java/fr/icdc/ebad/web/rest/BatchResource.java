@@ -14,12 +14,11 @@ import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/batchs")
@@ -55,23 +52,9 @@ public class BatchResource {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PostFilter("@permissionEnvironnement.canReadEnvironnements(filterObject.environnements, principal) or @permissionEnvironnement.canWriteEnvironnements(filterObject.environnements, principal)")
-    public List<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate) {
+    public Page<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate, Pageable pageable) {
         LOGGER.debug("REST request to get Batchs ");
-        return mapper.mapAsList(batchService.getAllBatchWithPredicate(predicate), BatchDto.class);
-    }
-
-    /**
-     * GET  /batchs/env/:env to get all batch from env.
-     */
-    @GetMapping(value = "/env/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Timed
-    @PreAuthorize("@permissionEnvironnement.canRead(#env, principal) or @permissionEnvironnement.canWrite(#env, principal)")
-    public ResponseEntity<List<BatchDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long env) throws URISyntaxException {
-        LOGGER.debug("REST request to get all Batchs from environnement {}", env);
-        Page<Batch> page = batchService.getAllBatchFromEnvironmentAsPage(env, PaginationUtil.generatePageRequest(offset, limit));
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/batchs/env/" + env, offset, limit);
-        return new ResponseEntity<>(mapper.mapAsList(page.getContent(), BatchDto.class), headers, HttpStatus.OK);
+        return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable)).map(batch -> mapper.map(batch, BatchDto.class));
     }
 
     /**

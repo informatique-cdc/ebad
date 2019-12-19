@@ -2,14 +2,17 @@ package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.domain.Actualite;
 import fr.icdc.ebad.security.SecurityUtils;
-import fr.icdc.ebad.service.ActualiteService;
+import fr.icdc.ebad.service.NewService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.ActualiteDto;
+import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,21 +25,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/news")
 @Tag(name = "New", description = "the new API")
-public class ActualiteResource {
+public class NewResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActualiteResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NewResource.class);
 
-    private final ActualiteService actualiteService;
+    private final NewService newService;
     private final MapperFacade mapper;
 
-    public ActualiteResource(ActualiteService actualiteService, MapperFacade mapper) {
-        this.actualiteService = actualiteService;
+    public NewResource(NewService newService, MapperFacade mapper) {
+        this.newService = newService;
         this.mapper = mapper;
     }
 
@@ -46,9 +48,10 @@ public class ActualiteResource {
     @GetMapping
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<ActualiteDto> getAll() {
+    public Page<ActualiteDto> getAll(Pageable pageable) {
         LOGGER.debug("REST request to get all Actualites - Read");
-        return mapper.mapAsList(actualiteService.getAllActualites(), ActualiteDto.class);
+        Page<Actualite> actualitePage = newService.getAllActualites(PaginationUtil.generatePageRequestOrDefault(pageable));
+        return actualitePage.map(theNew -> mapper.map(theNew, ActualiteDto.class));
     }
 
     /**
@@ -57,9 +60,10 @@ public class ActualiteResource {
     @GetMapping("/public")
     @Timed
     @PreAuthorize("isAuthenticated()")
-    public List<ActualiteDto> getActualityPublished() {
+    public Page<ActualiteDto> getActualityPublished(Pageable pageable) {
         LOGGER.debug("REST request to get all public Actualites - Read");
-        return mapper.mapAsList(actualiteService.getAllActualitesPubliees(), ActualiteDto.class);
+        Page<Actualite> actualitePage = newService.getAllActualitesPubliees(PaginationUtil.generatePageRequestOrDefault(pageable));
+        return actualitePage.map(theNew -> mapper.map(theNew, ActualiteDto.class));
     }
 
     /**
@@ -70,7 +74,7 @@ public class ActualiteResource {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ActualiteDto> getOne(@PathVariable("id") Long id) {
         LOGGER.debug("REST request to get Actualite with id {}", id);
-        Optional<ActualiteDto> actualiteDtoOptional = actualiteService.getActualite(id).map(actualite -> mapper.map(actualite, ActualiteDto.class));
+        Optional<ActualiteDto> actualiteDtoOptional = newService.getActualite(id).map(actualite -> mapper.map(actualite, ActualiteDto.class));
         return ResponseUtil.wrapOrNotFound(actualiteDtoOptional);
     }
 
@@ -86,7 +90,7 @@ public class ActualiteResource {
             return ResponseEntity.badRequest().build();
         }
         actualiteDto.setCreatedBy(SecurityUtils.getCurrentLogin());
-        actualiteService.saveActualite(mapper.map(actualiteDto, Actualite.class));
+        newService.saveActualite(mapper.map(actualiteDto, Actualite.class));
         return ResponseEntity.ok().build();
     }
 
@@ -99,7 +103,7 @@ public class ActualiteResource {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         LOGGER.debug("REST request to delete Actualite with id {}", id);
         Actualite actualite = Actualite.builder().id(id).build();
-        actualiteService.deleteActualite(actualite);
+        newService.deleteActualite(actualite);
         return ResponseEntity.ok().build();
     }
 
@@ -114,7 +118,7 @@ public class ActualiteResource {
         if (actualiteDto.getId() == null) {
             return ResponseEntity.badRequest().build();
         }
-        actualiteService.saveActualite(mapper.map(actualiteDto, Actualite.class));
+        newService.saveActualite(mapper.map(actualiteDto, Actualite.class));
         return ResponseEntity.ok().build();
     }
 }

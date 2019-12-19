@@ -16,7 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +51,8 @@ public class ApplicationService {
 
 
     @Transactional(readOnly = true)
-    public List<Application> getAllApplications() {
-        return applicationRepository.findAll(new Sort(Sort.Direction.DESC, FIELD_NAME_APPLICATION));
+    public Page<Application> getAllApplications(Pageable pageable) {
+        return applicationRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
@@ -155,5 +156,15 @@ public class ApplicationService {
         application.setExternalId(oldApplication.getExternalId());
         application.setPluginId(oldApplication.getPluginId());
         return saveApplication(application);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Application> getAllApplicationsManaged(Pageable pageable, String username) {
+        return applicationRepository.findAllManagedByUser(username, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Application> getAllApplicationsUsed(Pageable pageable, String username) {
+        return applicationRepository.findAllUsagedByUser(username, pageable);
     }
 }

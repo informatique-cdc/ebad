@@ -14,7 +14,6 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.querydsl.binding.SingleValueBinding;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -28,13 +27,11 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, QuerydslPre
 
     @EntityGraph(attributePaths = {"environnements"})
     @Override
+    Page<Batch> findAll(Predicate predicate, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"environnements"})
+    @Override
     Batch getOne(Long id);
-
-    @EntityGraph(attributePaths = {"environnements", "environnements.application", "environnements.batchs",
-            "environnements.batchs.chaineAssociations", "environnements.logBatchs"})
-    @Query("select batch from Batch batch left join batch.environnements environnements where environnements.id = :environnement")
-    Page<Batch> findBatchFromEnvironnement(Pageable pageable, @Param("environnement") Long environnement);
-
 
     @Query("select batch from Batch batch where batch.environnements is empty")
     List<Batch> findBatchWithoutEnvironnement();

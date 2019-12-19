@@ -1,19 +1,20 @@
 package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.service.EnvironnementService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.EnvironnementCreationDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementInfoDTO;
+import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,28 +42,25 @@ public class EnvironnementResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironnementResource.class);
 
-    private final EnvironnementRepository environnementRepository;
     private final EnvironnementService environnementService;
     private final MapperFacade mapper;
 
-    public EnvironnementResource(EnvironnementRepository environnementRepository, EnvironnementService environnementService, MapperFacade mapper) {
-        this.environnementRepository = environnementRepository;
+    public EnvironnementResource(EnvironnementService environnementService, MapperFacade mapper) {
         this.environnementService = environnementService;
         this.mapper = mapper;
     }
 
     /**
-     * GET  /environnement to get all environnements.
+     * GET  /environnements?applicationId={appId} to get environment from application.
      */
+    @PreAuthorize("@permissionApplication.canRead(#appId, principal) or @permissionApplication.canManage(#appId, principal)")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
-    public List<Environnement> getAll() {
-        LOGGER.debug("REST request to get all Environnements");
-        return environnementRepository.findAll(new Sort(Sort.Direction.ASC, "name"));
+    public Page<EnvironnementDto> getEnvironmentsFromApp(@RequestParam("applicationId") Long appId, Pageable pageable) {
+        LOGGER.debug("REST request to getEnvironmentsFromApp {}", appId);
+        Page<Environnement> environnementPage = environnementService.getEnvironmentFromApp(appId, PaginationUtil.generatePageRequestOrDefault(pageable));
+        return environnementPage.map(env -> mapper.map(env, EnvironnementDto.class));
     }
-
-
 
     /**
      * GET  /environnement/info/{env} to get info of environnement.
@@ -128,7 +126,7 @@ public class EnvironnementResource {
     @PreAuthorize("@permissionApplication.canWrite(#env.application, principal)")
     public ResponseEntity<EnvironnementDto> addEnvironnement(@RequestBody EnvironnementCreationDto env) {
         LOGGER.debug("REST request to add a new environnement {}", env);
-        if(env.getPrefix() == null){
+        if (env.getPrefix() == null) {
             env.setPrefix("");
         }
         Environnement environnement = environnementService.saveEnvironnement(mapper.map(env, Environnement.class));
@@ -157,7 +155,7 @@ public class EnvironnementResource {
         LOGGER.debug("REST request to delete Environnement : {}", idEnv);
         Optional<Environnement> environnementOptional = Optional.ofNullable(environnementService.getEnvironnement(idEnv));
         if (environnementOptional.isPresent()) {
-            environnementService.deleteEnvironnement(environnementOptional.get(),false);
+            environnementService.deleteEnvironnement(environnementOptional.get(), false);
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

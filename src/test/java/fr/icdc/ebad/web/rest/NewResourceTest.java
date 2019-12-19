@@ -2,15 +2,19 @@ package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Actualite;
-import fr.icdc.ebad.service.ActualiteService;
+import fr.icdc.ebad.service.NewService;
 import fr.icdc.ebad.util.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -40,19 +44,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Constants.SPRING_PROFILE_TEST)
 @SpringBootTest
-public class ActualiteResourceTest {
+public class NewResourceTest {
     @Autowired
-    private ActualiteResource actualiteResource;
+    private NewResource newResource;
 
     @MockBean
-    private ActualiteService actualiteService;
+    private NewService newService;
 
     private MockMvc restMvc;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        this.restMvc = MockMvcBuilders.standaloneSetup(actualiteResource).build();
+        this.restMvc = MockMvcBuilders
+                .standaloneSetup(newResource)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build();
     }
 
 
@@ -69,15 +76,15 @@ public class ActualiteResourceTest {
         Actualite actualite2 = new Actualite();
         actualite2.setId(2L);
         actualites.add(actualite2);
-
-        when(actualiteService.getAllActualites()).thenReturn(actualites);
+        Page<Actualite> actualitePage = new PageImpl<>(actualites);
+        when(newService.getAllActualites(ArgumentMatchers.any())).thenReturn(actualitePage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[1].id", is(2)));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", is(1)))
+                .andExpect(jsonPath("$.content[1].id", is(2)));
     }
 
     @Test
@@ -93,15 +100,16 @@ public class ActualiteResourceTest {
         Actualite actualite2 = new Actualite();
         actualite2.setId(2L);
         actualites.add(actualite2);
+        Page<Actualite> actualitePage = new PageImpl<>(actualites);
 
-        when(actualiteService.getAllActualitesPubliees()).thenReturn(actualites);
+        when(newService.getAllActualitesPubliees(ArgumentMatchers.any())).thenReturn(actualitePage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[1].id", is(2)));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", is(1)))
+                .andExpect(jsonPath("$.content[1].id", is(2)));
     }
 
     @Test
@@ -113,7 +121,7 @@ public class ActualiteResourceTest {
         actualite1.setId(1L);
 
 
-        when(actualiteService.getActualite(eq(1L))).thenReturn(Optional.of(actualite1));
+        when(newService.getActualite(eq(1L))).thenReturn(Optional.of(actualite1));
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -131,7 +139,7 @@ public class ActualiteResourceTest {
         actualite1.setCreatedDate(null);
         actualite1.setLastModifiedDate(null);
 
-        when(actualiteService.saveActualite(eq(actualite1))).thenReturn(actualite1);
+        when(newService.saveActualite(eq(actualite1))).thenReturn(actualite1);
 
         restMvc.perform(
                 builder
@@ -139,7 +147,7 @@ public class ActualiteResourceTest {
                         .content(TestUtil.convertObjectToJsonBytes(actualite1)))
                 .andExpect(status().isOk());
 
-        verify(actualiteService, times(1)).saveActualite(eq(actualite1));
+        verify(newService, times(1)).saveActualite(eq(actualite1));
 
     }
 
@@ -161,7 +169,7 @@ public class ActualiteResourceTest {
                         .content(TestUtil.convertObjectToJsonBytes(actualite1)))
                 .andExpect(status().isBadRequest());
 
-        verify(actualiteService, times(0)).saveActualite(eq(actualite1));
+        verify(newService, times(0)).saveActualite(eq(actualite1));
 
     }
 
@@ -170,13 +178,13 @@ public class ActualiteResourceTest {
     public void delete() throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete("/news/1");
 
-        doNothing().when(actualiteService).deleteActualite(argThat(actualite -> actualite.getId() == 1L));
+        doNothing().when(newService).deleteActualite(argThat(actualite -> actualite.getId() == 1L));
 
         restMvc.perform(
                 builder.contentType(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
-        verify(actualiteService, times(1)).deleteActualite(argThat(actualite -> actualite.getId() == 1L));
+        verify(newService, times(1)).deleteActualite(argThat(actualite -> actualite.getId() == 1L));
     }
 
     @Test
@@ -192,7 +200,7 @@ public class ActualiteResourceTest {
         actualite1.setLastModifiedDate(null);
 
 
-        when(actualiteService.saveActualite(eq(actualite1))).thenReturn(actualite1);
+        when(newService.saveActualite(eq(actualite1))).thenReturn(actualite1);
 
         restMvc.perform(
                 builder
@@ -200,7 +208,7 @@ public class ActualiteResourceTest {
                         .content(TestUtil.convertObjectToJsonBytes(actualite1)))
                 .andExpect(status().isOk());
 
-        verify(actualiteService, times(1)).saveActualite(eq(actualite1));
+        verify(newService, times(1)).saveActualite(eq(actualite1));
     }
 
     @Test
@@ -220,7 +228,7 @@ public class ActualiteResourceTest {
                         .content(TestUtil.convertObjectToJsonBytes(actualite1)))
                 .andExpect(status().isBadRequest());
 
-        verify(actualiteService, times(0)).saveActualite(eq(actualite1));
+        verify(newService, times(0)).saveActualite(eq(actualite1));
     }
 
 }

@@ -31,6 +31,10 @@ import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -570,5 +574,32 @@ public class EnvironnementServiceTest {
         assertThat(resultList, hasItem(expectedEnv1));
         assertThat(resultList, hasItem(expectedEnv2));
 
+    }
+
+    @Test
+    public void testGetEnvironmentFromApp() {
+        Application application = Application.builder().id(1L).build();
+        Environnement environnement1 = Environnement.builder()
+                .application(application)
+                .name("myEnv1")
+                .build();
+        Environnement environnement2 = Environnement.builder()
+                .application(application)
+                .name("myEnv2")
+                .build();
+        List<Environnement> environnementList = new ArrayList<>();
+        environnementList.add(environnement1);
+        environnementList.add(environnement2);
+        Page<Environnement> environnementPage = new PageImpl<>(environnementList);
+        Pageable page = PageRequest.of(0, 2);
+        when(environnementRepository.findAllByApplication_Id(eq(1L), eq(page))).thenReturn(environnementPage);
+
+        Page<Environnement> resultPage = environnementService.getEnvironmentFromApp(1l, page);
+        List<Environnement> resultList = resultPage.getContent();
+        verify(environnementRepository).findAllByApplication_Id(eq(1L), eq(page));
+
+        assertEquals(2, resultList.size());
+        assertThat(resultList, hasItem(environnement1));
+        assertThat(resultList, hasItem(environnement2));
     }
 }
