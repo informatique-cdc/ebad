@@ -23,7 +23,10 @@ import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -81,9 +84,6 @@ public class ApplicationServiceTest {
         application.setEnvironnements(environnementSet);
 
         when(applicationRepository.getOne(eq(9L))).thenReturn(application);
-//        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1), eq(true));
-//        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2), eq(true));
-//        doNothing().when(applicationRepository).delete(eq(application));
 
         applicationService.deleteApplication(9L);
 
@@ -104,13 +104,16 @@ public class ApplicationServiceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        when(applicationRepository.findAll(any(Sort.class))).thenReturn(applications);
+        Pageable pageable = PageRequest.of(0, 2);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
 
-        List<Application> result = applicationService.getAllApplications();
+        when(applicationRepository.findAll(eq(pageable))).thenReturn(applicationPage);
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(application1));
-        assertTrue(result.contains(application2));
+        Page<Application> result = applicationService.getAllApplications(pageable);
+
+        assertEquals(2, result.getContent().size());
+        assertTrue(result.getContent().contains(application1));
+        assertTrue(result.getContent().contains(application2));
     }
 
     @Test
@@ -322,5 +325,61 @@ public class ApplicationServiceTest {
         assertEquals(newApplication.getName(), result.getName());
         assertEquals(newApplication.getDateParametrePattern(), result.getDateParametrePattern());
         assertEquals(newApplication.getDateFichierPattern(), result.getDateFichierPattern());
+    }
+
+    @Test
+    public void testGetAllApplicationUsed() {
+        Application application1 = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application application2 = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        List<Application> applicationList = new ArrayList<>();
+        applicationList.add(application1);
+        applicationList.add(application2);
+
+        Page<Application> applicationPage = new PageImpl(applicationList);
+        when(applicationRepository.findAllUsagedByUser(eq("test"), any())).thenReturn(applicationPage);
+
+        Page<Application> result = applicationService.getAllApplicationsUsed(PageRequest.of(0, 2), "test");
+
+        assertEquals(applicationPage, result);
+    }
+
+    @Test
+    public void testGetAllApplicationsManaged() {
+        Application application1 = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application application2 = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        List<Application> applicationList = new ArrayList<>();
+        applicationList.add(application1);
+        applicationList.add(application2);
+
+        Page<Application> applicationPage = new PageImpl(applicationList);
+        when(applicationRepository.findAllManagedByUser(eq("test"), any())).thenReturn(applicationPage);
+
+        Page<Application> result = applicationService.getAllApplicationsManaged(PageRequest.of(0, 2), "test");
+
+        assertEquals(applicationPage, result);
     }
 }
