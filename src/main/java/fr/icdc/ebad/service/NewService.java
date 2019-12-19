@@ -2,30 +2,30 @@ package fr.icdc.ebad.service;
 
 import fr.icdc.ebad.domain.Actualite;
 import fr.icdc.ebad.repository.ActualiteRepository;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ActualiteService {
+public class NewService {
     public static final String FIELD_ID_ACTUALITE = "id";
     private final ActualiteRepository actualiteRepository;
 
-    public ActualiteService(ActualiteRepository actualiteRepository) {
+    public NewService(ActualiteRepository actualiteRepository) {
         this.actualiteRepository = actualiteRepository;
     }
 
     @Transactional(readOnly = true)
-    public List<Actualite> getAllActualites() {
-        return actualiteRepository.findAll(new Sort(Sort.Direction.DESC, FIELD_ID_ACTUALITE));
+    public Page<Actualite> getAllActualites(Pageable pageable) {
+        return actualiteRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<Actualite> getAllActualitesPubliees() {
-        return actualiteRepository.findByDraftFalse(new Sort(Sort.Direction.DESC, FIELD_ID_ACTUALITE));
+    public Page<Actualite> getAllActualitesPubliees(Pageable pageable) {
+        return actualiteRepository.findByDraftFalse(pageable);
     }
 
     @Transactional(readOnly = true)
