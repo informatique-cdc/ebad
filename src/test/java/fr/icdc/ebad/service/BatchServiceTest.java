@@ -1,25 +1,19 @@
 package fr.icdc.ebad.service;
 
-import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.LogBatch;
 import fr.icdc.ebad.domain.Norme;
-import fr.icdc.ebad.domain.QBatch;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -291,44 +285,6 @@ public class BatchServiceTest {
         verify(batchRepository).delete(batch1);
         verify(batchRepository).delete(batch2);
 
-    }
-
-    @Test
-    @Ignore("Use DBUNIT to test gracefully predicate")
-    public void testGetAllBatchWithPredicate() {
-        List<Batch> batchList = new ArrayList<>();
-        Batch batch1 = new Batch();
-        batch1.setId(1L);
-        batchList.add(batch1);
-
-        Batch batch2 = new Batch();
-        batch2.setId(2L);
-        batchList.add(batch2);
-        Predicate predicate = QBatch.batch.id.ne(3L);
-        when(batchRepository.findAll(eq(predicate))).thenReturn(batchList);
-    }
-
-    @Test
-    @Ignore("Use DBUNIT to test gracefully predicate")
-    public void testGetAllBatchFromEnvironmentAsPage() {
-        List<Batch> batchList = new ArrayList<>();
-        Batch batch1 = new Batch();
-        batch1.setId(1L);
-        batchList.add(batch1);
-
-        Batch batch2 = new Batch();
-        batch2.setId(2L);
-        batchList.add(batch2);
-
-        Page<Batch> batchPage = new PageImpl<>(batchList, Pageable.unpaged(), 2L);
-
-//        when(batchRepository.findBatchFromEnvironnement(any(Pageable.class), eq(1L))).thenReturn(batchPage);
-
-        Page<Batch> result = batchService.getAllBatchWithPredicate(QBatch.batch.environnements.any().id.eq(1L), Pageable.unpaged());
-
-        assertEquals(batchPage, result);
-        assertEquals(batchList, result.getContent());
-        assertEquals(batchList.size(), result.getContent().size());
     }
 
     @Test
