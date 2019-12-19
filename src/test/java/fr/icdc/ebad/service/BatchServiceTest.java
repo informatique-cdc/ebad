@@ -294,6 +294,7 @@ public class BatchServiceTest {
     }
 
     @Test
+    @Ignore("Use DBUNIT to test gracefully predicate")
     public void testGetAllBatchWithPredicate() {
         List<Batch> batchList = new ArrayList<>();
         Batch batch1 = new Batch();
