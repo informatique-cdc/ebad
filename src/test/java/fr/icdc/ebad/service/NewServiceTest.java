@@ -1,7 +1,7 @@
 package fr.icdc.ebad.service;
 
 import fr.icdc.ebad.domain.Actualite;
-import fr.icdc.ebad.repository.ActualiteRepository;
+import fr.icdc.ebad.repository.NewRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,7 +28,7 @@ public class NewServiceTest {
     private NewService newService;
 
     @Mock
-    private ActualiteRepository actualiteRepository;
+    private NewRepository newRepository;
 
     @Test
     public void getAllActualites() {
@@ -44,7 +44,7 @@ public class NewServiceTest {
         actualiteList.add(actualite4);
         Page<Actualite> actualitePage = new PageImpl<>(actualiteList);
 
-        when(actualiteRepository.findAll(any(Pageable.class))).thenReturn(actualitePage);
+        when(newRepository.findAll(any(Pageable.class))).thenReturn(actualitePage);
         Page<Actualite> result = newService.getAllActualites(PageRequest.of(0, 10));
 
         assertEquals(4, result.getContent().size(), 0);
@@ -64,7 +64,7 @@ public class NewServiceTest {
         actualiteList.add(actualite4);
 
         Page<Actualite> actualitePage = new PageImpl<>(actualiteList);
-        when(actualiteRepository.findByDraftFalse(any(Pageable.class))).thenReturn(actualitePage);
+        when(newRepository.findByDraftFalse(any(Pageable.class))).thenReturn(actualitePage);
         Page<Actualite> result = newService.getAllActualitesPubliees(PageRequest.of(0, 10));
 
         assertEquals(4, result.getContent().size(), 0);
@@ -74,7 +74,7 @@ public class NewServiceTest {
     public void getActualite() {
         Actualite actualite1 = Actualite.builder().id(1L).build();
 
-        when(actualiteRepository.findById(eq(1L))).thenReturn(Optional.of(actualite1));
+        when(newRepository.findById(eq(1L))).thenReturn(Optional.of(actualite1));
         Optional<Actualite> result = newService.getActualite(1L);
 
         assertEquals(1L, result.get().getId(), 0);
@@ -84,13 +84,13 @@ public class NewServiceTest {
     public void saveActualite() {
         Actualite actualite1 = Actualite.builder().id(1L).build();
         newService.saveActualite(actualite1);
-        verify(actualiteRepository).save(eq(actualite1));
+        verify(newRepository).save(eq(actualite1));
     }
 
     @Test
     public void deleteActualite() {
         Actualite actualite1 = Actualite.builder().id(1L).build();
         newService.deleteActualite(actualite1);
-        verify(actualiteRepository).deleteById(eq(actualite1.getId()));
+        verify(newRepository).deleteById(eq(actualite1.getId()));
     }
 }
