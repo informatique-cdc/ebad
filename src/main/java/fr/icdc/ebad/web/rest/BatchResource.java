@@ -7,6 +7,7 @@ import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.service.BatchService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
+import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
@@ -53,7 +54,7 @@ public class BatchResource {
     @Timed
     public Page<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate, Pageable pageable) {
         LOGGER.debug("REST request to get Batchs ");
-        return batchService.getAllBatchWithPredicate(predicate, pageable).map(batch -> mapper.map(batch, BatchDto.class));
+        return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable)).map(batch -> mapper.map(batch, BatchDto.class));
     }
 
     /**

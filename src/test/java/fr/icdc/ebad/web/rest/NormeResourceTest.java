@@ -10,7 +10,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,7 +31,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -47,7 +49,10 @@ public class NormeResourceTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        this.restMvc = MockMvcBuilders.standaloneSetup(normeResource).build();
+        this.restMvc = MockMvcBuilders
+                .standaloneSetup(normeResource)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build();
     }
 
     @Test
@@ -63,20 +68,19 @@ public class NormeResourceTest {
 
         normeList.add(norme1);
         normeList.add(norme2);
-
+        Page<Norme> normePage = new PageImpl<>(normeList);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms");
 
-        when(normeRepository.findAll(any(Sort.class))).thenReturn(normeList);
+        when(normeRepository.findAll(any(Pageable.class))).thenReturn(normePage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$",hasSize(2)))
-                .andExpect(jsonPath("$[0].id",is(1)))
-                .andExpect(jsonPath("$[1].id",is(2)))
-                .andDo(print());
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", is(1)))
+                .andExpect(jsonPath("$.content[1].id", is(2)));
 
-        verify(normeRepository,only()).findAll(any(Sort.class));
+        verify(normeRepository, only()).findAll(any(Pageable.class));
     }
 
     @Test

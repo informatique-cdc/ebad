@@ -4,13 +4,15 @@ import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.service.NormeService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.NormeDto;
+import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -48,10 +49,10 @@ public class NormeResource {
     @GetMapping
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODO')")
-    public List<NormeDto> getAll() {
+    public Page<NormeDto> getAll(Pageable pageable) {
         LOGGER.debug("REST request to get all Norme - Read");
-        List<Norme> normeList = normeService.getAllNormesSorted(new Sort(Sort.Direction.ASC, "name"));
-        return mapper.mapAsList(normeList, NormeDto.class);
+        Page<Norme> normePage = normeService.getAllNormes(PaginationUtil.generatePageRequestOrDefault(pageable));
+        return normePage.map(norme -> mapper.map(norme, NormeDto.class));
     }
 
     /**
