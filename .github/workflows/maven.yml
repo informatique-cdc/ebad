@@ -5,6 +5,9 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 1.6, 6.0.83, 7, 7.0.181, 8, 8.0.192, 9.0.x, 10, 11.0.x, 11.0.3, 12, 13 ]
     steps:
       - uses: actions/checkout@v1
       - name: Cache Maven Repo
@@ -16,6 +19,6 @@ jobs:
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
+          java-version: ${{ matrix.java }}
       - name: Build with Maven
         run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent package --file pom.xml
