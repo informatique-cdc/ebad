@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 1.6, 6.0.83, 7, 7.0.181, 8, 8.0.192, 9.0.x, 10, 11.0.x, 11.0.3, 12, 13 ]
+        java: [ 8, 8.0.192, 9.0.x, 10, 11.0.x, 11.0.3, 12, 13 ]
     steps:
       - uses: actions/checkout@v1
       - name: Cache Maven Repo
@@ -16,7 +16,7 @@ jobs:
         with:
           path: /home/runner/.m2/repository
           key: ${{ runner.os }}-maven-repo
-      - name: Set up JDK 1.8
+      - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
