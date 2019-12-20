@@ -43,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -229,7 +230,7 @@ public class ApplicationResourceTest {
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[1].id", is(2)))
                 .andExpect(jsonPath("$[0].login", is("test1")))
@@ -252,10 +253,19 @@ public class ApplicationResourceTest {
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[1].id", is(2)))
                 .andExpect(jsonPath("$[0].login", is("test1")))
                 .andExpect(jsonPath("$[1].login", is("test2")));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void importAll() throws Exception {
+        when(applicationService.importApp()).thenReturn("OK");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/applications/import-all");
+        restMvc.perform(builder).andExpect(status().isOk());
+        verify(applicationService).importApp();
     }
 }
