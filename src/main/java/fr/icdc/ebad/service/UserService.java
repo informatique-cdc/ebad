@@ -193,7 +193,10 @@ public class UserService {
     }
 
     @Transactional
-    public Optional<User> inactivateAccount(String login) {
+    public Optional<User> inactivateAccount(String login) throws EbadServiceException {
+        if (SecurityUtils.getCurrentLogin().equals(login)) {
+            throw new EbadServiceException("Impossible de désactiver son propre compte");
+        }
         User userSaved = userRepository.findOneByLogin(login)
                 .map(user -> {
                     user.setActivationKey(RandomUtil.generateActivationKey());
