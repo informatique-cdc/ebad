@@ -7,6 +7,7 @@ import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
+import fr.icdc.ebad.security.PermissionServiceOpen;
 import fr.icdc.ebad.service.ApplicationService;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import org.junit.Before;
@@ -61,6 +62,9 @@ public class ApplicationResourceTest {
 
     @MockBean
     private AuthorityRepository authorityRepository;
+
+    @MockBean
+    private PermissionServiceOpen permissionServiceOpen;
 
     private MockMvc restMvc;
 
@@ -191,6 +195,7 @@ public class ApplicationResourceTest {
                 .name("MyApp")
                 .build();
 
+        when(permissionServiceOpen.canCreateApplication()).thenReturn(true);
         when(applicationService.saveApplication(argThat((argApp ->
                 argApp.getCode().equals("AA0") &&
                         argApp.getDateFichierPattern().equals("yyyyMMdd") &&
