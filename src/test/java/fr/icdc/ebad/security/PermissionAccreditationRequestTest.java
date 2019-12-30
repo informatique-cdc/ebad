@@ -5,15 +5,19 @@ import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 
 import static org.junit.Assert.assertFalse;
@@ -22,14 +26,19 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({SecurityUtils.class,PermissionAccreditationRequest.class, PermissionApplication.class})
+@RunWith(MockitoJUnitRunner.class)
 public class PermissionAccreditationRequestTest {
     @Mock
     private PermissionApplication permissionApplication;
 
     @Mock
     private AccreditationRequestRepository accreditationRequestRepository;
+
+    @Mock
+    private Authentication authentication;
+
+    @Mock
+    private SecurityContext securityContext;
 
     @InjectMocks
     private PermissionAccreditationRequest permissionAccreditationRequest;
@@ -38,28 +47,36 @@ public class PermissionAccreditationRequestTest {
     private UserDetails userDetails;
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     public void canAcceptAccreditationRequestAdmin() {
-        PowerMockito.mockStatic(SecurityUtils.class);
-        BDDMockito.given(SecurityUtils.isAdmin()).willReturn(true);
+        Collection authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
         assertTrue(permissionAccreditationRequest.canAcceptAccreditationRequest(1L, userDetails));
     }
 
     @Test
     @WithMockUser(roles = "USER")
     public void canAcceptAccreditationRequestUserNoAccreditation() {
-        PowerMockito.mockStatic(SecurityUtils.class);
-        BDDMockito.given(SecurityUtils.isAdmin()).willReturn(false);
+        Collection authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
         when(accreditationRequestRepository.findById(eq(1L))).thenReturn(Optional.empty());
         assertFalse(permissionAccreditationRequest.canAcceptAccreditationRequest(1L, userDetails));
     }
 
     @Test
-    @WithMockUser(roles = "USER")
     public void cantAcceptAccreditationRequestUser() {
-        PowerMockito.mockStatic(SecurityUtils.class);
-        BDDMockito.given(SecurityUtils.isAdmin()).willReturn(false);
+        Collection authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
         AccreditationRequest accreditationRequest = AccreditationRequest
                 .builder()
@@ -72,10 +89,13 @@ public class PermissionAccreditationRequestTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
     public void canAcceptAccreditationRequestUser() {
-        PowerMockito.mockStatic(SecurityUtils.class);
-        BDDMockito.given(SecurityUtils.isAdmin()).willReturn(false);
+        Collection authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
 
         AccreditationRequest accreditationRequest = AccreditationRequest
                 .builder()
