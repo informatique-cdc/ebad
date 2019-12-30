@@ -15,6 +15,7 @@ spring:
         serverName:
         username:
         password:
+        data: classpath:nop.sql
 
     jpa:
         database-platform: org.hibernate.dialect.H2Dialect
