@@ -48,7 +48,7 @@ public class NormeResource {
      */
     @GetMapping
     @Timed
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public Page<NormeDto> getAll(Pageable pageable) {
         LOGGER.debug("REST request to get all Norme - Read");
         Page<Norme> normePage = normeService.getAllNormes(PaginationUtil.generatePageRequestOrDefault(pageable));
