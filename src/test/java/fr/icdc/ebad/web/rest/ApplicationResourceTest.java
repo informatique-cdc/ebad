@@ -119,7 +119,7 @@ public class ApplicationResourceTest {
     }
 
     @Test
-    @WithMockUser(roles = {"MODO"}, username = "dtrouillet")
+    @WithMockUser(username = "dtrouillet")
     public void getAllWrite() throws Exception {
         Principal mockPrincipal = Mockito.mock(Principal.class);
         Mockito.when(mockPrincipal.getName()).thenReturn("dtrouillet");

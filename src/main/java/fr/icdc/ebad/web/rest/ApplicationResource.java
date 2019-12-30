@@ -52,7 +52,7 @@ public class ApplicationResource {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public Page<ApplicationDto> getAll(Pageable pageable, Principal principal) {
         LOGGER.debug("REST request to get all Application - Read");
         return applicationService.getAllApplicationsUsed(PaginationUtil.generatePageRequestOrDefault(pageable), principal.getName())
@@ -73,7 +73,7 @@ public class ApplicationResource {
      */
     @GetMapping(value = "/write", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_MODO')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public Page<ApplicationDto> getAllWrite(Pageable pageable, Principal principal) {
         LOGGER.debug("REST request to get all Application - Write");
         return applicationService.getAllApplicationsManaged(
