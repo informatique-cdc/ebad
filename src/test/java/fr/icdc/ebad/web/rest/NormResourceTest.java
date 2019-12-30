@@ -37,9 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Constants.SPRING_PROFILE_TEST)
 @SpringBootTest
-public class NormeResourceTest {
+public class NormResourceTest {
     @Autowired
-    private NormeResource normeResource;
+    private NormResource normResource;
 
     @MockBean
     private NormeRepository normeRepository;
@@ -50,13 +50,13 @@ public class NormeResourceTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         this.restMvc = MockMvcBuilders
-                .standaloneSetup(normeResource)
+                .standaloneSetup(normResource)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
     @Test
-    @WithMockUser(roles = {"USER","ADMIN"})
+    @WithMockUser(roles = {"ADMIN"})
     public void getAll() throws Exception {
         List<Norme> normeList = new ArrayList<>();
 
@@ -70,6 +70,34 @@ public class NormeResourceTest {
         normeList.add(norme2);
         Page<Norme> normePage = new PageImpl<>(normeList);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms");
+
+        when(normeRepository.findAll(any(Pageable.class))).thenReturn(normePage);
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", is(1)))
+                .andExpect(jsonPath("$.content[1].id", is(2)));
+
+        verify(normeRepository, only()).findAll(any(Pageable.class));
+    }
+
+    @Test
+    @WithMockUser(roles = {"USER"})
+    public void getAllList() throws Exception {
+        List<Norme> normeList = new ArrayList<>();
+
+        Norme norme1 = new Norme();
+        norme1.setId(1L);
+
+        Norme norme2 = new Norme();
+        norme2.setId(2L);
+
+        normeList.add(norme1);
+        normeList.add(norme2);
+        Page<Norme> normePage = new PageImpl<>(normeList);
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms/name");
 
         when(normeRepository.findAll(any(Pageable.class))).thenReturn(normePage);
 
