@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({SecurityUtils.class,PermissionAccreditationRequest.class})
+@PrepareForTest({SecurityUtils.class,PermissionAccreditationRequest.class, PermissionApplication.class})
 public class PermissionAccreditationRequestTest {
     @Mock
     private PermissionApplication permissionApplication;
