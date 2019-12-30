@@ -14,7 +14,6 @@ import java.util.Optional;
  */
 @Service
 public class PermissionAccreditationRequest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionAccreditationRequest.class);
     private final AccreditationRequestRepository accreditationRequestRepository;
     private final PermissionApplication permissionApplication;
 
@@ -29,6 +28,6 @@ public class PermissionAccreditationRequest {
             return true;
         }
         Optional<AccreditationRequest> accreditationRequest = accreditationRequestRepository.findById(id);
-        return accreditationRequest.filter(request -> permissionApplication.canWrite(request.getApplication().getId(), userDetails)).isPresent();
+        return accreditationRequest.map(request -> permissionApplication.canWrite(request.getApplication().getId(), userDetails)).orElse(false);
     }
 }
