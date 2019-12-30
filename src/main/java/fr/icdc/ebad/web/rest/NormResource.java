@@ -3,6 +3,7 @@ package fr.icdc.ebad.web.rest;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.service.NormeService;
 import fr.icdc.ebad.web.ResponseUtil;
+import fr.icdc.ebad.web.rest.dto.NormLabelIdDto;
 import fr.icdc.ebad.web.rest.dto.NormeDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
@@ -30,21 +31,21 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/norms")
 @Tag(name = "Norms", description = "the norm API")
-public class NormeResource {
+public class NormResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NormeResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NormResource.class);
 
     private final NormeService normeService;
     private final MapperFacade mapper;
 
     @Autowired
-    public NormeResource(NormeService normeService, MapperFacade mapper) {
+    public NormResource(NormeService normeService, MapperFacade mapper) {
         this.normeService = normeService;
         this.mapper = mapper;
     }
 
     /**
-     * GET  /api/normes to get all normes.
+     * GET  /norms to get all normes.
      */
     @GetMapping
     @Timed
@@ -53,6 +54,17 @@ public class NormeResource {
         LOGGER.debug("REST request to get all Norme - Read");
         Page<Norme> normePage = normeService.getAllNormes(PaginationUtil.generatePageRequestOrDefault(pageable));
         return normePage.map(norme -> mapper.map(norme, NormeDto.class));
+    }
+
+    /**
+     * GET  /norms/name to get all normes.
+     */
+    @GetMapping("/name")
+    @Timed
+    public Page<NormLabelIdDto> getAllForList(Pageable pageable) {
+        LOGGER.debug("REST request to get all Norme - Read");
+        Page<Norme> normePage = normeService.getAllNormes(PaginationUtil.generatePageRequestOrDefault(pageable));
+        return normePage.map(norme -> mapper.map(norme, NormLabelIdDto.class));
     }
 
     /**
@@ -89,7 +101,7 @@ public class NormeResource {
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        LOGGER.debug("REST request to delete Norme with id {}", id);
+        LOGGER.debug("REST request to delete Norm with id {}", id);
         normeService.deleteNormeById(id);
         return ResponseEntity.ok().build();
     }
@@ -101,7 +113,7 @@ public class NormeResource {
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NormeDto> update(@RequestBody NormeDto normeDto) {
-        LOGGER.debug("REST request to update Norme");
+        LOGGER.debug("REST request to update Norm");
         if (normeDto.getId() == null) {
             return ResponseEntity.badRequest().build();
         }
