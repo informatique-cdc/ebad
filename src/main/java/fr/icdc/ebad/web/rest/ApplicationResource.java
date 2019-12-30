@@ -59,12 +59,13 @@ public class ApplicationResource {
                 .map(application -> mapper.map(application, ApplicationDto.class));
     }
 
-    @PostMapping(value = "/import-all", produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/import-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String importAll() {
+    public ResponseEntity importAll() {
         LOGGER.debug("REST request to import all Application ");
-        return applicationService.importApp();
+        applicationService.importApp();
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -97,7 +98,7 @@ public class ApplicationResource {
      */
     @PutMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionApplication.canManage(#applicationDto,principal)")
+    @PreAuthorize("@permissionApplication.canManage(#applicationDto,principal) && @permissionServiceOpen.canCreateApplication()")
     public ApplicationDto createApplication(@RequestBody ApplicationDto applicationDto) {
         LOGGER.debug("REST request to create Application");
         applicationDto.setCreatedBy(SecurityUtils.getCurrentLogin());

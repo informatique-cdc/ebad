@@ -123,7 +123,7 @@ public class EnvironnementResource {
      */
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionApplication.canWrite(#env.application, principal)")
+    @PreAuthorize("@permissionApplication.canWrite(#env.application, principal) && @permissionServiceOpen.canCreateEnvironment()")
     public ResponseEntity<EnvironnementDto> addEnvironnement(@RequestBody EnvironnementCreationDto env) {
         LOGGER.debug("REST request to add a new environnement {}", env);
         if (env.getPrefix() == null) {

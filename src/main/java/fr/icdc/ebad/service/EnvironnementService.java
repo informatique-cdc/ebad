@@ -221,7 +221,7 @@ public class EnvironnementService {
             for (EnvironnementConnectorPlugin environnementConnectorPlugin : environnementConnectorPluginList) {
                 PluginWrapper pluginWrapper = springPluginManager.whichPlugin(environnementConnectorPlugin.getClass());
                 String pluginId = pluginWrapper.getPluginId();
-                List<EnvironnementDiscoverDto> environnementDiscoverDtos = environnementConnectorPlugin.discoverFromApp(application.getCode(), normeDiscoverDtos);
+                List<EnvironnementDiscoverDto> environnementDiscoverDtos = environnementConnectorPlugin.discoverFromApp(application.getCode(), application.getName(), normeDiscoverDtos);
                 for (EnvironnementDiscoverDto environnementDiscoverDto : environnementDiscoverDtos) {
                     Environnement environnement = environnementRepository
                             .findAllByExternalIdAndPluginId(environnementDiscoverDto.getId(), pluginId)

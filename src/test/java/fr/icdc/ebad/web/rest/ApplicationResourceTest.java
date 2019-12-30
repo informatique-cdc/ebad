@@ -7,6 +7,7 @@ import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
+import fr.icdc.ebad.security.PermissionServiceOpen;
 import fr.icdc.ebad.service.ApplicationService;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import org.junit.Before;
@@ -42,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,6 +63,9 @@ public class ApplicationResourceTest {
 
     @MockBean
     private AuthorityRepository authorityRepository;
+
+    @MockBean
+    private PermissionServiceOpen permissionServiceOpen;
 
     private MockMvc restMvc;
 
@@ -191,6 +196,7 @@ public class ApplicationResourceTest {
                 .name("MyApp")
                 .build();
 
+        when(permissionServiceOpen.canCreateApplication()).thenReturn(true);
         when(applicationService.saveApplication(argThat((argApp ->
                 argApp.getCode().equals("AA0") &&
                         argApp.getDateFichierPattern().equals("yyyyMMdd") &&
@@ -224,7 +230,7 @@ public class ApplicationResourceTest {
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[1].id", is(2)))
                 .andExpect(jsonPath("$[0].login", is("test1")))
@@ -247,10 +253,19 @@ public class ApplicationResourceTest {
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[1].id", is(2)))
                 .andExpect(jsonPath("$[0].login", is("test1")))
                 .andExpect(jsonPath("$[1].login", is("test2")));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void importAll() throws Exception {
+        when(applicationService.importApp()).thenReturn("OK");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/applications/import-all");
+        restMvc.perform(builder).andExpect(status().isOk());
+        verify(applicationService).importApp();
     }
 }

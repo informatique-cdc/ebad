@@ -347,7 +347,8 @@ public class UserServiceTest {
     }
 
     @Test
-    public void inactivateAccount() {
+    @WithMockUser(username = "admin")
+    public void inactivateAccount() throws EbadServiceException {
         User user1 = User.builder().activated(true).id(1L).login("dtrouillet").build();
         when(userRepository.findOneByLogin(eq("dtrouillet"))).thenReturn(Optional.of(user1));
         when(userRepository.save(eq(user1))).thenReturn(user1);

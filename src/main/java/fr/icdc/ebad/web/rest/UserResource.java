@@ -99,7 +99,7 @@ public class UserResource {
     @GetMapping(value = "/inactivate/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDto> inactivateAccount(@PathVariable String login) {
+    public ResponseEntity<UserDto> inactivateAccount(@PathVariable String login) throws EbadServiceException {
         Optional<UserDto> userDto = userService.inactivateAccount(login).map(user -> mapper.map(user, UserDto.class));
         return ResponseUtil.wrapOrNotFound(userDto);
     }
@@ -109,7 +109,7 @@ public class UserResource {
      */
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') && @permissionServiceOpen.canCreateOrUpdateUser()")
     public ResponseEntity<UserDto> saveUser(@Valid @RequestBody UserAccountDto userDto) throws EbadServiceException {
         LOGGER.debug("REST request to save new User");
         User user = userService.createUser(userDto.getLogin(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName(), userDto.getPassword());
@@ -121,7 +121,7 @@ public class UserResource {
      */
     @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') && @permissionServiceOpen.canCreateOrUpdateUser()")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) throws EbadServiceException {
         LOGGER.debug("REST request to save  User");
         User user = userService.updateUser(userDto.getId(), userDto.getLogin(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName(), userDto.getPassword());
@@ -134,7 +134,7 @@ public class UserResource {
      */
     @PatchMapping(value = "/roles", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') && @permissionServiceOpen.canCreateOrUpdateUser()")
     public ResponseEntity<UserDto> changeRoles(@RequestBody RolesDTO roles) throws EbadServiceException {
         LOGGER.debug("REST request to change role User : {}", roles.getLoginUser());
         User user = userService.changeRoles(roles.getLoginUser(), roles.isRoleAdmin(), roles.isRoleUser());

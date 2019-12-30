@@ -359,7 +359,7 @@ public class EnvironnementServiceTest {
 
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(application));
         when(normeRepository.findAll()).thenReturn(normeList);
-        when(environnementConnectorPlugin.discoverFromApp(eq(application.getCode()), anyList())).thenReturn(discoverDtoList);
+        when(environnementConnectorPlugin.discoverFromApp(eq(application.getCode()), eq(application.getName()), anyList())).thenReturn(discoverDtoList);
 
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
@@ -371,7 +371,7 @@ public class EnvironnementServiceTest {
 
         //THEN
         verify(applicationRepository).findById(eq(1L));
-        verify(environnementConnectorPlugin).discoverFromApp(eq(application.getCode()), anyList());
+        verify(environnementConnectorPlugin).discoverFromApp(eq(application.getCode()), eq(application.getName()), anyList());
         verify(environnementRepository).findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"));
         verify(environnementRepository).findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"));
 
@@ -514,7 +514,7 @@ public class EnvironnementServiceTest {
         when(applicationRepository.findAll()).thenReturn(applicationList);
 
         when(normeRepository.findAll()).thenReturn(normeList);
-        when(environnementConnectorPlugin.discoverFromApp(eq(application.getCode()), anyList())).thenReturn(discoverDtoList);
+        when(environnementConnectorPlugin.discoverFromApp(eq(application.getCode()), eq(application.getName()), anyList())).thenReturn(discoverDtoList);
 
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
@@ -526,7 +526,7 @@ public class EnvironnementServiceTest {
 
         //THEN
         verify(applicationRepository).findById(eq(1L));
-        verify(environnementConnectorPlugin).discoverFromApp(eq(application.getCode()), anyList());
+        verify(environnementConnectorPlugin).discoverFromApp(eq(application.getCode()), eq(application.getName()), anyList());
         verify(environnementRepository).findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"));
         verify(environnementRepository).findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"));
 
