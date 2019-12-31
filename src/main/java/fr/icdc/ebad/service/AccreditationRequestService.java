@@ -47,7 +47,8 @@ public class AccreditationRequestService {
     @Transactional(readOnly = true)
     public Page<AccreditationRequest> getAllAccreditationRequestToAnswer(Pageable pageable) {
         if (SecurityUtils.isAdmin()) {
-            return accreditationRequestRepository.findAll(pageable);
+            Predicate predicate = QAccreditationRequest.accreditationRequest.state.eq(StateRequest.SENT);
+            return accreditationRequestRepository.findAll(predicate, pageable);
         }
 
         PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
