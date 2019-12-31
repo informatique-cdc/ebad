@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccreditationRequestDto {
+public class AccreditationRequestDto extends AbstractAuditingDto {
     private Long id;
     private UserSimpleDto user;
 
