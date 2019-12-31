@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -67,6 +68,9 @@ public class ApplicationResourceTest {
     @MockBean
     private PermissionServiceOpen permissionServiceOpen;
 
+    @Autowired
+    private QuerydslPredicateArgumentResolver querydslPredicateArgumentResolver;
+
     private MockMvc restMvc;
 
     @Autowired
@@ -79,9 +83,36 @@ public class ApplicationResourceTest {
         MockitoAnnotations.initMocks(this);
         this.restMvc = MockMvcBuilders
                 .standaloneSetup(applicationResource)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setCustomArgumentResolvers(querydslPredicateArgumentResolver, new PageableHandlerMethodArgumentResolver())
                 .build();
         objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"ADMIN"})
+    public void findApplication() throws Exception {
+        Principal mockPrincipal = Mockito.mock(Principal.class);
+        Mockito.when(mockPrincipal.getName()).thenReturn("user");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/applications/search?name=test").principal(mockPrincipal);
+
+        List<Application> applications = new ArrayList<>();
+        Application application1 = new Application();
+        application1.setId(1L);
+        applications.add(application1);
+
+        Application application2 = new Application();
+        application2.setId(2L);
+        applications.add(application2);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+
+        when(applicationService.findApplication(any(), any())).thenReturn(applicationPage);
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", is(1)))
+                .andExpect(jsonPath("$.content[1].id", is(2)));
     }
 
 

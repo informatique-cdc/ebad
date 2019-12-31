@@ -1,10 +1,12 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.ApplicationService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
+import fr.icdc.ebad.web.rest.dto.ApplicationSimpleDto;
 import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +48,14 @@ public class ApplicationResource {
     public ApplicationResource(ApplicationService applicationService, MapperFacade mapper) {
         this.applicationService = applicationService;
         this.mapper = mapper;
+    }
+
+    @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public Page<ApplicationSimpleDto> findApplication(Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
+        LOGGER.debug("REST request to find Application - Read");
+        return applicationService.findApplication(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
+                .map(application -> mapper.map(application, ApplicationSimpleDto.class));
     }
 
     /**

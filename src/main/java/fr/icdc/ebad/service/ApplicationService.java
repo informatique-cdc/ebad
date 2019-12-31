@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 
 @Service
@@ -56,10 +55,13 @@ public class ApplicationService {
     }
 
     @Transactional(readOnly = true)
+    public Page<Application> findApplication(Predicate predicate, Pageable pageable) {
+        return applicationRepository.findAll(predicate, pageable);
+    }
+
+    @Transactional(readOnly = true)
     public List<Application> findApplication(Predicate predicate) {
-        return StreamSupport
-                .stream(applicationRepository.findAll(predicate).spliterator(), false)
-                .collect(Collectors.toList());
+        return findApplication(predicate, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
     }
 
     @Transactional(readOnly = true)
