@@ -130,7 +130,7 @@ public class AccreditationRequestServiceTest {
         accreditationRequestList.add(accreditationRequest2);
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        when(accreditationRequestRepository.findAll(eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList));
+        when(accreditationRequestRepository.findAll(any(Predicate.class), eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList));
 
         Page<AccreditationRequest> result = accreditationRequestService.getAllAccreditationRequestToAnswer(pageRequest);
 

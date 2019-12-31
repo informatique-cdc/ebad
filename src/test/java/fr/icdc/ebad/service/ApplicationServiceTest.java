@@ -147,11 +147,11 @@ public class ApplicationServiceTest {
         applications.add(application1);
 
         Predicate predicate = QApplication.application.id.eq(1L);
-        when(applicationRepository.findAll(eq(predicate))).thenReturn(applications);
+        when(applicationRepository.findAll(eq(predicate), any(Pageable.class))).thenReturn(new PageImpl<>(applications));
 
         List<Application> results = applicationService.findApplication(predicate);
 
-        verify(applicationRepository).findAll(eq(predicate));
+        verify(applicationRepository).findAll(eq(predicate), any(Pageable.class));
         assertEquals(1, results.size());
         assertEquals(results.get(0), application1);
     }
