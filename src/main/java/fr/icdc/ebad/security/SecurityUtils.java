@@ -1,5 +1,6 @@
 package fr.icdc.ebad.security;
 
+import fr.icdc.ebad.config.Constants;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,5 +33,12 @@ public final class SecurityUtils {
             }
         }
         return userName;
+    }
+
+    public static boolean isAdmin() {
+
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(
+                authority -> authority.getAuthority().equals(Constants.ROLE_ADMIN)
+        );
     }
 }

@@ -5,6 +5,7 @@ import fr.icdc.ebad.service.GlobalSettingService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.GlobalSettingKeyValueDto;
 import fr.icdc.ebad.web.rest.dto.GlobalSettingValueDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/global-settings")
+@Tag(name = "Global Setting", description = "the global setting request API")
 public class GlobalSettingResource {
     private final GlobalSettingService globalSettingService;
     private final MapperFacade mapper;
