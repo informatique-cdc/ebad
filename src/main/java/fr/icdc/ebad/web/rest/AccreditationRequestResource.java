@@ -51,17 +51,17 @@ public class AccreditationRequestResource {
     @PutMapping
     public ResponseEntity<AccreditationRequestDto> createAccreditationRequest(@RequestBody @Valid CreationAccreditationRequestDto creationAccreditationRequestDto, BindingResult result) throws EbadServiceException {
         if (result.hasErrors()) {
-            ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build();
         }
         AccreditationRequest accreditationRequest = accreditationRequestService.requestNewAccreditation(creationAccreditationRequestDto.getApplicationId(), creationAccreditationRequestDto.isWantManage(), creationAccreditationRequestDto.isWantUse());
         return ResponseEntity.ok(mapperFacade.map(accreditationRequest, AccreditationRequestDto.class));
     }
 
     @PostMapping("/response")
-    @PreAuthorize("@permissionAccreditationRequest.canAcceptAccreditationRequest(responseAccreditationRequestDto.id, principal)")
+    @PreAuthorize("@permissionAccreditationRequest.canAcceptAccreditationRequest(#responseAccreditationRequestDto.id, principal)")
     public ResponseEntity answerRequest(@RequestBody @Valid ResponseAccreditationRequestDto responseAccreditationRequestDto, BindingResult result) throws EbadServiceException {
         if (result.hasErrors()) {
-            ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build();
         }
         accreditationRequestService.answerToRequest(responseAccreditationRequestDto.getId(), responseAccreditationRequestDto.isAccepted());
         return ResponseEntity.ok().build();

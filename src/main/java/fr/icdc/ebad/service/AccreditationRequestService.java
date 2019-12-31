@@ -69,7 +69,6 @@ public class AccreditationRequestService {
     }
 
     @Transactional
-    //FIXME check permission
     public void answerToRequest(Long idAccreditationRequest, boolean isAccepted) throws EbadServiceException {
         AccreditationRequest accreditationRequest = accreditationRequestRepository.findByIdAndState(idAccreditationRequest, StateRequest.SENT).orElseThrow(EbadServiceException::new);
         if (!isAccepted) {

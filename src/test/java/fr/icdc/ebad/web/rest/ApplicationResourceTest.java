@@ -81,11 +81,6 @@ public class ApplicationResourceTest {
                 .standaloneSetup(applicationResource)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
-//        restMvc = MockMvcBuilders
-//                .webAppContextSetup(context)
-//                .apply(springSecurity())
-//                .build();
-
         objectMapper.registerModule(new JavaTimeModule());
     }
 
