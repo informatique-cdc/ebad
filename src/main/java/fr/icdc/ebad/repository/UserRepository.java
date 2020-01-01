@@ -51,10 +51,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select user from User user left join  user.usageApplications usageApplication on user.id = usageApplication.user left join usageApplication.application application where application.id = :application and user.login = :login and usageApplication.canManage = true")
     User findManagerFromApplication(@Param("application") Long application, @Param("login") String login);
 
-    @Query("select user from User user left join  user.usageApplications usageApplication on user.id = usageApplication.user where user.login = :login")
-    User findUserWithUsageApplication(@Param("login") String login);
-
-
     @Query("select user from User user left join  user.usageApplications usageApplication left join usageApplication.application application left join application.environnements environnement where environnement.id = :env and user.login = :login and usageApplication.canUse = true")
     User findUserFromEnv(@Param("env") Long env, @Param("login") String login);
 
