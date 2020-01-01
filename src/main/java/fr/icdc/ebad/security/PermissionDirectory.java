@@ -3,7 +3,6 @@ package fr.icdc.ebad.security;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.DirectoryRepository;
-import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import org.slf4j.Logger;
@@ -22,12 +21,10 @@ public class PermissionDirectory {
 
     private final UserRepository userRepository;
     private final DirectoryRepository directoryRepository;
-    private final EnvironnementRepository environnementRepository;
 
-    public PermissionDirectory(UserRepository userRepository, DirectoryRepository directoryRepository, EnvironnementRepository environnementRepository) {
+    public PermissionDirectory(UserRepository userRepository, DirectoryRepository directoryRepository) {
         this.userRepository = userRepository;
         this.directoryRepository = directoryRepository;
-        this.environnementRepository = environnementRepository;
     }
 
     @Transactional(readOnly = true)
@@ -35,13 +32,6 @@ public class PermissionDirectory {
         DirectoryDto directory = new DirectoryDto();
         directory.setId(directoryId);
         return canRead(directory, userDetails);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean canWrite(Long directoryId, UserDetails userDetails) {
-        DirectoryDto directory = new DirectoryDto();
-        directory.setId(directoryId);
-        return canWrite(directory, userDetails);
     }
 
     @Transactional(readOnly = true)
