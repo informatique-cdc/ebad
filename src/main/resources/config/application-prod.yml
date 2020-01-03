@@ -4,7 +4,9 @@ spring:
     username: postgres
     password:
     initialization-mode: always
-
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: POSTGRESQL
 ebad:
   security:
     authentication:
