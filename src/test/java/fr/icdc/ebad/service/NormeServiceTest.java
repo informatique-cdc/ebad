@@ -48,7 +48,7 @@ public class NormeServiceTest {
         Page<Norme> normePage = new PageImpl<>(normeList);
         when(normeRepository.findAll(eq(pageable))).thenReturn(normePage);
 
-        Page<Norme> results = normeService.getAllNormes(pageable);
+        Page<Norme> results = normeService.getAllNormes(null, pageable);
 
         assertEquals(normeList.size(), results.getContent().size());
         assertTrue(results.getContent().contains(norme1));

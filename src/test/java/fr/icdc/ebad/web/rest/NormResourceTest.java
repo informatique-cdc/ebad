@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.service.NormeService;
@@ -75,7 +76,7 @@ public class NormResourceTest {
         Page<Norme> normePage = new PageImpl<>(normeList);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms");
 
-        when(normeService.getAllNormes(any(Pageable.class))).thenReturn(normePage);
+        when(normeService.getAllNormes(any(Predicate.class), any(Pageable.class))).thenReturn(normePage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -84,7 +85,7 @@ public class NormResourceTest {
                 .andExpect(jsonPath("$.content[0].id", is(1)))
                 .andExpect(jsonPath("$.content[1].id", is(2)));
 
-        verify(normeService, only()).getAllNormes(any(Pageable.class));
+        verify(normeService, only()).getAllNormes(any(Predicate.class), any(Pageable.class));
     }
 
     @Test
@@ -103,7 +104,7 @@ public class NormResourceTest {
         Page<Norme> normePage = new PageImpl<>(normeList);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms/name");
 
-        when(normeService.getAllNormes(any(Pageable.class))).thenReturn(normePage);
+        when(normeService.getAllNormes(any(Predicate.class), any(Pageable.class))).thenReturn(normePage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -112,7 +113,7 @@ public class NormResourceTest {
                 .andExpect(jsonPath("$.content[0].id", is(1)))
                 .andExpect(jsonPath("$.content[1].id", is(2)));
 
-        verify(normeService, only()).getAllNormes(any(Pageable.class));
+        verify(normeService, only()).getAllNormes(any(Predicate.class), any(Pageable.class));
     }
 
     @Test

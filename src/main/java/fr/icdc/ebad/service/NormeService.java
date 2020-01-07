@@ -53,7 +53,7 @@ public class NormeService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Norme> getAllNormes(Pageable pageable) {
-        return normeRepository.findAll(pageable);
+    public Page<Norme> getAllNormes(Predicate predicate, Pageable pageable) {
+        return normeRepository.findAll(predicate, pageable);
     }
 }
