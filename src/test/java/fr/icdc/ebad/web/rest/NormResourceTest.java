@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,6 +47,10 @@ public class NormResourceTest {
     @Autowired
     private NormResource normResource;
 
+
+    @Autowired
+    private QuerydslPredicateArgumentResolver querydslPredicateArgumentResolver;
+
     @MockBean
     private NormeService normeService;
 
@@ -56,7 +61,7 @@ public class NormResourceTest {
         MockitoAnnotations.initMocks(this);
         this.restMvc = MockMvcBuilders
                 .standaloneSetup(normResource)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setCustomArgumentResolvers(querydslPredicateArgumentResolver, new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
