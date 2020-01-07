@@ -50,8 +50,8 @@ public class ApplicationService {
 
 
     @Transactional(readOnly = true)
-    public Page<Application> getAllApplications(Pageable pageable) {
-        return applicationRepository.findAll(pageable);
+    public Page<Application> getAllApplications(Predicate predicate, Pageable pageable) {
+        return applicationRepository.findAll(predicate, pageable);
     }
 
     @Transactional(readOnly = true)

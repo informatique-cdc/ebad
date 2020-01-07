@@ -1,7 +1,7 @@
 package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.service.StatistiquesService;
-import fr.icdc.ebad.web.rest.dto.StatistiquesDto;
+import fr.icdc.ebad.web.rest.dto.StatisticsDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +24,7 @@ public class StatistiquesResource {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<StatistiquesDto> getGeneralStatistiques() {
+    public ResponseEntity<StatisticsDto> getGeneralStatistiques() {
         return ResponseEntity.ok(statistiquesService.generationStatistiques());
     }
 }

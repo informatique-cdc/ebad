@@ -98,9 +98,9 @@ public class ApplicationResource {
     @GetMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<ApplicationDto> getAllManage(Pageable pageable) {
+    public Page<ApplicationDto> getAllManage(Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Application - Write");
-        return applicationService.getAllApplications(pageable)
+        return applicationService.getAllApplications(predicate, pageable)
                 .map(application -> mapper.map(application, ApplicationDto.class));
     }
 

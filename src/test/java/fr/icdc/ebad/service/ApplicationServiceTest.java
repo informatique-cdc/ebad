@@ -109,7 +109,7 @@ public class ApplicationServiceTest {
 
         when(applicationRepository.findAll(eq(pageable))).thenReturn(applicationPage);
 
-        Page<Application> result = applicationService.getAllApplications(pageable);
+        Page<Application> result = applicationService.getAllApplications(any(), pageable);
 
         assertEquals(2, result.getContent().size());
         assertTrue(result.getContent().contains(application1));

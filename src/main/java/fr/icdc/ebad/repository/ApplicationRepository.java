@@ -1,5 +1,6 @@
 package fr.icdc.ebad.repository;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import fr.icdc.ebad.domain.Application;
@@ -41,6 +42,12 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     })
     @Override
     Page<Application> findAll(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"environnements", "environnements.batchs",
+            "environnements.batchs.chaineAssociations", "environnements.logBatchs", "usageApplications", "environnements.batchs.environnements",
+    })
+    @Override
+    Page<Application> findAll(Predicate predicate, Pageable pageable);
 
     @EntityGraph(attributePaths = {"environnements", "environnements.batchs",
             "environnements.batchs.chaineAssociations", "environnements.logBatchs", "usageApplications",
