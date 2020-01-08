@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
 
 @Profile("jwt")
 @Configuration
@@ -37,12 +39,14 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final TokenProvider tokenProvider;
     private final SecurityProblemSupport problemSupport;
+    private final Environment environment;
 
-    public JwtConfiguration(AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService, TokenProvider tokenProvider, SecurityProblemSupport problemSupport) {
+    public JwtConfiguration(AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService, TokenProvider tokenProvider, SecurityProblemSupport problemSupport, Environment environment) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDetailsService = userDetailsService;
         this.tokenProvider = tokenProvider;
         this.problemSupport = problemSupport;
+        this.environment = environment;
     }
 
     @PostConstruct
@@ -104,16 +108,19 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .apply(securityConfigurerAdapter());
 
+        if(Arrays.stream(environment.getActiveProfiles()).anyMatch("disable-csrf"::equalsIgnoreCase)){
+            http.csrf().disable();
+        }
     }
 
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200"));
+        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:3000", "https://ebad-front.herokuapp.com"));
         configuration.setAllowedMethods(Lists.newArrayList("GET", "POST", "OPTIONS", "HEAD", "PUT", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Lists.newArrayList("x-xsrf-token", "XSRF-TOKEN"));
+        configuration.addAllowedHeader("*");
         configuration.setMaxAge(10L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

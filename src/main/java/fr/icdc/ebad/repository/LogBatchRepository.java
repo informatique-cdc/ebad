@@ -19,7 +19,12 @@ public interface LogBatchRepository extends JpaRepository<LogBatch, Long> {
     @Query("select logBatch from LogBatch logBatch left join logBatch.environnement environnement left join logBatch.batch batch left join logBatch.user user where environnement.id = :environnementId and (:batchId is null or batch.id = :batchId) order by logBatch.id desc")
     Page<LogBatch> findByEnvironnement(Pageable pageable, @Param("environnementId") Long environnmentId, @Param("batchId") Long batchId);
 
-    @Query("select new fr.icdc.ebad.web.rest.dto.StatisticByDayDto(function('to_char',logBatch.logDate,'YYYY-MM-DD'), count(logBatch), avg(logBatch.executionTime)) from LogBatch logBatch where logBatch.logDate  >= :date group by function('to_char',logBatch.logDate,'YYYY-MM-DD') order by function('to_char',logBatch.logDate,'YYYY-MM-DD') desc")
+    @Query("select new fr.icdc.ebad.web.rest.dto.StatisticByDayDto(" +
+            "CONCAT(function('to_char',logBatch.logDate,'YYYY-MM-DD'),''), " +
+            "count(logBatch), " +
+            "avg(logBatch.executionTime)" +
+            ")" +
+            " from LogBatch logBatch where logBatch.logDate  >= :date group by function('to_char',logBatch.logDate,'YYYY-MM-DD') order by function('to_char',logBatch.logDate,'YYYY-MM-DD') desc")
     List<StatisticByDayDto> countBatchByDay(@Param("date") Date date);
 
     @Query("select avg(logBatch.executionTime) from LogBatch logBatch")
