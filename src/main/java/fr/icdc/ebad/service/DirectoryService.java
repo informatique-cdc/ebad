@@ -3,7 +3,9 @@ package fr.icdc.ebad.service;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
+import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
@@ -86,8 +88,9 @@ public class DirectoryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Directory> findDirectoryFromEnvironnement(Long environnementId, Pageable pageable) {
-        return directoryRepository.findDirectoryFromEnvironnement(pageable, environnementId);
+    public Page<Directory> findDirectoryFromEnvironnement(Predicate predicate, Pageable pageable, Long environnementId) {
+        Predicate newPredicate = QDirectory.directory.environnement.id.eq(environnementId).and(predicate);
+        return directoryRepository.findAll(newPredicate, pageable);
     }
 
     @Transactional

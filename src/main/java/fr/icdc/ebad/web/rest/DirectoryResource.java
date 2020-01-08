@@ -1,23 +1,32 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.service.DirectoryService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
-import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -47,11 +56,12 @@ public class DirectoryResource {
     @GetMapping(value = "/env/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal) or @permissionEnvironnement.canWrite(#env, principal)")
-    public ResponseEntity<List<DirectoryDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long env) throws URISyntaxException {
+    public ResponseEntity<Page<DirectoryDto>> getAllFromEnv(Pageable pageable, @QuerydslPredicate(root = Directory.class) Predicate predicate, @PathVariable Long env) throws URISyntaxException {
         LOGGER.debug("REST request to get all Directory from environnement {}", env);
-        Page<Directory> page = directoryService.findDirectoryFromEnvironnement(env, PaginationUtil.generatePageRequest(offset, limit));
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/chaines/env/" + env, offset, limit);
-        return new ResponseEntity<>(mapper.mapAsList(page.getContent(), DirectoryDto.class), headers, HttpStatus.OK);
+        Page<Directory> page = directoryService.findDirectoryFromEnvironnement(predicate, pageable, env);
+        Page<DirectoryDto> directoryDtos = page.map(directory -> mapper.map(directory, DirectoryDto.class));
+
+        return new ResponseEntity<>(directoryDtos, HttpStatus.OK);
     }
 
     /**

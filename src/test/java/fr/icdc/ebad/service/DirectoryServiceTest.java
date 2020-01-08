@@ -4,8 +4,10 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -155,9 +158,9 @@ public class DirectoryServiceTest {
 
         Environnement environnement = new Environnement();
         environnement.setId(1L);
-        when(directoryRepository.findDirectoryFromEnvironnement(eq(Pageable.unpaged()), eq(environnement.getId()))).thenReturn(directoryPage);
+        when(directoryRepository.findAll(any(Predicate.class), eq(Pageable.unpaged()))).thenReturn(directoryPage);
 
-        Page<Directory> result = directoryService.findDirectoryFromEnvironnement(environnement.getId(), Pageable.unpaged());
+        Page<Directory> result = directoryService.findDirectoryFromEnvironnement(QDirectory.directory.id.eq(1L), Pageable.unpaged(), environnement.getId());
 
         assertEquals(directoryPage, result);
         assertEquals(directoryList, result.getContent());
