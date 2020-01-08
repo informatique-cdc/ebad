@@ -117,7 +117,7 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:3000", "http://ebad-front.herokuapp.com"));
+        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:3000", "https://ebad-front.herokuapp.com"));
         configuration.setAllowedMethods(Lists.newArrayList("GET", "POST", "OPTIONS", "HEAD", "PUT", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Lists.newArrayList("x-xsrf-token", "XSRF-TOKEN", "content-type"));
