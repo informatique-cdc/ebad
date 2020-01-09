@@ -6,8 +6,6 @@ import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.LogBatch;
 import fr.icdc.ebad.domain.QLogBatch;
 import fr.icdc.ebad.web.rest.dto.StatisticByDayDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -25,13 +23,8 @@ import java.util.List;
 public interface LogBatchRepository extends JpaRepository<LogBatch, Long>, QuerydslPredicateExecutor<LogBatch>, QuerydslBinderCustomizer<QLogBatch> {
     @Override
     default void customize(QuerydslBindings bindings, QLogBatch root) {
-        bindings
-                .bind(String.class)
-                .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
+        bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
     }
-
-    @Query("select logBatch from LogBatch logBatch left join logBatch.environnement environnement left join logBatch.batch batch left join logBatch.user user where environnement.id = :environnementId and (:batchId is null or batch.id = :batchId) order by logBatch.id desc")
-    Page<LogBatch> findByEnvironnement(Pageable pageable, @Param("environnementId") Long environnmentId, @Param("batchId") Long batchId);
 
     @Query("select new fr.icdc.ebad.web.rest.dto.StatisticByDayDto(" +
             "CONCAT(function('to_char',logBatch.logDate,'YYYY-MM-DD'),''), " +
