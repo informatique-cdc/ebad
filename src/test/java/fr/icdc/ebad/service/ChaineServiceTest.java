@@ -5,6 +5,7 @@ import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.ChaineAssociation;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.QChaine;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.ChaineRepository;
 import org.junit.Test;
@@ -194,7 +195,7 @@ public class ChaineServiceTest {
         environnement.setId(1L);
         when(chaineRepository.findAll(any(Predicate.class), eq(Pageable.unpaged()))).thenReturn(chainePage);
 
-        Page<Chaine> result = chaineService.getAllChaineFromEnvironmentWithPageable(any(Predicate.class), Pageable.unpaged(), environnement);
+        Page<Chaine> result = chaineService.getAllChaineFromEnvironmentWithPageable(QChaine.chaine.environnement.id.eq(1L), Pageable.unpaged(), environnement);
 
         assertEquals(chainePage, result);
         assertEquals(chaineList, result.getContent());
