@@ -21,8 +21,6 @@ public interface TypeFichierRepository extends JpaRepository<TypeFichier, Long>,
                 .bind(String.class)
                 .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
     }
-//    @Query("select typeFichier from TypeFichier typeFichier left join typeFichier.application application where application.id = :application")
-//    Page<TypeFichier> findTypeFichierFromApplication(PrePageable pageable, @Param("application") Long application);
 
     void deleteByApplication(Application application);
 }
