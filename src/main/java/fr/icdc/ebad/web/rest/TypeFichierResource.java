@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URISyntaxException;
 
 @RestController
-@RequestMapping("/typefichier")
+@RequestMapping("/file-kinds")
 @Tag(name = "TypeFichier", description = "the typefichier API")
 public class TypeFichierResource {
 
@@ -74,6 +74,7 @@ public class TypeFichierResource {
     /**
      * POST  /typefichier/delete to delete a fichier type
      */
+    //FIXME SET DELETE MAPPING, WE CANT TRUST application.id in input DTO
     @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canWrite(#typeFichierDto.application.id,principal)")
