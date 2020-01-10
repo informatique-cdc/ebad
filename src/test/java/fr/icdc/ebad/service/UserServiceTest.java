@@ -4,6 +4,7 @@ import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Authority;
+import fr.icdc.ebad.domain.QUser;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
@@ -332,7 +333,7 @@ public class UserServiceTest {
 
         when(userRepository.findAll(any(Predicate.class), any(Pageable.class))).thenReturn(new PageImpl<>(users));
 
-        Page<User> results = userService.getAllUsers(null, PageRequest.of(0, 20));
+        Page<User> results = userService.getAllUsers(QUser.user.id.eq(10L), PageRequest.of(0, 20));
 
         assertEquals(2, results.getContent().size());
         assertTrue(results.getContent().contains(user1));
