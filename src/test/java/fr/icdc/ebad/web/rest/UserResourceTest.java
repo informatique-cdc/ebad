@@ -67,7 +67,30 @@ public class UserResourceTest {
     }
 
     @Test
-    public void currentUser() {
+    @WithMockUser(username = "user", roles = {"ADMIN"})
+    public void currentUser() throws Exception {
+        Principal mockPrincipal = Mockito.mock(Principal.class);
+        Mockito.when(mockPrincipal.getName()).thenReturn("user");
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/users/current").principal(mockPrincipal);
+        User user = User.builder()
+                .login("test")
+                .activated(true)
+                .email("test@test.fr")
+                .firstName("testFirst")
+                .lastName("testLast")
+                .password("testPassword")
+                .id(1L)
+                .build();
+        when(userService.getUserWithAuthorities()).thenReturn(user);
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.login", is("test")))
+                .andExpect(jsonPath("$.activated", is(true)))
+                .andExpect(jsonPath("$.email", is("test@test.fr")))
+                .andExpect(jsonPath("$.firstName", is("testFirst")))
+                .andExpect(jsonPath("$.lastName", is("testLast")))
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     @Test

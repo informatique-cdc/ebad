@@ -54,9 +54,10 @@ public class UserResource {
     @GetMapping("/current")
     @PreAuthorize("isAuthenticated()")
     @Timed
-    public ResponseEntity<User> currentUser() throws EbadServiceException {
+    public ResponseEntity<UserDto> currentUser() throws EbadServiceException {
         User user = this.userService.getUserWithAuthorities();
-        return new ResponseEntity<>(user, HttpStatus.OK);
+
+        return new ResponseEntity<>(mapper.map(user, UserDto.class), HttpStatus.OK);
     }
 
     /**
