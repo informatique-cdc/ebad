@@ -43,9 +43,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     @Override
     Page<Application> findAll(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"environnements", "environnements.batchs",
-            "environnements.batchs.chaineAssociations", "environnements.logBatchs", "usageApplications", "environnements.batchs.environnements",
-    })
     @Override
     Page<Application> findAll(Predicate predicate, Pageable pageable);
 
@@ -64,18 +61,13 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     Optional<Application> findAllByExternalIdAndPluginId(String externalId, String pluginId);
 
 
-    @EntityGraph(attributePaths = {"environnements", "environnements.batchs",
-            "environnements.batchs.chaineAssociations", "environnements.logBatchs", "usageApplications", "environnements.batchs.environnements",
-    })
     @Query("select application from Application application" +
             " left join application.usageApplications usageApplications" +
             " left join usageApplications.user user" +
             " where user.login = :login and usageApplications.canManage = true")
     Page<Application> findAllManagedByUser(@Param("login") String login, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"environnements", "environnements.batchs",
-            "environnements.batchs.chaineAssociations", "environnements.logBatchs", "usageApplications", "environnements.batchs.environnements",
-    })
+
     @Query("select application from Application application" +
             " left join application.usageApplications usageApplications" +
             " left join usageApplications.user user" +

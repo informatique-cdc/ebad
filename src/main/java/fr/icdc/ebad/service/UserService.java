@@ -186,7 +186,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<User> getAllUsers(Predicate predicate, Pageable pageable) {
-        return userRepository.findAll(predicate, pageable);
+        Page<User> users = userRepository.findAll(predicate, pageable);
+        for (User user : users.getContent()) {
+            user.getAuthorities().size();
+            user.getUsageApplications().size();
+        }
+        return users;
     }
 
     @Transactional

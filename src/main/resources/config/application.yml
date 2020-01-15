@@ -26,12 +26,12 @@ spring:
     properties:
       hibernate.cache.use_second_level_cache: true
       hibernate.cache.use_query_cache: false
-      hibernate.generate_statistics: true
-      hibernate.cache.ehcache.missing: create
-      hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+      hibernate.generate_statistics: false
+      hibernate.javax.cache.provider: org.ehcache.jsr107.EhcacheCachingProvider
+      hibernate.cache.region.factory_class: jcache
       hibernate.jdbc.time_zone: Europe/Paris
       hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
-      hibernate.cache.ehcache.missing_cache_strategy: create
+      hibernate.javax.cache.missing_cache_strategy: create
 management:
   endpoint:
     health:

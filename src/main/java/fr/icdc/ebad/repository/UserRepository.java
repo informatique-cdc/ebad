@@ -31,7 +31,6 @@ public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredi
                 .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
     }
 
-    @EntityGraph(attributePaths = {"authorities", "usageApplications"})
     @Override
     Page<User> findAll(Predicate predicate, Pageable pageable);
 
