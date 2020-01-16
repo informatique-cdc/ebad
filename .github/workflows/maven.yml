@@ -23,5 +23,5 @@ jobs:
       - name: Build with Maven
         run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml
       - name: Sonarqube analysis
-        run: mvn -B org.sonarsource.scanner.maven:sonar --file pom.xml
+        run: mvn -B sonar:sonar --file pom.xml
 
