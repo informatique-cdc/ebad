@@ -1,9 +1,11 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.ChaineAssociation;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.QChaine;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.ChaineRepository;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -190,9 +193,9 @@ public class ChaineServiceTest {
 
         Environnement environnement = new Environnement();
         environnement.setId(1L);
-        when(chaineRepository.findChaineFromEnvironnement(eq(Pageable.unpaged()), eq(environnement.getId()))).thenReturn(chainePage);
+        when(chaineRepository.findAll(any(Predicate.class), eq(Pageable.unpaged()))).thenReturn(chainePage);
 
-        Page<Chaine> result = chaineService.getAllChaineFromEnvironmentWithPageable(environnement, Pageable.unpaged());
+        Page<Chaine> result = chaineService.getAllChaineFromEnvironmentWithPageable(QChaine.chaine.environnement.id.eq(1L), Pageable.unpaged(), environnement);
 
         assertEquals(chainePage, result);
         assertEquals(chaineList, result.getContent());

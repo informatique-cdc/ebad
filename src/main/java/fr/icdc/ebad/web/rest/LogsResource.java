@@ -1,5 +1,8 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
+import fr.icdc.ebad.domain.LogBatch;
+import fr.icdc.ebad.domain.QLogBatch;
 import fr.icdc.ebad.service.LogBatchService;
 import fr.icdc.ebad.web.rest.dto.LogBatchDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
@@ -9,12 +12,13 @@ import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -34,24 +38,22 @@ public class LogsResource {
         this.logBatchService = logBatchService;
     }
 
-    @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<LogBatchDto> getAllLog(@RequestParam(value = "page", required = false) Integer offset,
-                                       @RequestParam(value = "per_page", required = false) Integer limit) {
+    public Page<LogBatchDto> getAllLog(@QuerydslPredicate(root = LogBatch.class) Predicate predicate, Pageable pageable) {
         LOGGER.debug("get all log");
-        return logBatchService.getAllLogBatchWithPageable(PaginationUtil.generatePageRequest(offset, limit))
+        return logBatchService.getAllLogBatchWithPageable(predicate, pageable)
                 .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
     }
 
     @GetMapping(value = "/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
-    public Page<LogBatchDto> getAllLogFromEnv(@PathVariable Long env,
-                                              @RequestParam(value = "page", required = false) Integer offset,
-                                              @RequestParam(value = "per_page", required = false) Integer limit) {
-        LOGGER.debug("get all log from env {}",env);
-        return logBatchService.getAllLogBatchFromEnvironmentWithPageable(PaginationUtil.generatePageRequest(offset, limit), env)
+    public Page<LogBatchDto> getAllLogFromEnv(@PathVariable Long env, @QuerydslPredicate(root = LogBatch.class) Predicate predicate, Pageable pageable) {
+        LOGGER.debug("get all log from env {}", env);
+        Predicate envPredicate = QLogBatch.logBatch.environnement.id.eq(env).and(predicate);
+        return logBatchService.getAllLogBatchWithPageable(envPredicate, PaginationUtil.generatePageRequestOrDefault(pageable))
                 .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
     }
 
@@ -60,13 +62,16 @@ public class LogsResource {
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
     public Page<LogBatchDto> getAllLogFromEnvBatch(@PathVariable Long env,
                                                    @PathVariable Long batch,
-                                                   @RequestParam(value = "page", required = false) Integer offset,
-                                                   @RequestParam(value = "per_page", required = false) Integer limit) {
-        LOGGER.debug("get all log from env {}",env);
+                                                   @QuerydslPredicate(root = LogBatch.class) Predicate predicate, Pageable pageable
+    ) {
+        LOGGER.debug("get all log from env {}", env);
+
+        Predicate envBatchPredicate = QLogBatch.logBatch.environnement.id.eq(env)
+                .and(QLogBatch.logBatch.batch.id.eq(batch))
+                .and(predicate);
 
         return logBatchService
-                .getAllLogBatchFromEnvironmentAndBatchWithPageable(
-                        PaginationUtil.generatePageRequest(offset, limit), env, batch
+                .getAllLogBatchWithPageable(envBatchPredicate, PaginationUtil.generatePageRequestOrDefault(pageable)
                 )
                 .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
     }

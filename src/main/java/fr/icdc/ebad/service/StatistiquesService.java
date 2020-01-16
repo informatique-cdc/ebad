@@ -4,14 +4,23 @@ import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.repository.UserRepository;
-import fr.icdc.ebad.web.rest.dto.StatistiquesDto;
-import fr.icdc.ebad.web.rest.util.PaginationUtil;
+import fr.icdc.ebad.web.rest.dto.StatisticsDto;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import static javax.management.timer.Timer.ONE_HOUR;
 
 /**
  * Ce service permet de generer les statistiques d'utilisation de l'application
  * nombre de batchs, nombre d'application, nombre de visiteurs, ...
+ *
  * @author dtrouillet
  */
 @Service
@@ -29,14 +38,22 @@ public class StatistiquesService {
     }
 
     @Transactional
-    public StatistiquesDto generationStatistiques() {
-        StatistiquesDto statistiquesDto = new StatistiquesDto();
-        statistiquesDto.setNbrApplications(applicationRepository.count());
-        statistiquesDto.setNbrBatchs(batchRepository.count());
-        statistiquesDto.setNbrBatchsLances(logBatchRepository.count());
-        statistiquesDto.setTpsMoyenBatch(logBatchRepository.avgTime());
-        statistiquesDto.setNbrUtilisateurs(userRepository.count());
-        statistiquesDto.setNbrBatchLancesParJour(logBatchRepository.countBatchByDay(PaginationUtil.generatePageRequest(0, 10)));
+    @Cacheable("stats")
+    public StatisticsDto generationStatistiques() {
+        StatisticsDto statistiquesDto = new StatisticsDto();
+        statistiquesDto.setApplicationsNbr(applicationRepository.count());
+        statistiquesDto.setAvgExecutionTime(logBatchRepository.avgTime());
+        statistiquesDto.setBatchsNbrs(batchRepository.count());
+        statistiquesDto.setBatchsRunnedNbrs(logBatchRepository.count());
+        Instant instant = Instant.now().minus(30, ChronoUnit.DAYS);
+        statistiquesDto.setStatisticsByDay(logBatchRepository.countBatchByDay(Date.from(instant)));
+        statistiquesDto.setUsersNbr(userRepository.count());
         return statistiquesDto;
+    }
+
+    @Scheduled(fixedDelay = ONE_HOUR)
+    @CacheEvict("stats")
+    public void evictCache() {
+        //noop
     }
 }

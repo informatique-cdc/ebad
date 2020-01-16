@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -51,9 +54,10 @@ public class UserResource {
     @GetMapping("/current")
     @PreAuthorize("isAuthenticated()")
     @Timed
-    public ResponseEntity<User> currentUser() throws EbadServiceException {
+    public ResponseEntity<UserDto> currentUser() throws EbadServiceException {
         User user = this.userService.getUserWithAuthorities();
-        return new ResponseEntity<>(user, HttpStatus.OK);
+
+        return new ResponseEntity<>(mapper.map(user, UserDto.class), HttpStatus.OK);
     }
 
     /**
@@ -62,11 +66,10 @@ public class UserResource {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    //TODO dtrouillet mettre en place une pagination
-    public List<UserDto> getAll() {
+    public Page<UserDto> getAll(Pageable pageable, @QuerydslPredicate(root = User.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Users");
-        List<User> userList = userService.getAllUsers();
-        return mapper.mapAsList(userList, UserDto.class);
+        Page<User> userPage = userService.getAllUsers(predicate, pageable);
+        return userPage.map((user -> mapper.map(user, UserDto.class)));
     }
 
     /*

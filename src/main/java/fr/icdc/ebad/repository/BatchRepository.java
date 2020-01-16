@@ -25,7 +25,6 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, QuerydslPre
     @Override
     Iterable<Batch> findAll(Predicate predicate);
 
-    @EntityGraph(attributePaths = {"environnements"})
     @Override
     Page<Batch> findAll(Predicate predicate, Pageable pageable);
 

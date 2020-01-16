@@ -1,5 +1,6 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Authority;
 import fr.icdc.ebad.domain.UsageApplication;
@@ -14,7 +15,8 @@ import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -183,8 +185,13 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAll(new Sort(Sort.Direction.ASC, FIELD_LOGIN_USER));
+    public Page<User> getAllUsers(Predicate predicate, Pageable pageable) {
+        Page<User> users = userRepository.findAll(predicate, pageable);
+        for (User user : users.getContent()) {
+            user.getAuthorities().size();
+            user.getUsageApplications().size();
+        }
+        return users;
     }
 
     @Transactional

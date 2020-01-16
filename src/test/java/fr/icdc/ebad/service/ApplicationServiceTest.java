@@ -107,9 +107,9 @@ public class ApplicationServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         PageImpl<Application> applicationPage = new PageImpl<>(applications);
 
-        when(applicationRepository.findAll(eq(pageable))).thenReturn(applicationPage);
+        when(applicationRepository.findAll(any(Predicate.class), eq(pageable))).thenReturn(applicationPage);
 
-        Page<Application> result = applicationService.getAllApplications(pageable);
+        Page<Application> result = applicationService.getAllApplications(QApplication.application.id.eq(1L), pageable);
 
         assertEquals(2, result.getContent().size());
         assertTrue(result.getContent().contains(application1));

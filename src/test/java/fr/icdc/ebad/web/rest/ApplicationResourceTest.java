@@ -190,7 +190,7 @@ public class ApplicationResourceTest {
 
         PageImpl<Application> applicationPage = new PageImpl<>(applications);
 
-        when(applicationService.getAllApplications(any())).thenReturn(applicationPage);
+        when(applicationService.getAllApplications(any(), any())).thenReturn(applicationPage);
         restMvc.perform(builder)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())

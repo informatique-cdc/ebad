@@ -1,11 +1,20 @@
 package fr.icdc.ebad.repository;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringPath;
+import fr.icdc.ebad.domain.QUser;
 import fr.icdc.ebad.domain.User;
 import org.joda.time.DateTime;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
+import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.querydsl.binding.SingleValueBinding;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -14,10 +23,16 @@ import java.util.Optional;
 /**
  * Spring Data JPA repository for the User entity.
  */
-public interface UserRepository extends JpaRepository<User, Long> {
-    @EntityGraph(attributePaths = {"authorities", "usageApplications"})
+public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredicateExecutor<User>, QuerydslBinderCustomizer<QUser> {
     @Override
-    List<User> findAll(Sort sort);
+    default void customize(QuerydslBindings bindings, QUser root) {
+        bindings
+                .bind(String.class)
+                .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
+    }
+
+    @Override
+    Page<User> findAll(Predicate predicate, Pageable pageable);
 
     @EntityGraph(attributePaths = {"authorities", "usageApplications"})
     @Override

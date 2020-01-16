@@ -1,27 +1,38 @@
 package fr.icdc.ebad.repository;
 
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringPath;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.LogBatch;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import fr.icdc.ebad.domain.QLogBatch;
+import fr.icdc.ebad.web.rest.dto.StatisticByDayDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
+import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.querydsl.binding.SingleValueBinding;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
  * Spring Data JPA repository for the Application entity.
  */
-public interface LogBatchRepository extends JpaRepository<LogBatch, Long> {
-    @Query("select logBatch from LogBatch logBatch left join logBatch.environnement environnement left join logBatch.batch batch left join logBatch.user user where environnement.id = :environnementId and (:batchId is null or batch.id = :batchId) order by logBatch.id desc")
-    Page<LogBatch> findByEnvironnement(Pageable pageable, @Param("environnementId") Long environnmentId, @Param("batchId") Long batchId);
+public interface LogBatchRepository extends JpaRepository<LogBatch, Long>, QuerydslPredicateExecutor<LogBatch>, QuerydslBinderCustomizer<QLogBatch> {
+    @Override
+    default void customize(QuerydslBindings bindings, QLogBatch root) {
+        bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
+    }
 
-    @Query("select logBatch from LogBatch logBatch left join logBatch.batch batch where batch.id = :batchId")
-    List<LogBatch> findAllByBatchId(@Param("batchId") Long batchId);
-
-    @Query("select count(logBatch) from LogBatch logBatch group by substring(logBatch.logDate,1,10) order by substring(logBatch.logDate,1,10) desc")
-    List<Long> countBatchByDay(Pageable pageable);
+    @Query("select new fr.icdc.ebad.web.rest.dto.StatisticByDayDto(" +
+            "CONCAT(function('to_char',logBatch.logDate,'YYYY-MM-DD'),''), " +
+            "count(logBatch), " +
+            "avg(logBatch.executionTime)" +
+            ")" +
+            " from LogBatch logBatch where logBatch.logDate  >= :date group by function('to_char',logBatch.logDate,'YYYY-MM-DD') order by function('to_char',logBatch.logDate,'YYYY-MM-DD') desc")
+    List<StatisticByDayDto> countBatchByDay(@Param("date") Date date);
 
     @Query("select avg(logBatch.executionTime) from LogBatch logBatch")
     Long avgTime();

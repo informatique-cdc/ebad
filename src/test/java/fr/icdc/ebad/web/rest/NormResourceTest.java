@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.service.NormeService;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -45,6 +47,10 @@ public class NormResourceTest {
     @Autowired
     private NormResource normResource;
 
+
+    @Autowired
+    private QuerydslPredicateArgumentResolver querydslPredicateArgumentResolver;
+
     @MockBean
     private NormeService normeService;
 
@@ -55,7 +61,7 @@ public class NormResourceTest {
         MockitoAnnotations.initMocks(this);
         this.restMvc = MockMvcBuilders
                 .standaloneSetup(normResource)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setCustomArgumentResolvers(querydslPredicateArgumentResolver, new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
@@ -75,7 +81,7 @@ public class NormResourceTest {
         Page<Norme> normePage = new PageImpl<>(normeList);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms");
 
-        when(normeService.getAllNormes(any(Pageable.class))).thenReturn(normePage);
+        when(normeService.getAllNormes(any(Predicate.class), any(Pageable.class))).thenReturn(normePage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -84,7 +90,7 @@ public class NormResourceTest {
                 .andExpect(jsonPath("$.content[0].id", is(1)))
                 .andExpect(jsonPath("$.content[1].id", is(2)));
 
-        verify(normeService, only()).getAllNormes(any(Pageable.class));
+        verify(normeService, only()).getAllNormes(any(Predicate.class), any(Pageable.class));
     }
 
     @Test
@@ -103,7 +109,7 @@ public class NormResourceTest {
         Page<Norme> normePage = new PageImpl<>(normeList);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms/name");
 
-        when(normeService.getAllNormes(any(Pageable.class))).thenReturn(normePage);
+        when(normeService.getAllNormes(any(Predicate.class), any(Pageable.class))).thenReturn(normePage);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -112,7 +118,7 @@ public class NormResourceTest {
                 .andExpect(jsonPath("$.content[0].id", is(1)))
                 .andExpect(jsonPath("$.content[1].id", is(2)));
 
-        verify(normeService, only()).getAllNormes(any(Pageable.class));
+        verify(normeService, only()).getAllNormes(any(Predicate.class), any(Pageable.class));
     }
 
     @Test

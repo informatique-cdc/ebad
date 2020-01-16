@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.service.NormeService;
 import fr.icdc.ebad.web.ResponseUtil;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,9 +52,9 @@ public class NormResource {
     @GetMapping
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public Page<NormeDto> getAll(Pageable pageable) {
+    public Page<NormeDto> getAll(Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Norme - Read");
-        Page<Norme> normePage = normeService.getAllNormes(PaginationUtil.generatePageRequestOrDefault(pageable));
+        Page<Norme> normePage = normeService.getAllNormes(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         return normePage.map(norme -> mapper.map(norme, NormeDto.class));
     }
 
@@ -61,9 +63,9 @@ public class NormResource {
      */
     @GetMapping("/name")
     @Timed
-    public Page<NormLabelIdDto> getAllForList(Pageable pageable) {
+    public Page<NormLabelIdDto> getAllForList(Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Norme - Read");
-        Page<Norme> normePage = normeService.getAllNormes(PaginationUtil.generatePageRequestOrDefault(pageable));
+        Page<Norme> normePage = normeService.getAllNormes(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         return normePage.map(norme -> mapper.map(norme, NormLabelIdDto.class));
     }
 

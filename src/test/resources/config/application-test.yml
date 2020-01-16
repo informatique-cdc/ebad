@@ -19,7 +19,7 @@ spring:
         data: classpath:nop.sql
 
     jpa:
-        database-platform: org.hibernate.dialect.H2Dialect
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
         database: H2
         openInView: false
         show_sql: false
@@ -51,3 +51,4 @@ ebad:
     ssh:
         login: ebad
         private_key_path: src/test/resources/key
+
