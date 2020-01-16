@@ -21,9 +21,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Maven
-        run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent package --file pom.xml
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml
+      - name: Sonarqube analysis
+        run: mvn -B org.sonarsource.scanner.maven:sonar --file pom.xml
+
