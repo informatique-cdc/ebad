@@ -22,9 +22,9 @@ jobs:
           java-version: ${{ matrix.java }}
       - name: Build with Maven
         run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml
-      - name: Sonarqube analysis
-        run: mvn -B initialize sonar:sonar --file pom.xml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#      - name: Sonarqube analysis
+#        run: mvn -B initialize sonar:sonar --file pom.xml
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
