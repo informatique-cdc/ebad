@@ -482,6 +482,7 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.4</version>
+
                 <executions>
                     <execution>
                         <id>jacoco-instrument</id>
@@ -498,7 +499,8 @@
                     </execution>
                     <!-- attached to Maven test phase -->
                     <execution>
-                        <id>default-report</id>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -572,4 +574,20 @@
             <url>https://jcenter.bintray.com/</url>
         </repository>
     </repositories>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!-- select non-aggregate reports -->
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
