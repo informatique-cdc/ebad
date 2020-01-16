@@ -80,7 +80,7 @@ public class DirectoryResource {
      */
     @PostMapping(value = "/files/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory, principal)")
+    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory.id, principal)")
     public ResponseEntity<Void> removeFileFromDirectory(@RequestBody FilesDto filesDTO) throws EbadServiceException {
         LOGGER.debug("REST request to remove file from directory {}", filesDTO.getName());
         try {
@@ -94,7 +94,7 @@ public class DirectoryResource {
 
 
     @PostMapping(value = "/files/read")
-    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory, principal)")
+    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory.id, principal)")
     public void downloadFile(@RequestBody FilesDto filesDTO, HttpServletResponse httpServletResponse) throws EbadServiceException {
         LOGGER.debug("REST request to read file from directory {}", filesDTO.getName());
         try {
@@ -113,14 +113,8 @@ public class DirectoryResource {
     public ResponseEntity<Void> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("directory") Long directory) throws EbadServiceException {
         LOGGER.debug("REST request to write file to directory {}", directory);
         if (!file.isEmpty()) {
-            try {
-                FilesDto filesDTO = new FilesDto(directoryService.getDirectory(directory), file.getOriginalFilename(), 0L, 0, 0);
-                directoryService.uploadFile(file.getInputStream(), filesDTO);
-                return new ResponseEntity<>(HttpStatus.OK);
-            } catch (IOException e) {
-                LOGGER.error("Erreur lors de l'upload", e);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+            directoryService.uploadFile(file, directory);
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

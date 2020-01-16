@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,19 +105,23 @@ public class DirectoryServiceTest {
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
         doNothing().when(shellService).uploadFile(eq(directory), eq(inputStream), eq(filesDTO.getName()));
-        directoryService.uploadFile(inputStream, filesDTO);
+        MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
+
+        directoryService.uploadFile(secondFile, 1L);
         verify(shellService).uploadFile(eq(directory), eq(inputStream), eq(filesDTO.getName()));
 
         directory.setCanWrite(false);
         doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), eq(inputStream), eq(filesDTO.getName()));
-        directoryService.uploadFile(inputStream, filesDTO);
+        directoryService.uploadFile(secondFile, 1L);
     }
 
     @Test(expected = IllegalAccessError.class)
     public void uploadFileKo() throws EbadServiceException {
         InputStream inputStream = IOUtils.toInputStream("hello", Charset.forName("UTF-8"));
         FilesDto filesDTO = new FilesDto();
-        directoryService.uploadFile(inputStream, filesDTO);
+        MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
+
+        directoryService.uploadFile(secondFile, 1L);
     }
 
     private ChannelSftp.LsEntry lsEntryWithGivenFilenameAndMTime(String filename, long mtime) {
