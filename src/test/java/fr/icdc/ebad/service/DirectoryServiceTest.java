@@ -109,7 +109,6 @@ public class DirectoryServiceTest {
 
         directoryService.uploadFile(secondFile, 1L);
         verify(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
-
         directory.setCanWrite(false);
         doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
         directoryService.uploadFile(secondFile, 1L);
