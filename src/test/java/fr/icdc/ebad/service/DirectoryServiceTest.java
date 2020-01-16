@@ -4,8 +4,10 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
@@ -19,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -94,26 +99,26 @@ public class DirectoryServiceTest {
 
 
     @Test(expected = EbadServiceException.class)
-    public void uploadFile() throws SftpException, JSchException, EbadServiceException {
-        InputStream inputStream = IOUtils.toInputStream("hello", Charset.forName("UTF-8"));
+    public void uploadFile() throws SftpException, JSchException, EbadServiceException, IOException {
 
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
-        FilesDto filesDTO = new FilesDto();
-        filesDTO.setDirectory(directory);
-        doNothing().when(shellService).uploadFile(eq(directory), eq(inputStream), eq(filesDTO.getName()));
-        directoryService.uploadFile(inputStream, filesDTO);
-        verify(shellService).uploadFile(eq(directory), eq(inputStream), eq(filesDTO.getName()));
+        when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
+        MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
+        doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
+
+        directoryService.uploadFile(secondFile, 1L);
+        verify(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
         directory.setCanWrite(false);
-        doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), eq(inputStream), eq(filesDTO.getName()));
-        directoryService.uploadFile(inputStream, filesDTO);
+        doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
+        directoryService.uploadFile(secondFile, 1L);
     }
 
     @Test(expected = IllegalAccessError.class)
     public void uploadFileKo() throws EbadServiceException {
-        InputStream inputStream = IOUtils.toInputStream("hello", Charset.forName("UTF-8"));
-        FilesDto filesDTO = new FilesDto();
-        directoryService.uploadFile(inputStream, filesDTO);
+        MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
+
+        directoryService.uploadFile(secondFile, 1L);
     }
 
     private ChannelSftp.LsEntry lsEntryWithGivenFilenameAndMTime(String filename, long mtime) {
@@ -155,9 +160,9 @@ public class DirectoryServiceTest {
 
         Environnement environnement = new Environnement();
         environnement.setId(1L);
-        when(directoryRepository.findDirectoryFromEnvironnement(eq(Pageable.unpaged()), eq(environnement.getId()))).thenReturn(directoryPage);
+        when(directoryRepository.findAll(any(Predicate.class), eq(Pageable.unpaged()))).thenReturn(directoryPage);
 
-        Page<Directory> result = directoryService.findDirectoryFromEnvironnement(environnement.getId(), Pageable.unpaged());
+        Page<Directory> result = directoryService.findDirectoryFromEnvironnement(QDirectory.directory.id.eq(1L), Pageable.unpaged(), environnement.getId());
 
         assertEquals(directoryPage, result);
         assertEquals(directoryList, result.getContent());

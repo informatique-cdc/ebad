@@ -151,7 +151,11 @@ public class BatchService {
         Predicate finalPredicate = ExpressionUtils.allOf(predicate, userPredicate, ExpressionUtils.anyOf(isManagerPredicate, isUserPredicate));
 
 
-        return batchRepository.findAll(finalPredicate, pageable);
+        Page<Batch> batchPage = batchRepository.findAll(finalPredicate, pageable);
+        for (Batch batch : batchPage.getContent()) {
+            batch.getEnvironnements().size();
+        }
+        return batchPage;
     }
 
 

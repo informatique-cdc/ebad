@@ -43,7 +43,7 @@ public class Batch extends AbstractAuditingEntity {
 
     @NotNull
     @Size(min = 1, max = 50)
-    @Column(length = 50, unique = true, nullable = false)
+    @Column(length = 50, nullable = false)
     private String name;
 
     @ManyToMany

@@ -12,6 +12,6 @@ public class CachingConfiguration {
 
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("global_settings");
+        return new ConcurrentMapCacheManager("global_settings", "stats");
     }
 }

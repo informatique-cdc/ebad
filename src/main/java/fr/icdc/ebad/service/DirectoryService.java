@@ -3,7 +3,9 @@ package fr.icdc.ebad.service;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
+import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,20 +66,23 @@ public class DirectoryService {
         try {
             return shellService.getFile(directory, filesDTO.getName());
         } catch (SftpException | JSchException | IOException e) {
-            throw new EbadServiceException("Impossible de lire le fichier " + filesDTO.getName());
+            throw new EbadServiceException("Impossible de lire le fichier " + filesDTO.getName(), e);
 
         }
     }
 
-    public void uploadFile(InputStream stream, FilesDto filesDTO) throws EbadServiceException {
+    @Transactional
+    public void uploadFile(MultipartFile multipartFile, Long directoryId) throws EbadServiceException {
+        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0);
+
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
         }
 
         try {
-            shellService.uploadFile(filesDTO.getDirectory(), stream, filesDTO.getName());
-        } catch (SftpException | JSchException e) {
-            throw new EbadServiceException("Erreur lors de l'écriture d'un fichier du dossiers " + filesDTO.getDirectory().getName());
+            shellService.uploadFile(filesDTO.getDirectory(), multipartFile.getInputStream(), filesDTO.getName());
+        } catch (SftpException | JSchException | IOException e) {
+            throw new EbadServiceException("Erreur lors de l'écriture d'un fichier du dossiers " + filesDTO.getDirectory().getName(), e);
         }
     }
 
@@ -86,8 +92,9 @@ public class DirectoryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Directory> findDirectoryFromEnvironnement(Long environnementId, Pageable pageable) {
-        return directoryRepository.findDirectoryFromEnvironnement(pageable, environnementId);
+    public Page<Directory> findDirectoryFromEnvironnement(Predicate predicate, Pageable pageable, Long environnementId) {
+        Predicate newPredicate = QDirectory.directory.environnement.id.eq(environnementId).and(predicate);
+        return directoryRepository.findAll(newPredicate, pageable);
     }
 
     @Transactional

@@ -1,7 +1,9 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.QNorme;
 import fr.icdc.ebad.repository.NormeRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +48,9 @@ public class NormeServiceTest {
         normeList.add(norme1);
         normeList.add(norme2);
         Page<Norme> normePage = new PageImpl<>(normeList);
-        when(normeRepository.findAll(eq(pageable))).thenReturn(normePage);
+        when(normeRepository.findAll(any(Predicate.class), eq(pageable))).thenReturn(normePage);
 
-        Page<Norme> results = normeService.getAllNormes(pageable);
+        Page<Norme> results = normeService.getAllNormes(QNorme.norme.id.eq(1L), pageable);
 
         assertEquals(normeList.size(), results.getContent().size());
         assertTrue(results.getContent().contains(norme1));
