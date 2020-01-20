@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Environnement;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -47,13 +49,16 @@ public class EnvironnementResourceTest {
     @MockBean
     private PermissionApplication permissionApplication;
 
+    @Autowired
+    private QuerydslPredicateArgumentResolver querydslPredicateArgumentResolver;
+
     private MockMvc restMvc;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         this.restMvc = MockMvcBuilders.standaloneSetup(environnementResource)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setCustomArgumentResolvers(querydslPredicateArgumentResolver, new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
@@ -74,7 +79,7 @@ public class EnvironnementResourceTest {
         environnementList.add(environnement2);
         Page<Environnement> environnementPage = new PageImpl<>(environnementList);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/environments?applicationId=1");
-        when(environnementService.getEnvironmentFromApp(eq(1L), any())).thenReturn(environnementPage);
+        when(environnementService.getEnvironmentFromApp(eq(1L), any(Predicate.class), any())).thenReturn(environnementPage);
         when(permissionApplication.canRead(eq(1L), any())).thenReturn(true);
         when(permissionApplication.canManage(eq(1L), any())).thenReturn(false);
 

@@ -1,9 +1,11 @@
 package fr.icdc.ebad.service;
 
 import com.jcraft.jsch.JSchException;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.QEnvironnement;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
@@ -267,7 +269,8 @@ public class EnvironnementService {
         return environnementList;
     }
 
-    public Page<Environnement> getEnvironmentFromApp(Long appId, Pageable pageable) {
-        return environnementRepository.findAllByApplication_Id(appId, pageable);
+    public Page<Environnement> getEnvironmentFromApp(Long appId, Predicate predicate, Pageable pageable) {
+        Predicate predicateAll = QEnvironnement.environnement.application.id.eq(appId).and(predicate);
+        return environnementRepository.findAll(predicateAll, pageable);
     }
 }
