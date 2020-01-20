@@ -1,10 +1,12 @@
 package fr.icdc.ebad.service;
 
 import com.jcraft.jsch.JSchException;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.QEnvironnement;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
@@ -592,11 +594,11 @@ public class EnvironnementServiceTest {
         environnementList.add(environnement2);
         Page<Environnement> environnementPage = new PageImpl<>(environnementList);
         Pageable page = PageRequest.of(0, 2);
-        when(environnementRepository.findAllByApplication_Id(eq(1L), eq(page))).thenReturn(environnementPage);
+        when(environnementRepository.findAll(any(Predicate.class), eq(page))).thenReturn(environnementPage);
 
-        Page<Environnement> resultPage = environnementService.getEnvironmentFromApp(1l, page);
+        Page<Environnement> resultPage = environnementService.getEnvironmentFromApp(1l, QEnvironnement.environnement.id.eq(1L), page);
         List<Environnement> resultList = resultPage.getContent();
-        verify(environnementRepository).findAllByApplication_Id(eq(1L), eq(page));
+        verify(environnementRepository).findAll(any(Predicate.class), eq(page));
 
         assertEquals(2, resultList.size());
         assertThat(resultList, hasItem(environnement1));

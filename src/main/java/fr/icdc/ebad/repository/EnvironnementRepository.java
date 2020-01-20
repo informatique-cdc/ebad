@@ -4,8 +4,6 @@ import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.QEnvironnement;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -32,5 +30,4 @@ public interface EnvironnementRepository extends JpaRepository<Environnement, Lo
 
     Optional<Environnement> findAllByExternalIdAndPluginId(String externalId, String pluginId);
 
-    Page<Environnement> findAllByApplication_Id(Long applicationId, Pageable pageable);
 }
