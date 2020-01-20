@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.service.EnvironnementService;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,9 +58,9 @@ public class EnvironnementResource {
     @PreAuthorize("@permissionApplication.canRead(#appId, principal) or @permissionApplication.canManage(#appId, principal)")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public Page<EnvironnementDto> getEnvironmentsFromApp(@RequestParam("applicationId") Long appId, Pageable pageable) {
+    public Page<EnvironnementDto> getEnvironmentsFromApp(@RequestParam("applicationId") Long appId, @QuerydslPredicate(root = Environnement.class) Predicate predicate, Pageable pageable) {
         LOGGER.debug("REST request to getEnvironmentsFromApp {}", appId);
-        Page<Environnement> environnementPage = environnementService.getEnvironmentFromApp(appId, PaginationUtil.generatePageRequestOrDefault(pageable));
+        Page<Environnement> environnementPage = environnementService.getEnvironmentFromApp(appId, predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         return environnementPage.map(env -> mapper.map(env, EnvironnementDto.class));
     }
 
