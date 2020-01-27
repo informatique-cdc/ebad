@@ -6,6 +6,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,21 +94,21 @@ public class TokenProvider {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(authToken);
             return true;
-//        } catch (SignatureException e) {
-//            log.info("Invalid JWT signature.");
-//            log.trace("Invalid JWT signature trace: {}", e);
+        } catch (SignatureException e) {
+            log.info("Invalid JWT signature.");
+            log.trace("Invalid JWT signature trace", e);
         } catch (MalformedJwtException e) {
             log.warn("Invalid JWT token.");
-            log.trace("Invalid JWT token trace: {}", e);
+            log.trace("Invalid JWT token trace", e);
         } catch (ExpiredJwtException e) {
             log.warn("Expired JWT token.");
-            log.trace("Expired JWT token trace: {}", e);
+            log.trace("Expired JWT token trace", e);
         } catch (UnsupportedJwtException e) {
             log.warn("Unsupported JWT token.");
-            log.trace("Unsupported JWT token trace: {}", e);
+            log.trace("Unsupported JWT token trace", e);
         } catch (IllegalArgumentException e) {
             log.warn("JWT token compact of handler are invalid.");
-            log.trace("JWT token compact of handler are invalid trace: {}", e);
+            log.trace("JWT token compact of handler are invalid trace", e);
         }
         return false;
     }

@@ -2,7 +2,6 @@ package fr.icdc.ebad.web.rest.errors;
 
 
 import fr.icdc.ebad.service.util.EbadServiceException;
-import fr.icdc.ebad.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -91,13 +90,6 @@ public class ExceptionTranslator implements ProblemHandling {
             .with(FIELD_ERRORS_KEY, fieldErrors)
             .build();
         return create(ex, problem, request);
-    }
-
-    @ExceptionHandler(BadRequestAlertException.class)
-    public ResponseEntity<Problem> handleBadRequestAlertException(BadRequestAlertException ex, NativeWebRequest request) {
-        LOGGER.warn("Bad Request !", ex);
-
-        return create(ex, request, HeaderUtil.createFailureAlert(ex.getEntityName(), ex.getErrorKey(), ex.getMessage()));
     }
 
     @ExceptionHandler(EbadServiceException.class)
