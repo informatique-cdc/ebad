@@ -1,6 +1,7 @@
 package fr.icdc.ebad;
 
 import fr.icdc.ebad.config.properties.EbadProperties;
+import fr.icdc.ebad.domain.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -22,12 +23,12 @@ import java.util.Arrays;
 @EnableConfigurationProperties(EbadProperties.class)
 @EnableAsync
 @EnableScheduling
-public class Application {
-    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(Application.class);
+public class EbadApplication {
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(EbadApplication.class);
 
     private final Environment env;
 
-    public Application(Environment env) {
+    public EbadApplication(Environment env) {
         this.env = env;
     }
 
@@ -38,7 +39,7 @@ public class Application {
      * @throws UnknownHostException exception
      */
     public static void main(String[] args) throws UnknownHostException {
-        SpringApplication app = new SpringApplication(Application.class);
+        SpringApplication app = new SpringApplication(EbadApplication.class);
 
         ConfigurableApplicationContext applicationContext = app.run(args);
         Environment env = applicationContext.getEnvironment();
