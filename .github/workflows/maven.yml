@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 8, 8.0.192, 9.0.x, 10, 11.0.x, 11.0.3, 12, 13 ]
+        java: [ 8, 8.0.192, 9.0.x, 10, 11.0.x, 11.0.3, 12, 13, 14 ]
     steps:
       - uses: actions/checkout@v1
       - name: Cache Maven Repo
@@ -24,6 +24,8 @@ jobs:
         run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml
       - name: Sonarqube analysis
         run: mvn -B initialize sonar:sonar --file pom.xml
+        with:
+          java-version: 13
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
