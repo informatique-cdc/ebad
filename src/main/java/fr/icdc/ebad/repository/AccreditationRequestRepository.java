@@ -3,6 +3,7 @@ package fr.icdc.ebad.repository;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import fr.icdc.ebad.domain.AccreditationRequest;
+import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.QAccreditationRequest;
 import fr.icdc.ebad.domain.StateRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,6 @@ public interface AccreditationRequestRepository extends JpaRepository<Accreditat
     }
 
     Optional<AccreditationRequest> findByIdAndState(Long id, StateRequest state);
+
+    void deleteByApplication(Application application);
 }
