@@ -6,6 +6,7 @@ import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
+import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -33,19 +34,20 @@ import java.util.Set;
 @DependsOn("springPluginManager")
 public class ApplicationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
-    private static final String FIELD_NAME_APPLICATION = "name";
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
     private final EnvironnementService environnementService;
     private final List<ApplicationConnectorPlugin> applicationConnectorPlugins;
     private final SpringPluginManager springPluginManager;
+    private final AccreditationRequestRepository accreditationRequestRepository;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<ApplicationConnectorPlugin> applicationConnectorPlugins, SpringPluginManager springPluginManager) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<ApplicationConnectorPlugin> applicationConnectorPlugins, SpringPluginManager springPluginManager, AccreditationRequestRepository accreditationRequestRepository) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
         this.environnementService = environnementService;
         this.applicationConnectorPlugins = applicationConnectorPlugins;
         this.springPluginManager = springPluginManager;
+        this.accreditationRequestRepository = accreditationRequestRepository;
     }
 
 
@@ -73,6 +75,7 @@ public class ApplicationService {
     @Transactional
     public void deleteApplication(Long appId) {
         Application application = applicationRepository.getOne(appId);
+        accreditationRequestRepository.deleteByApplication(application);
         typeFichierRepository.deleteByApplication(application);
         application.getEnvironnements().forEach(environnement -> environnementService.deleteEnvironnement(environnement, true));
         applicationRepository.delete(application);
