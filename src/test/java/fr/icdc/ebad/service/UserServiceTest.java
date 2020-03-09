@@ -1,8 +1,10 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Authority;
+import fr.icdc.ebad.domain.QUser;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
@@ -14,7 +16,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -326,13 +331,13 @@ public class UserServiceTest {
         users.add(user1);
         users.add(user2);
 
-        when(userRepository.findAll(any(Sort.class))).thenReturn(users);
+        when(userRepository.findAll(any(Predicate.class), any(Pageable.class))).thenReturn(new PageImpl<>(users));
 
-        List<User> results = userService.getAllUsers();
+        Page<User> results = userService.getAllUsers(QUser.user.id.eq(10L), PageRequest.of(0, 20));
 
-        assertEquals(2, results.size());
-        assertTrue(results.contains(user1));
-        assertTrue(results.contains(user2));
+        assertEquals(2, results.getContent().size());
+        assertTrue(results.getContent().contains(user1));
+        assertTrue(results.getContent().contains(user2));
     }
 
     @Test
@@ -347,7 +352,8 @@ public class UserServiceTest {
     }
 
     @Test
-    public void inactivateAccount() {
+    @WithMockUser(username = "admin")
+    public void inactivateAccount() throws EbadServiceException {
         User user1 = User.builder().activated(true).id(1L).login("dtrouillet").build();
         when(userRepository.findOneByLogin(eq("dtrouillet"))).thenReturn(Optional.of(user1));
         when(userRepository.save(eq(user1))).thenReturn(user1);

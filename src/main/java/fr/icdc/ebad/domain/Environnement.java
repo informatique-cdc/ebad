@@ -50,8 +50,14 @@ import java.util.Set;
 public class Environnement extends AbstractAuditingEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "external_id")
+    private String externalId;
+
+    @Column(name = "plugin_id")
+    private String pluginId;
 
     @NotNull
     @Size(min = 1, max = 50)

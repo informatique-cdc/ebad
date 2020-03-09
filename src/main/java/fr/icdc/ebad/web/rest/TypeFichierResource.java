@@ -1,15 +1,17 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.TypeFichier;
 import fr.icdc.ebad.service.TypeFichierService;
 import fr.icdc.ebad.web.rest.dto.TypeFichierDto;
-import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +23,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URISyntaxException;
-import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/file-kinds")
+@Tag(name = "TypeFichier", description = "the typefichier API")
 public class TypeFichierResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeFichierResource.class);
@@ -45,24 +46,23 @@ public class TypeFichierResource {
     /**
      * GET  /typefichier/application/:app to get all file kind from app.
      */
-    @GetMapping(value = "/typefichier/application/{app}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/application/{app}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canRead(#app,principal) or @permissionApplication.canWrite(#app,principal)")
-    public ResponseEntity<List<TypeFichierDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long app) throws URISyntaxException {
+    public ResponseEntity<Page<TypeFichierDto>> getAllFromEnv(Pageable pageable, @QuerydslPredicate(root = TypeFichier.class) Predicate predicate, @PathVariable Long app) throws URISyntaxException {
         LOGGER.debug("REST request to get all TypeFichier from application {}", app);
-        Page<TypeFichier> pageTypeFichier = typeFichierService.getTypeFichierFromApplication(PaginationUtil.generatePageRequest(offset, limit), app);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(pageTypeFichier, "/api/typefichier/application/" + app, offset, limit);
+        Page<TypeFichier> pageTypeFichier = typeFichierService.getTypeFichierFromApplication(predicate, pageable, app);
 
         Page<TypeFichierDto> pageTypeFichierDto = pageTypeFichier.map(typeFichier ->
                 mapper.map(typeFichier, TypeFichierDto.class)
         );
-        return new ResponseEntity<>(pageTypeFichierDto.getContent(), headers, HttpStatus.OK);
+        return new ResponseEntity<>(pageTypeFichierDto, HttpStatus.OK);
     }
 
     /**
      * PUT  /typefichier to add a new file type
      */
-    @PutMapping(value = "/typefichier", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canWrite(#typeFichierDto.application.id,principal)")
     public ResponseEntity<TypeFichierDto> addTypeFichier(@RequestBody TypeFichierDto typeFichierDto) {
@@ -74,7 +74,8 @@ public class TypeFichierResource {
     /**
      * POST  /typefichier/delete to delete a fichier type
      */
-    @PostMapping(value = "/typefichier/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    //FIXME SET DELETE MAPPING, WE CANT TRUST application.id in input DTO
+    @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canWrite(#typeFichierDto.application.id,principal)")
     public ResponseEntity<Void> removeTypeFichier(@RequestBody TypeFichierDto typeFichierDto) {
@@ -87,7 +88,7 @@ public class TypeFichierResource {
     /**
      * PATCH  /typefichier to update a fichier type&
      */
-    @PatchMapping(value = "/typefichier", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canWrite(#typeFichierDto.application.id,principal)")
     public ResponseEntity<TypeFichierDto> updateTypeFichier(@RequestBody TypeFichierDto typeFichierDto) {

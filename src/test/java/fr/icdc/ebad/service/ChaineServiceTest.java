@@ -1,29 +1,27 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.config.Constants;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.ChaineAssociation;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.QChaine;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.ChaineRepository;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,24 +30,18 @@ import static org.mockito.Mockito.when;
 /**
  * Created by dtrouillet on 15/03/2018.
  */
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class ChaineServiceTest {
 
-    @MockBean
+    @Mock
     private BatchService batchService;
 
-    @MockBean
+    @Mock
     private ChaineRepository chaineRepository;
 
-    @Autowired
+    @InjectMocks
     private ChaineService chaineService;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void runChaine() throws Exception {
@@ -201,9 +193,9 @@ public class ChaineServiceTest {
 
         Environnement environnement = new Environnement();
         environnement.setId(1L);
-        when(chaineRepository.findChaineFromEnvironnement(eq(Pageable.unpaged()), eq(environnement.getId()))).thenReturn(chainePage);
+        when(chaineRepository.findAll(any(Predicate.class), eq(Pageable.unpaged()))).thenReturn(chainePage);
 
-        Page<Chaine> result = chaineService.getAllChaineFromEnvironmentWithPageable(environnement, Pageable.unpaged());
+        Page<Chaine> result = chaineService.getAllChaineFromEnvironmentWithPageable(QChaine.chaine.environnement.id.eq(1L), Pageable.unpaged(), environnement);
 
         assertEquals(chainePage, result);
         assertEquals(chaineList, result.getContent());

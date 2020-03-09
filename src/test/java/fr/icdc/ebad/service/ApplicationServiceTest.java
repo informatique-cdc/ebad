@@ -1,55 +1,61 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.config.Constants;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.QApplication;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
+import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
+import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
-import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
+import fr.icdc.ebad.service.util.EbadServiceException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.pf4j.PluginDependency;
+import org.pf4j.PluginDescriptor;
+import org.pf4j.PluginException;
+import org.pf4j.PluginWrapper;
+import org.pf4j.spring.SpringPluginManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class ApplicationServiceTest {
-    @MockBean
+    @InjectMocks
+    private ApplicationService applicationService;
+    @Mock
     private ApplicationRepository applicationRepository;
-    @MockBean
-    private AuthorityRepository authorityRepository;
-    @MockBean
-    private TypeFichierRepository typeFichierRepository;
-    @MockBean
+    @Mock
     private EnvironnementService environnementService;
+    @Mock
+    private ApplicationConnectorPlugin applicationConnectorPlugin;
+    @Mock
+    private SpringPluginManager springPluginManager;
+    @Mock
+    private TypeFichierRepository typeFichierRepository;
+    @Mock
+    private AccreditationRequestRepository accreditationRequestRepository;
 
-    @Autowired
-    ApplicationService applicationService;
+    @Spy
+    private List<ApplicationConnectorPlugin> applicationConnectorPlugins = new ArrayList<>();
+
+    @Before
+    public void setup() {
+        applicationConnectorPlugins.add(applicationConnectorPlugin);
+    }
+
     @Test
     public void deleteApplication() {
         Environnement environnement1 = new Environnement();
@@ -67,16 +73,13 @@ public class ApplicationServiceTest {
         application.setEnvironnements(environnementSet);
 
         when(applicationRepository.getOne(eq(9L))).thenReturn(application);
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement1),eq(true));
-        doNothing().when(environnementService).deleteEnvironnement(eq(environnement2),eq(true));
-        doNothing().when(applicationRepository).delete(eq(application));
 
         applicationService.deleteApplication(9L);
 
-        verify(applicationRepository,times(1)).getOne(eq(9L));
-        verify(environnementService,times(1)).deleteEnvironnement(eq(environnement1),eq(true));
-        verify(environnementService,times(1)).deleteEnvironnement(eq(environnement2),eq(true));
-        verify(applicationRepository,times(1)).delete(eq(application));
+        verify(applicationRepository, times(1)).getOne(eq(9L));
+        verify(environnementService, times(1)).deleteEnvironnement(eq(environnement1), eq(true));
+        verify(environnementService, times(1)).deleteEnvironnement(eq(environnement2), eq(true));
+        verify(applicationRepository, times(1)).delete(eq(application));
     }
 
     @Test
@@ -90,13 +93,16 @@ public class ApplicationServiceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        when(applicationRepository.findAll(any(Sort.class))).thenReturn(applications);
+        Pageable pageable = PageRequest.of(0, 2);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications);
 
-        List<Application> result = applicationService.getAllApplications();
+        when(applicationRepository.findAll(any(Predicate.class), eq(pageable))).thenReturn(applicationPage);
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(application1));
-        assertTrue(result.contains(application2));
+        Page<Application> result = applicationService.getAllApplications(QApplication.application.id.eq(1L), pageable);
+
+        assertEquals(2, result.getContent().size());
+        assertTrue(result.getContent().contains(application1));
+        assertTrue(result.getContent().contains(application2));
     }
 
     @Test
@@ -112,7 +118,7 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void setSaveApplication() {
+    public void testSaveApplication() {
         Application application = new Application();
         application.setId(1L);
 
@@ -130,11 +136,11 @@ public class ApplicationServiceTest {
         applications.add(application1);
 
         Predicate predicate = QApplication.application.id.eq(1L);
-        when(applicationRepository.findAll(eq(predicate))).thenReturn(applications);
+        when(applicationRepository.findAll(eq(predicate), any(Pageable.class))).thenReturn(new PageImpl<>(applications));
 
         List<Application> results = applicationService.findApplication(predicate);
 
-        verify(applicationRepository).findAll(eq(predicate));
+        verify(applicationRepository).findAll(eq(predicate), any(Pageable.class));
         assertEquals(1, results.size());
         assertEquals(results.get(0), application1);
     }
@@ -197,5 +203,172 @@ public class ApplicationServiceTest {
 
         assertFalse(results.isEmpty());
         assertTrue(results.contains(user3));
+    }
+
+    @Test
+    public void testImportApp() throws PluginException {
+        List<ApplicationDiscoverDto> applicationDiscoverDtoList = new ArrayList<>();
+        ApplicationDiscoverDto applicationDiscoverDto1 = ApplicationDiscoverDto.builder()
+                .code("aa2")
+                .id("2")
+                .name("appa")
+                .build();
+        ApplicationDiscoverDto applicationDiscoverDto2 = ApplicationDiscoverDto.builder()
+                .code("aa3")
+                .id("3")
+                .name("appa3")
+                .build();
+
+        applicationDiscoverDtoList.add(applicationDiscoverDto1);
+        applicationDiscoverDtoList.add(applicationDiscoverDto2);
+
+        PluginDescriptor pluginDescriptor = new PluginDescriptor() {
+            @Override
+            public String getPluginId() {
+                return "import-plugin";
+            }
+
+            @Override
+            public String getPluginDescription() {
+                return null;
+            }
+
+            @Override
+            public String getPluginClass() {
+                return null;
+            }
+
+            @Override
+            public String getVersion() {
+                return null;
+            }
+
+            @Override
+            public String getRequires() {
+                return null;
+            }
+
+            @Override
+            public String getProvider() {
+                return null;
+            }
+
+            @Override
+            public String getLicense() {
+                return null;
+            }
+
+            @Override
+            public List<PluginDependency> getDependencies() {
+                return null;
+            }
+        };
+        PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
+        when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
+
+        when(applicationRepository.findAllByExternalIdAndPluginId(eq("2"), eq("import-plugin"))).thenReturn(Optional.empty());
+        when(applicationConnectorPlugin.discoverApp()).thenReturn(applicationDiscoverDtoList);
+        applicationService.importApp();
+        verify(applicationRepository).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto1.getName())
+                        && app.getCode().equals(applicationDiscoverDto1.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto1.getId())
+        ));
+        verify(applicationRepository).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto2.getName())
+                        && app.getCode().equals(applicationDiscoverDto2.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto2.getId())
+        ));
+    }
+
+    @Test
+    public void testUpdateApplication() throws EbadServiceException {
+        Application oldApplication = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application newApplication = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(oldApplication));
+        when(applicationRepository.save(eq(newApplication))).thenReturn(newApplication);
+        Application result = applicationService.updateApplication(newApplication);
+
+        verify(applicationRepository).save(argThat((app) ->
+                app.getId().equals(newApplication.getId())
+                        && app.getCode().equals(newApplication.getCode())
+                        && app.getName().equals(newApplication.getName())
+                        && app.getDateParametrePattern().equals(newApplication.getDateParametrePattern())
+                        && app.getDateFichierPattern().equals(newApplication.getDateFichierPattern())
+        ));
+
+        assertEquals(newApplication.getId(), result.getId());
+        assertEquals(newApplication.getCode(), result.getCode());
+        assertEquals(newApplication.getName(), result.getName());
+        assertEquals(newApplication.getDateParametrePattern(), result.getDateParametrePattern());
+        assertEquals(newApplication.getDateFichierPattern(), result.getDateFichierPattern());
+    }
+
+    @Test
+    public void testGetAllApplicationUsed() {
+        Application application1 = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application application2 = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        List<Application> applicationList = new ArrayList<>();
+        applicationList.add(application1);
+        applicationList.add(application2);
+
+        Page<Application> applicationPage = new PageImpl(applicationList);
+        when(applicationRepository.findAllUsagedByUser(eq("test"), any())).thenReturn(applicationPage);
+
+        Page<Application> result = applicationService.getAllApplicationsUsed(PageRequest.of(0, 2), "test");
+
+        assertEquals(applicationPage, result);
+    }
+
+    @Test
+    public void testGetAllApplicationsManaged() {
+        Application application1 = Application.builder()
+                .id(1L)
+                .name("test")
+                .code("154")
+                .dateParametrePattern("ddMMyyyyy")
+                .dateFichierPattern("ddMMyyyyy")
+                .build();
+        Application application2 = Application.builder()
+                .id(1L)
+                .name("news")
+                .code("548")
+                .dateParametrePattern("yyyy-MM-dd")
+                .dateFichierPattern("yyyy-dd-MM")
+                .build();
+        List<Application> applicationList = new ArrayList<>();
+        applicationList.add(application1);
+        applicationList.add(application2);
+
+        Page<Application> applicationPage = new PageImpl(applicationList);
+        when(applicationRepository.findAllManagedByUser(eq("test"), any())).thenReturn(applicationPage);
+
+        Page<Application> result = applicationService.getAllApplicationsManaged(PageRequest.of(0, 2), "test");
+
+        assertEquals(applicationPage, result);
     }
 }

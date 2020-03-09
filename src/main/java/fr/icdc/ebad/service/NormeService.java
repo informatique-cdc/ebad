@@ -7,7 +7,8 @@ import fr.icdc.ebad.domain.QApplication;
 import fr.icdc.ebad.repository.NormeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +32,6 @@ public class NormeService {
     }
 
     @Transactional(readOnly = true)
-    public List<Norme> getAllNormesSorted(Sort sort) {
-        return normeRepository.findAll(sort);
-    }
-
-    @Transactional(readOnly = true)
     public Optional<Norme> findNormeById(Long normeId) {
         return normeRepository.findById(normeId);
     }
@@ -54,5 +50,10 @@ public class NormeService {
             throw new IllegalStateException("Norme " + normeId + " utilisée par un ou plusieurs environnements: Suppression impossible");
         }
         normeRepository.deleteById(normeId);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Norme> getAllNormes(Predicate predicate, Pageable pageable) {
+        return normeRepository.findAll(predicate, pageable);
     }
 }

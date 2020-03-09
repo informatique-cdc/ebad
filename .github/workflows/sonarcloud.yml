@@ -1,0 +1,26 @@
+name: SonarCloud Analysis
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache Maven Repo
+        id: cache-maven-repo
+        uses: actions/cache@v1
+        with:
+          path: /home/runner/.m2/repository
+          key: ${{ runner.os }}-maven-repo
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 13
+      - name: Build with Maven
+        run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml
+      - name: Sonarqube analysis
+        run: mvn -B initialize sonar:sonar --file pom.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

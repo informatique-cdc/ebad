@@ -3,6 +3,7 @@ package fr.icdc.ebad.web.rest;
 import fr.icdc.ebad.domain.Notification;
 import fr.icdc.ebad.service.NotificationService;
 import fr.icdc.ebad.web.rest.dto.NotificationDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +18,8 @@ import java.util.List;
  * Created by dtrouillet on 21/03/2018.
  */
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
+@Tag(name = "Notifications", description = "the notification API")
 public class NotificationResource {
     private final NotificationService notificationService;
     private final MapperFacade mapper;

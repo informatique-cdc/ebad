@@ -7,12 +7,13 @@ import java.util.Date;
 @Data
 public class LogBatchDto {
     private Long id;
-    private BatchDto batch;
-    private UserDto user;
+    private BatchLogDto batch;
     private EnvironnementDto environnement;
     private Date logDate;
     private Long executionTime;
     private int returnCode;
     private String params;
     private Date dateTraitement;
+    private String login;
 }
+

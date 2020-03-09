@@ -1,9 +1,11 @@
 package fr.icdc.ebad.service;
 
 import com.jcraft.jsch.JSchException;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.ChaineAssociation;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.QChaine;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.ChaineRepository;
 import fr.icdc.ebad.security.SecurityUtils;
@@ -81,8 +83,9 @@ public class ChaineService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Chaine> getAllChaineFromEnvironmentWithPageable(Environnement environnement, Pageable pageable) {
-        return chaineRepository.findChaineFromEnvironnement(pageable, environnement.getId());
+    public Page<Chaine> getAllChaineFromEnvironmentWithPageable(Predicate predicate, Pageable pageable, Environnement environnement) {
+        Predicate newPredicate = QChaine.chaine.environnement.id.eq(environnement.getId()).and(predicate);
+        return chaineRepository.findAll(newPredicate, pageable);
     }
 
     @Transactional

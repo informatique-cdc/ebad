@@ -1,5 +1,6 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Authority;
 import fr.icdc.ebad.domain.UsageApplication;
@@ -14,7 +15,8 @@ import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,8 +34,8 @@ import java.util.Set;
 @Transactional
 public class UserService {
 
-    public static final int NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS = 30;
-    public static final String FIELD_LOGIN_USER = "login";
+    private static final int NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS = 30;
+    private static final String FIELD_LOGIN_USER = "login";
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
@@ -136,7 +138,7 @@ public class UserService {
         }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public User changeAutorisationApplication(AuthorityApplicationDTO authorityDTO) {
         Optional<User> userOptional = userRepository.findOneByLoginUser(authorityDTO.getLoginUser());
         if (!userOptional.isPresent()) {
@@ -183,8 +185,13 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAll(new Sort(Sort.Direction.ASC, FIELD_LOGIN_USER));
+    public Page<User> getAllUsers(Predicate predicate, Pageable pageable) {
+        Page<User> users = userRepository.findAll(predicate, pageable);
+        for (User user : users.getContent()) {
+            user.getAuthorities().size();
+            user.getUsageApplications().size();
+        }
+        return users;
     }
 
     @Transactional
@@ -193,7 +200,10 @@ public class UserService {
     }
 
     @Transactional
-    public Optional<User> inactivateAccount(String login) {
+    public Optional<User> inactivateAccount(String login) throws EbadServiceException {
+        if (SecurityUtils.getCurrentLogin().equals(login)) {
+            throw new EbadServiceException("Impossible de désactiver son propre compte");
+        }
         User userSaved = userRepository.findOneByLogin(login)
                 .map(user -> {
                     user.setActivationKey(RandomUtil.generateActivationKey());
@@ -242,7 +252,7 @@ public class UserService {
         userToUpdate.setFirstName(firstName);
         userToUpdate.setLastName(lastName);
 
-        return updateUser(userToUpdate);
+        return userRepository.save(userToUpdate);
     }
 
     public User changeRoles(String loginUser, boolean roleAdmin, boolean roleUser) throws EbadServiceException {

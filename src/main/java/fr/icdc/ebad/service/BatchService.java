@@ -1,14 +1,17 @@
 package fr.icdc.ebad.service;
 
 import com.jcraft.jsch.JSchException;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.LogBatch;
+import fr.icdc.ebad.domain.QBatch;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
+import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +28,6 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class BatchService {
@@ -125,6 +126,7 @@ public class BatchService {
      * puis toutes les heures (3600000ms)
      */
     @Scheduled(fixedRate = INTERVAL_CLEAN_BATCH)
+    @Transactional
     public void removeBatchsWithoutEnvironnement() {
         List<Batch> lstBatchs = batchRepository.findBatchWithoutEnvironnement();
         for (Batch batch : lstBatchs) {
@@ -135,15 +137,27 @@ public class BatchService {
     }
 
     @Transactional(readOnly = true)
-    public List<Batch> getAllBatchWithPredicate(Predicate predicate) {
-        Iterable<Batch> batchsIterable = batchRepository.findAll(predicate);
-        return StreamSupport.stream(batchsIterable.spliterator(), false).collect(Collectors.toList());
+    public Page<Batch> getAllBatchWithPredicate(Predicate predicate, Pageable pageable) {
+        Predicate userPredicate = QBatch.batch.environnements.any()
+                .application.usageApplications.any()
+                .user.login.eq(SecurityUtils.getCurrentLogin());
+        Predicate isManagerPredicate = QBatch.batch.environnements.any()
+                .application.usageApplications.any()
+                .canManage.isTrue();
+        Predicate isUserPredicate = QBatch.batch.environnements.any()
+                .application.usageApplications.any()
+                .canUse.isTrue();
+
+        Predicate finalPredicate = ExpressionUtils.allOf(predicate, userPredicate, ExpressionUtils.anyOf(isManagerPredicate, isUserPredicate));
+
+
+        Page<Batch> batchPage = batchRepository.findAll(finalPredicate, pageable);
+        for (Batch batch : batchPage.getContent()) {
+            batch.getEnvironnements().size();
+        }
+        return batchPage;
     }
 
-    @Transactional(readOnly = true)
-    public Page<Batch> getAllBatchFromEnvironmentAsPage(Long environmentId, Pageable pageable) {
-        return batchRepository.findBatchFromEnvironnement(pageable, environmentId);
-    }
 
     @Transactional
     public Batch saveBatch(Batch batch) {

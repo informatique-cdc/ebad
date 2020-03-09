@@ -1,17 +1,19 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.service.DirectoryService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
-import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/directories")
+@Tag(name = "Directory", description = "the directory API")
 public class DirectoryResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryResource.class);
@@ -50,20 +53,21 @@ public class DirectoryResource {
     /**
      * GET  /dossiers/env/:env to get all directories from env.
      */
-    @GetMapping(value = "/directories/env/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/env/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal) or @permissionEnvironnement.canWrite(#env, principal)")
-    public ResponseEntity<List<DirectoryDto>> getAllFromEnv(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long env) throws URISyntaxException {
+    public ResponseEntity<Page<DirectoryDto>> getAllFromEnv(Pageable pageable, @QuerydslPredicate(root = Directory.class) Predicate predicate, @PathVariable Long env) throws URISyntaxException {
         LOGGER.debug("REST request to get all Directory from environnement {}", env);
-        Page<Directory> page = directoryService.findDirectoryFromEnvironnement(env, PaginationUtil.generatePageRequest(offset, limit));
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/chaines/env/" + env, offset, limit);
-        return new ResponseEntity<>(mapper.mapAsList(page.getContent(), DirectoryDto.class), headers, HttpStatus.OK);
+        Page<Directory> page = directoryService.findDirectoryFromEnvironnement(predicate, pageable, env);
+        Page<DirectoryDto> directoryDtos = page.map(directory -> mapper.map(directory, DirectoryDto.class));
+
+        return new ResponseEntity<>(directoryDtos, HttpStatus.OK);
     }
 
     /**
      * GET  /dossiers/files/{id} to get all files from directory.
      */
-    @GetMapping(value = "/directories/files/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/files/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionDirectory.canRead(#id, principal)")
     public ResponseEntity<List<FilesDto>> getFilesFromDirectory(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long id) throws EbadServiceException {
@@ -74,9 +78,9 @@ public class DirectoryResource {
     /**
      * POST  /dossiers/files/ to remove file from directory.
      */
-    @PostMapping(value = "/directories/files/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/files/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory, principal)")
+    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory.id, principal)")
     public ResponseEntity<Void> removeFileFromDirectory(@RequestBody FilesDto filesDTO) throws EbadServiceException {
         LOGGER.debug("REST request to remove file from directory {}", filesDTO.getName());
         try {
@@ -89,8 +93,8 @@ public class DirectoryResource {
     }
 
 
-    @PostMapping(value = "/directories/files/read")
-    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory, principal)")
+    @PostMapping(value = "/files/read")
+    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory.id, principal)")
     public void downloadFile(@RequestBody FilesDto filesDTO, HttpServletResponse httpServletResponse) throws EbadServiceException {
         LOGGER.debug("REST request to read file from directory {}", filesDTO.getName());
         try {
@@ -104,28 +108,22 @@ public class DirectoryResource {
     }
 
 
-    @PostMapping(value = "/directories/files/upload")
+    @PostMapping(value = "/files/upload")
     @PreAuthorize("@permissionDirectory.canWriteFile(#directory, principal)")
     public ResponseEntity<Void> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("directory") Long directory) throws EbadServiceException {
         LOGGER.debug("REST request to write file to directory {}", directory);
         if (!file.isEmpty()) {
-            try {
-                FilesDto filesDTO = new FilesDto(directoryService.getDirectory(directory), file.getOriginalFilename(), 0L, 0, 0);
-                directoryService.uploadFile(file.getInputStream(), filesDTO);
-                return new ResponseEntity<>(HttpStatus.OK);
-            } catch (IOException e) {
-                LOGGER.error("Erreur lors de l'upload", e);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+            directoryService.uploadFile(file, directory);
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     /**
-     * PUT  /chaines to add a new directory
+     * PUT  /directories to add a new directory
      */
-    @PutMapping(value = "/directories", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionDirectory.canWrite(#directoryDto, principal)")
     public ResponseEntity<DirectoryDto> addDirectory(@RequestBody DirectoryDto directoryDto) {
@@ -137,7 +135,7 @@ public class DirectoryResource {
     /**
      * POST  /directories/delete to delete a directory
      */
-    @PostMapping(value = "/directories/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionDirectory.canWrite(#directoryDto, principal)")
     public ResponseEntity<Void> removeDirectory(@RequestBody DirectoryDto directoryDto) {
@@ -150,7 +148,7 @@ public class DirectoryResource {
     /**
      * PATCH  /directories to update a directory
      */
-    @PatchMapping(value = "/directories", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionDirectory.canWrite(#directoryDto, principal)")
     public ResponseEntity<DirectoryDto> updateDirectory(@RequestBody DirectoryDto directoryDto) {

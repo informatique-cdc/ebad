@@ -1,39 +1,42 @@
 server:
     port: 10344
     address: localhost
-
 async:
     corePoolSize: 2
     maxPoolSize: 50
     queueCapacity: 10000
+
 spring:
     profiles:
         active: test
     datasource:
-        dataSourceClassName: org.h2.jdbcx.JdbcDataSource
+        dataSourceClassName: org.h2.Driver
         url: jdbc:h2:mem:ebad;DB_CLOSE_DELAY=-1
         databaseName:
         serverName:
         username:
         password:
+        data: classpath:nop.sql
 
     jpa:
-        database-platform: org.hibernate.dialect.H2Dialect
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
         database: H2
         openInView: false
-        show_sql: true
+        show_sql: false
         generate-ddl: false
         hibernate:
-               ddl-auto: create-drop
-               naming:
-                 physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+            ddl-auto: create-drop
+            naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
         properties:
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: true
-            #hibernate.hbm2ddl.auto: validate
+            javax.persistence.schema-generation.database.action: drop-and-create
+            javax.persistence.schema-generation.drop-source: script-then-metadata
+            javax.persistence.schema-generation.drop-script-source: drop-tables.sql
     main:
       allow-bean-definition-overriding: true
+      banner-mode: "off"
 metrics:
     jmx.enabled: false
 
@@ -48,3 +51,4 @@ ebad:
     ssh:
         login: ebad
         private_key_path: src/test/resources/key
+

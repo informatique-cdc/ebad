@@ -1,17 +1,20 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.config.Constants;
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.QNorme;
 import fr.icdc.ebad.repository.NormeRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,35 +27,34 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles(Constants.SPRING_PROFILE_TEST)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class NormeServiceTest {
-    @MockBean
+    @Mock
     private NormeRepository normeRepository;
 
-    @MockBean
+    @Mock
     private ApplicationService applicationService;
 
-    @Autowired
+    @InjectMocks
     private NormeService normeService;
 
     @Test
     public void getAllNormesSorted() {
         Sort sort = new Sort(Sort.Direction.ASC, "name");
+        Pageable pageable = PageRequest.of(0, 10, sort);
         List<Norme> normeList = new ArrayList<>();
         Norme norme1 = Norme.builder().id(1L).build();
         Norme norme2 = Norme.builder().id(2L).build();
         normeList.add(norme1);
         normeList.add(norme2);
+        Page<Norme> normePage = new PageImpl<>(normeList);
+        when(normeRepository.findAll(any(Predicate.class), eq(pageable))).thenReturn(normePage);
 
-        when(normeRepository.findAll(eq(sort))).thenReturn(normeList);
+        Page<Norme> results = normeService.getAllNormes(QNorme.norme.id.eq(1L), pageable);
 
-        List<Norme> results = normeService.getAllNormesSorted(sort);
-
-        assertEquals(normeList.size(), results.size());
-        assertTrue(results.contains(norme1));
-        assertTrue(results.contains(norme2));
+        assertEquals(normeList.size(), results.getContent().size());
+        assertTrue(results.getContent().contains(norme1));
+        assertTrue(results.getContent().contains(norme2));
     }
 
     @Test

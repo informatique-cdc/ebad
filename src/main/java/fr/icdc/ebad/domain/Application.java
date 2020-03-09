@@ -20,6 +20,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
@@ -35,7 +36,10 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, exclude = {"environnements", "usageApplications"})
 @ToString(exclude = {"environnements", "usageApplications"})
-@Table(name = "t_application")
+@Table(name = "t_application",
+        uniqueConstraints =
+        @UniqueConstraint(columnNames = {"name", "code"})
+)
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Application extends AbstractAuditingEntity {
 
@@ -43,9 +47,15 @@ public class Application extends AbstractAuditingEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "external_id")
+    private String externalId;
+
+    @Column(name = "plugin_id")
+    private String pluginId;
+
     @NotNull
     @Size(min = 1, max = 50)
-    @Column(length = 50, unique = true, nullable = false)
+    @Column(length = 50, nullable = false)
     private String name;
 
     @NotNull

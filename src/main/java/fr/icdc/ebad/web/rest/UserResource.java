@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -9,9 +10,13 @@ import fr.icdc.ebad.web.rest.dto.RolesDTO;
 import fr.icdc.ebad.web.rest.dto.UserAccountDto;
 import fr.icdc.ebad.web.rest.dto.UserDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +31,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 
 /**
  * REST controller for managing users.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/users")
+@Tag(name = "User", description = "the user API")
 public class UserResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
@@ -46,31 +51,31 @@ public class UserResource {
         this.mapper = mapper;
     }
 
-    @GetMapping("/user")
+    @GetMapping("/current")
     @PreAuthorize("isAuthenticated()")
     @Timed
-    public ResponseEntity<User> currentUser() throws EbadServiceException {
+    public ResponseEntity<UserDto> currentUser() throws EbadServiceException {
         User user = this.userService.getUserWithAuthorities();
-        return new ResponseEntity<>(user, HttpStatus.OK);
+
+        return new ResponseEntity<>(mapper.map(user, UserDto.class), HttpStatus.OK);
     }
 
     /**
      * GET  /users to get all users.
      */
-    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    //TODO dtrouillet mettre en place une pagination
-    public List<UserDto> getAll() {
+    public Page<UserDto> getAll(Pageable pageable, @QuerydslPredicate(root = User.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Users");
-        List<User> userList = userService.getAllUsers();
-        return mapper.mapAsList(userList, UserDto.class);
+        Page<User> userPage = userService.getAllUsers(predicate, pageable);
+        return userPage.map((user -> mapper.map(user, UserDto.class)));
     }
 
     /*
     * GET  /users/:login to get the "login" user.
     */
-    @GetMapping(value = "/users/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> getUser(@PathVariable String login) {
@@ -82,7 +87,7 @@ public class UserResource {
     /**
      * GET  /users/:login to get the "login" user.
      */
-    @GetMapping(value = "/users/activate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/activate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> activateAccount(@RequestParam(value = "key") String key) {
@@ -94,10 +99,10 @@ public class UserResource {
     /**
      * GET  /users/:login to get the "login" user.
      */
-    @GetMapping(value = "/users/inactivate/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/inactivate/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDto> inactivateAccount(@PathVariable String login) {
+    public ResponseEntity<UserDto> inactivateAccount(@PathVariable String login) throws EbadServiceException {
         Optional<UserDto> userDto = userService.inactivateAccount(login).map(user -> mapper.map(user, UserDto.class));
         return ResponseUtil.wrapOrNotFound(userDto);
     }
@@ -105,9 +110,9 @@ public class UserResource {
     /**
      * PUT  /users to save new user.
      */
-    @PutMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') && @permissionServiceOpen.canCreateOrUpdateUser()")
     public ResponseEntity<UserDto> saveUser(@Valid @RequestBody UserAccountDto userDto) throws EbadServiceException {
         LOGGER.debug("REST request to save new User");
         User user = userService.createUser(userDto.getLogin(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName(), userDto.getPassword());
@@ -117,9 +122,9 @@ public class UserResource {
     /**
      * PATCH  /users to save  user.
      */
-    @PatchMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') && @permissionServiceOpen.canCreateOrUpdateUser()")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) throws EbadServiceException {
         LOGGER.debug("REST request to save  User");
         User user = userService.updateUser(userDto.getId(), userDto.getLogin(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName(), userDto.getPassword());
@@ -130,9 +135,9 @@ public class UserResource {
     /**
      * PATCH  /users/roles to change roles of user.
      */
-    @PatchMapping(value = "/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/roles", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') && @permissionServiceOpen.canCreateOrUpdateUser()")
     public ResponseEntity<UserDto> changeRoles(@RequestBody RolesDTO roles) throws EbadServiceException {
         LOGGER.debug("REST request to change role User : {}", roles.getLoginUser());
         User user = userService.changeRoles(roles.getLoginUser(), roles.isRoleAdmin(), roles.isRoleUser());
@@ -142,7 +147,7 @@ public class UserResource {
     /**
      * PATCH  /users/application to add or remove application of user.
      */
-    @PatchMapping(value = "/users/application", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/application", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> changeApplicationAuthority(@RequestBody AuthorityApplicationDTO authorityApplicationDTO) {

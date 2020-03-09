@@ -1,5 +1,6 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.LogBatch;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import org.springframework.data.domain.Page;
@@ -22,22 +23,8 @@ public class LogBatchService {
 
 
     @Transactional(readOnly = true)
-    public Page<LogBatch> getAllLogBatchWithPageable(Pageable pageable) {
-        return logBatchRepository.findAll(pageable);
+    public Page<LogBatch> getAllLogBatchWithPageable(Predicate predicate, Pageable pageable) {
+        return logBatchRepository.findAll(predicate, pageable);
     }
 
-    @Transactional(readOnly = true)
-    public Page<LogBatch> getAllLogBatchFromEnvironmentWithPageable(Pageable pageable, Long environnementId) {
-        return logBatchRepository.findByEnvironnement(pageable, environnementId, null);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<LogBatch> getAllLogBatchFromEnvironmentAndBatchWithPageable(Pageable pageable, Long environnementId, Long batchId) {
-        return logBatchRepository.findByEnvironnement(pageable, environnementId, batchId);
-    }
-
-    @Transactional
-    public LogBatch saveLogBatch(LogBatch logBatch) {
-        return logBatchRepository.save(logBatch);
-    }
 }
