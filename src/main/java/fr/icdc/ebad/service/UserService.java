@@ -7,6 +7,7 @@ import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.UsageApplicationId;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
+import fr.icdc.ebad.repository.UsageApplicationRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -40,11 +41,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
+    private final UsageApplicationRepository usageApplicationRepository;
 
-    public UserService(PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, UserRepository userRepository) {
+    public UserService(PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, UserRepository userRepository, UsageApplicationRepository usageApplicationRepository) {
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
         this.userRepository = userRepository;
+        this.usageApplicationRepository = usageApplicationRepository;
     }
 
     @Transactional
@@ -179,7 +182,11 @@ public class UserService {
             usageApplicationToUpdate.setCanManage(false);
         }
 
+
         userRepository.save(user);
+        if (!usageApplicationToUpdate.isCanManage() && !usageApplicationToUpdate.isCanUse()) {
+            user.getUsageApplications().remove(usageApplicationToUpdate);
+        }
         return user;
 
     }
