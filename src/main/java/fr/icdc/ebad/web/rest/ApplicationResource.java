@@ -7,6 +7,7 @@ import fr.icdc.ebad.service.ApplicationService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import fr.icdc.ebad.web.rest.dto.ApplicationSimpleDto;
+import fr.icdc.ebad.web.rest.dto.UsageApplicationDto;
 import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
@@ -52,6 +53,7 @@ public class ApplicationResource {
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public Page<ApplicationSimpleDto> findApplication(Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
         LOGGER.debug("REST request to find Application - Read");
         return applicationService.findApplication(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
@@ -147,7 +149,7 @@ public class ApplicationResource {
      */
     @GetMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionApplication.canManage(#id,principal)")
+    @PreAuthorize("@permissionApplication.canManage(#id,principal) or @permissionApplication.canWrite(#id, principal)")
     public Set<UserSimpleDto> getUsersFromApplication(@PathVariable Long id) {
         LOGGER.debug("REST request to get all users from Application");
         return mapper.mapAsSet(applicationService.getUsers(id), UserSimpleDto.class);
@@ -158,9 +160,16 @@ public class ApplicationResource {
      */
     @GetMapping(value = "/moderators/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionApplication.canManage(#id,principal)")
+    @PreAuthorize("@permissionApplication.canManage(#id,principal) or @permissionApplication.canWrite(#id, principal)")
     public Set<UserSimpleDto> getModeratorsFromApplication(@PathVariable Long id) {
         LOGGER.debug("REST request to get all users from Application");
         return mapper.mapAsSet(applicationService.getManagers(id), UserSimpleDto.class);
+    }
+
+    @GetMapping(value = "/{id}/usages")
+    @PreAuthorize("@permissionApplication.canManage(#id,principal) or @permissionApplication.canWrite(#id, principal)")
+    public Page<UsageApplicationDto> getAllUsages(@PathVariable Long id, Pageable pageable) {
+        LOGGER.debug("REST request to get all usages from Application");
+        return applicationService.getUsage(pageable, id).map(usage -> mapper.map(usage, UsageApplicationDto.class));
     }
 }

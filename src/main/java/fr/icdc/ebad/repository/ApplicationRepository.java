@@ -73,4 +73,5 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
             " left join usageApplications.user user" +
             " where user.login = :login and usageApplications.canUse = true")
     Page<Application> findAllUsagedByUser(@Param("login") String login, Pageable pageable);
+
 }
