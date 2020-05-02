@@ -52,6 +52,7 @@ public class BatchResource {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public Page<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate, Pageable pageable) {
         LOGGER.debug("REST request to get Batchs ");
         return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable)).map(batch -> mapper.map(batch, BatchDto.class));
