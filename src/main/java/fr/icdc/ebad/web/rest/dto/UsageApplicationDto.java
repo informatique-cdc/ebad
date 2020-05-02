@@ -8,7 +8,7 @@ import lombok.ToString;
 @ToString(exclude = {"application", "user"})
 @EqualsAndHashCode(exclude = {"application", "user"})
 public class UsageApplicationDto {
-    private UserDto user;
+    private UserPublicDto user;
     private ApplicationDto application;
     private boolean canManage;
     private boolean canUse;

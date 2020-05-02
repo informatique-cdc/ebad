@@ -9,6 +9,7 @@ import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
+import fr.icdc.ebad.repository.UsageApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.pf4j.PluginException;
 import org.pf4j.PluginWrapper;
@@ -36,14 +37,16 @@ public class ApplicationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
     private final ApplicationRepository applicationRepository;
     private final TypeFichierRepository typeFichierRepository;
+    private final UsageApplicationRepository usageApplicationRepository;
     private final EnvironnementService environnementService;
     private final List<ApplicationConnectorPlugin> applicationConnectorPlugins;
     private final SpringPluginManager springPluginManager;
     private final AccreditationRequestRepository accreditationRequestRepository;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, EnvironnementService environnementService, List<ApplicationConnectorPlugin> applicationConnectorPlugins, SpringPluginManager springPluginManager, AccreditationRequestRepository accreditationRequestRepository) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, UsageApplicationRepository usageApplicationRepository, EnvironnementService environnementService, List<ApplicationConnectorPlugin> applicationConnectorPlugins, SpringPluginManager springPluginManager, AccreditationRequestRepository accreditationRequestRepository) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
+        this.usageApplicationRepository = usageApplicationRepository;
         this.environnementService = environnementService;
         this.applicationConnectorPlugins = applicationConnectorPlugins;
         this.springPluginManager = springPluginManager;
@@ -90,22 +93,20 @@ public class ApplicationService {
 
     @Transactional
     public Set<User> getManagers(Long applicationId) {
-        Set<UsageApplication> usageApplications = getApplication(applicationId).orElseGet(Application::new).getUsageApplications();
-        Set<User> users = new HashSet<>();
-        for (UsageApplication usageApplication : usageApplications) {
-            if (usageApplication.isCanManage()) {
-                users.add(usageApplication.getUser());
-            }
-        }
-        return users;
+        return getUsersOrManager(applicationId, false, true);
     }
 
     @Transactional
     public Set<User> getUsers(Long applicationId) {
+        return getUsersOrManager(applicationId, true, false);
+    }
+
+    @Transactional
+    public Set<User> getUsersOrManager(Long applicationId, boolean canUser, boolean canManage) {
         Set<UsageApplication> usageApplications = getApplication(applicationId).orElseGet(Application::new).getUsageApplications();
         Set<User> users = new HashSet<>();
         for (UsageApplication usageApplication : usageApplications) {
-            if (usageApplication.isCanUse()) {
+            if ((usageApplication.isCanUse() && canUser) || (usageApplication.isCanManage() && canManage)) {
                 users.add(usageApplication.getUser());
             }
         }
@@ -171,5 +172,10 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public Page<Application> getAllApplicationsUsed(Pageable pageable, String username) {
         return applicationRepository.findAllUsagedByUser(username, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UsageApplication> getUsage(Pageable pageable, Long appId) {
+        return usageApplicationRepository.findAllByApplicationId(appId, pageable);
     }
 }

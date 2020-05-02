@@ -63,6 +63,7 @@ public class NormResource {
      */
     @GetMapping("/name")
     @Timed
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public Page<NormLabelIdDto> getAllForList(Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Norme - Read");
         Page<Norme> normePage = normeService.getAllNormes(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));

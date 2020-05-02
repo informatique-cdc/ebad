@@ -149,7 +149,7 @@ public class UserResource {
      */
     @PatchMapping(value = "/application", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @permissionApplication.canManage(#authorityApplicationDTO.idApplication,principal) or @permissionApplication.canWrite(#authorityApplicationDTO.idApplication, principal)")
     public ResponseEntity<UserDto> changeApplicationAuthority(@RequestBody AuthorityApplicationDTO authorityApplicationDTO) {
         LOGGER.debug("REST request to change authorityApplication User : {}", authorityApplicationDTO.getLoginUser());
         User user = userService.changeAutorisationApplication(authorityApplicationDTO);

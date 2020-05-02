@@ -1,5 +1,5 @@
 server:
-  port: 10300
+  port: 11006
   servlet:
     context-path: /ebad
 
@@ -18,7 +18,7 @@ spring:
   jpa:
     openInView: false
     show_sql: false
-    generate-ddl: true
+    generate-ddl: false
     hibernate:
       ddl-auto: update
       naming:
@@ -45,4 +45,3 @@ security:
     enabled: false
 logging.level:
   fr.icdc.ebad: debug
-  fr.icdc.ebad.plugin: info
