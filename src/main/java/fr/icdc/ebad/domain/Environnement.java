@@ -50,7 +50,7 @@ import java.util.Set;
 public class Environnement extends AbstractAuditingEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "external_id")
