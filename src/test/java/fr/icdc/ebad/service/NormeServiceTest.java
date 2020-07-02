@@ -40,7 +40,7 @@ public class NormeServiceTest {
 
     @Test
     public void getAllNormesSorted() {
-        Sort sort = new Sort(Sort.Direction.ASC, "name");
+        Sort sort = Sort.by(Sort.Direction.ASC, "name");
         Pageable pageable = PageRequest.of(0, 10, sort);
         List<Norme> normeList = new ArrayList<>();
         Norme norme1 = Norme.builder().id(1L).build();

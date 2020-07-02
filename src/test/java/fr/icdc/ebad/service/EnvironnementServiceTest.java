@@ -30,7 +30,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginDescriptor;
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
 import org.springframework.data.domain.Page;
@@ -276,7 +276,7 @@ public class EnvironnementServiceTest {
     }
 
     @Test
-    public void testImportEnvironments() throws PluginException, EbadServiceException {
+    public void testImportEnvironments() throws PluginRuntimeException, EbadServiceException {
         //GIVEN
         Application application = Application.builder()
                 .id(1L)
@@ -425,7 +425,7 @@ public class EnvironnementServiceTest {
     }
 
     @Test
-    public void testImportEnvironmentsAll() throws PluginException, EbadServiceException {
+    public void testImportEnvironmentsAll() throws PluginRuntimeException, EbadServiceException {
         //GIVEN
         Application application = Application.builder()
                 .id(1L)

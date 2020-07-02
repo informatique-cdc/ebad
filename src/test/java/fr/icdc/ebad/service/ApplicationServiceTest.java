@@ -1,7 +1,11 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.QApplication;
+import fr.icdc.ebad.domain.UsageApplication;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
@@ -17,7 +21,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginDescriptor;
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
 import org.springframework.data.domain.Page;
@@ -25,11 +29,21 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationServiceTest {
@@ -206,7 +220,7 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void testImportApp() throws PluginException {
+    public void testImportApp() throws PluginRuntimeException {
         List<ApplicationDiscoverDto> applicationDiscoverDtoList = new ArrayList<>();
         ApplicationDiscoverDto applicationDiscoverDto1 = ApplicationDiscoverDto.builder()
                 .code("aa2")
