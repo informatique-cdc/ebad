@@ -44,6 +44,9 @@ public class BatchServiceTest {
     private UserService userService;
 
     @Mock
+    private NormeService normeService;
+
+    @Mock
     private LogBatchRepository logBatchRepository;
 
     @Mock
@@ -122,7 +125,7 @@ public class BatchServiceTest {
         )).thenReturn(logBatchExpected);
 
         doNothing().when(notificationService).createNotification(any());
-
+        when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
         batchService.runBatch(batch,environnementIntegration);
 
         verify(environnementService,times(1)).getDateTraiement(
@@ -224,6 +227,8 @@ public class BatchServiceTest {
 
         when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
         when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
+
+        when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
 
         batchService.runBatch(batch.getId(), environnementIntegration.getId(), batch.getParams());
 

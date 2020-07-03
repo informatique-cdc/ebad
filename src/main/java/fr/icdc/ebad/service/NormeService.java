@@ -56,4 +56,8 @@ public class NormeService {
     public Page<Norme> getAllNormes(Predicate predicate, Pageable pageable) {
         return normeRepository.findAll(predicate, pageable);
     }
+
+    public String getShellPath(Norme norme, String appCode) {
+        return norme.getPathShell().replace("$APP_CODE$", appCode);
+    }
 }
