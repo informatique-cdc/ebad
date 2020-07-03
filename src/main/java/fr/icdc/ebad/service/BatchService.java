@@ -46,14 +46,16 @@ public class BatchService {
     private final UserService userService;
     private final LogBatchRepository logBatchRepository;
     private final NotificationService notificationService;
+    private final NormeService normeService;
 
-    public BatchService(LogBatchRepository logBatchRepository, ShellService shellService, BatchRepository batchRepository, EnvironnementService environnementService, UserService userService, NotificationService notificationService) {
+    public BatchService(LogBatchRepository logBatchRepository, ShellService shellService, BatchRepository batchRepository, EnvironnementService environnementService, UserService userService, NotificationService notificationService, NormeService normeService) {
         this.logBatchRepository = logBatchRepository;
         this.shellService = shellService;
         this.batchRepository = batchRepository;
         this.environnementService = environnementService;
         this.userService = userService;
         this.notificationService = notificationService;
+        this.normeService = normeService;
     }
 
 
@@ -94,7 +96,8 @@ public class BatchService {
             }
         }
 
-        String command = environnement.getHomePath() + "/" + environnement.getNorme().getPathShell() + environnement.getPrefix() + batch.getPath() + " " + realParams;
+
+        String command = environnement.getHomePath() + "/" + normeService.getShellPath(environnement.getNorme(), environnement.getApplication().getCode()) + environnement.getPrefix() + batch.getPath() + " " + realParams;
 
 
         LOGGER.debug("Execute batch with command : '{}'", command);
