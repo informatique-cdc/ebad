@@ -6,7 +6,7 @@
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
-        <version>2.3.0.RELEASE</version>
+        <version>2.3.1.RELEASE</version>
         <relativePath/>
     </parent>
     <licenses>
@@ -269,14 +269,9 @@
             <artifactId>spring-security-messaging</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-            <version>${spring-security-oauth2.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>2.3.0.RELEASE</version>
+            <version>2.3.1.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -362,7 +357,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>2.3.0.RELEASE</version>
+            <version>2.3.1.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -396,18 +391,6 @@
             <version>0.8.5</version>
         </dependency>
         <dependency>
-            <groupId>com.amashchenko.maven.plugin</groupId>
-            <artifactId>gitflow-maven-plugin</artifactId>
-            <version>1.14.0</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>google-collect</artifactId>
-                    <groupId>com.google.code.google-collections</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.pf4j</groupId>
             <artifactId>pf4j-spring</artifactId>
             <version>${pf4j-spring.version}</version>
@@ -428,7 +411,7 @@
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-commons</artifactId>
-                <version>2.3.0.RELEASE</version>
+                <version>2.3.1.RELEASE</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
