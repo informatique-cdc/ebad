@@ -330,6 +330,74 @@ public class ApplicationServiceTest {
         assertEquals(newApplication.getDateFichierPattern(), result.getDateFichierPattern());
     }
 
+
+    @Test
+    public void testImportAppError() throws PluginRuntimeException {
+        List<ApplicationDiscoverDto> applicationDiscoverDtoList = new ArrayList<>();
+        ApplicationDiscoverDto applicationDiscoverDto1 = ApplicationDiscoverDto.builder()
+                .code("aa2")
+                .id("2")
+                .name("appa")
+                .build();
+        ApplicationDiscoverDto applicationDiscoverDto2 = ApplicationDiscoverDto.builder()
+                .code("aa3")
+                .id("3")
+                .name("appa3")
+                .build();
+
+        applicationDiscoverDtoList.add(applicationDiscoverDto1);
+        applicationDiscoverDtoList.add(applicationDiscoverDto2);
+
+        PluginDescriptor pluginDescriptor = new PluginDescriptor() {
+            @Override
+            public String getPluginId() {
+                return "import-plugin";
+            }
+
+            @Override
+            public String getPluginDescription() {
+                return null;
+            }
+
+            @Override
+            public String getPluginClass() {
+                return null;
+            }
+
+            @Override
+            public String getVersion() {
+                return null;
+            }
+
+            @Override
+            public String getRequires() {
+                return null;
+            }
+
+            @Override
+            public String getProvider() {
+                return null;
+            }
+
+            @Override
+            public String getLicense() {
+                return null;
+            }
+
+            @Override
+            public List<PluginDependency> getDependencies() {
+                return null;
+            }
+        };
+        PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
+        when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
+
+        when(applicationRepository.findAllByExternalIdAndPluginId(eq("2"), eq("import-plugin"))).thenReturn(Optional.empty());
+        when(applicationConnectorPlugin.discoverApp()).thenThrow(new PluginRuntimeException());
+        applicationService.importApp();
+
+    }
+
     @Test
     public void testGetAllApplicationUsed() {
         Application application1 = Application.builder()

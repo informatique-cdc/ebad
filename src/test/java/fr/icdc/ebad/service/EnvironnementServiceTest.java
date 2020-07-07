@@ -47,11 +47,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -420,8 +418,114 @@ public class EnvironnementServiceTest {
 
         List<Environnement> resultList = new ArrayList(result);
         assertEquals(2, resultList.size());
-        assertThat(resultList, hasItem(expectedEnv1));
-        assertThat(resultList, hasItem(expectedEnv2));
+        assertTrue(resultList.contains(expectedEnv1));
+        assertTrue(resultList.contains(expectedEnv2));
+
+    }
+
+    @Test
+    public void testImportEnvironmentsError() throws PluginRuntimeException, EbadServiceException {
+        //GIVEN
+        Application application = Application.builder()
+                .id(1L)
+                .code("tt1")
+                .build();
+        List<Norme> normeList = new ArrayList<>();
+        normeList.add(Norme.builder()
+                .name("Unix")
+                .build());
+        normeList.add(Norme.builder()
+                .name("Windows")
+                .build());
+
+        List<EnvironnementDiscoverDto> discoverDtoList = new ArrayList<>();
+        EnvironnementDiscoverDto environnementDiscoverDto1 = EnvironnementDiscoverDto.builder()
+                .id("3")
+                .host("localhost")
+                .name("my environment")
+                .code("my")
+                .login("root")
+                .home("/home/batch")
+                .kindOs(EnvironnementDiscoverDto.OsKind.UNIX)
+                .norme(NormeDiscoverDto.builder().name("Unix").build())
+                .prefix("P")
+                .build();
+        EnvironnementDiscoverDto environnementDiscoverDto2 = EnvironnementDiscoverDto.builder()
+                .id("9")
+                .host("10.0.0.1")
+                .name("my remote")
+                .code("tf")
+                .login("loc")
+                .home("/home/batch/loc")
+                .kindOs(EnvironnementDiscoverDto.OsKind.WINDOWS)
+                .norme(NormeDiscoverDto.builder().name("Windows").build())
+                .prefix("W")
+                .build();
+        discoverDtoList.add(environnementDiscoverDto1);
+        discoverDtoList.add(environnementDiscoverDto2);
+
+        PluginDescriptor pluginDescriptor = new PluginDescriptor() {
+            @Override
+            public String getPluginId() {
+                return "import-plugin";
+            }
+
+            @Override
+            public String getPluginDescription() {
+                return null;
+            }
+
+            @Override
+            public String getPluginClass() {
+                return null;
+            }
+
+            @Override
+            public String getVersion() {
+                return null;
+            }
+
+            @Override
+            public String getRequires() {
+                return null;
+            }
+
+            @Override
+            public String getProvider() {
+                return null;
+            }
+
+            @Override
+            public String getLicense() {
+                return null;
+            }
+
+            @Override
+            public List<PluginDependency> getDependencies() {
+                return null;
+            }
+        };
+        PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
+
+        when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(application));
+        when(normeRepository.findAll()).thenReturn(normeList);
+        when(environnementConnectorPlugin.discoverFromApp(eq(application.getCode()), eq(application.getName()), anyList())).thenThrow(new PluginRuntimeException());
+
+        when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
+        when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
+
+        when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
+
+        //WHEN
+        Set<Environnement> result = environnementService.importEnvironments(1L);
+
+        //THEN
+        verify(applicationRepository).findById(eq(1L));
+        verify(environnementConnectorPlugin).discoverFromApp(eq(application.getCode()), eq(application.getName()), anyList());
+
+        List<Environnement> resultList = new ArrayList(result);
+        assertTrue(resultList.isEmpty());
+
     }
 
     @Test
@@ -573,8 +677,8 @@ public class EnvironnementServiceTest {
                 .build();
 
         assertEquals(2, resultList.size());
-        assertThat(resultList, hasItem(expectedEnv1));
-        assertThat(resultList, hasItem(expectedEnv2));
+        assertTrue(resultList.contains(expectedEnv1));
+        assertTrue(resultList.contains(expectedEnv2));
 
     }
 
@@ -596,12 +700,12 @@ public class EnvironnementServiceTest {
         Pageable page = PageRequest.of(0, 2);
         when(environnementRepository.findAll(any(Predicate.class), eq(page))).thenReturn(environnementPage);
 
-        Page<Environnement> resultPage = environnementService.getEnvironmentFromApp(1l, QEnvironnement.environnement.id.eq(1L), page);
+        Page<Environnement> resultPage = environnementService.getEnvironmentFromApp(1L, QEnvironnement.environnement.id.eq(1L), page);
         List<Environnement> resultList = resultPage.getContent();
         verify(environnementRepository).findAll(any(Predicate.class), eq(page));
 
         assertEquals(2, resultList.size());
-        assertThat(resultList, hasItem(environnement1));
-        assertThat(resultList, hasItem(environnement2));
+        assertTrue(resultList.contains(environnement1));
+        assertTrue(resultList.contains(environnement2));
     }
 }
