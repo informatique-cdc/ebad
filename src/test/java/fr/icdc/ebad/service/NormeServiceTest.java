@@ -65,7 +65,7 @@ public class NormeServiceTest {
         Optional<Norme> result = normeService.findNormeById(1L);
 
         assertTrue(result.isPresent());
-        assertEquals(result, result);
+        assertEquals(norme1, result.get());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class NormeServiceTest {
         Norme result = normeService.saveNorme(norme1);
 
         verify(normeRepository).saveAndFlush(eq(norme1));
-        assertEquals(result, result);
+        assertEquals(norme1, result);
     }
 
     @Test
