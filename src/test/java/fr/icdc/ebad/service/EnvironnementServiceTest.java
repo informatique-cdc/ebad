@@ -511,8 +511,6 @@ public class EnvironnementServiceTest {
         when(normeRepository.findAll()).thenReturn(normeList);
         when(environnementConnectorPlugin.discoverFromApp(eq(application.getCode()), eq(application.getName()), anyList())).thenThrow(new PluginRuntimeException());
 
-        when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
-        when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
 
         when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
 

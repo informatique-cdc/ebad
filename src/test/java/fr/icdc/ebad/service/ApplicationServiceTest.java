@@ -392,10 +392,9 @@ public class ApplicationServiceTest {
         PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
         when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
 
-        when(applicationRepository.findAllByExternalIdAndPluginId(eq("2"), eq("import-plugin"))).thenReturn(Optional.empty());
         when(applicationConnectorPlugin.discoverApp()).thenThrow(new PluginRuntimeException());
-        applicationService.importApp();
-
+        String result = applicationService.importApp();
+        assertEquals(result, "error when import applications with plugin import-plugin\n");
     }
 
     @Test
