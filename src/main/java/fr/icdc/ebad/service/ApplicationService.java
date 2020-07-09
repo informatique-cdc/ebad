@@ -11,7 +11,7 @@ import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.repository.UsageApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
@@ -146,7 +146,7 @@ public class ApplicationService {
                         result.append("error when try to import application ").append(applicationDiscoverDto).append("\n");
                     }
                 }
-            } catch (PluginException e) {
+            } catch (PluginRuntimeException e) {
                 LOGGER.error("error when import applications", e);
                 result.append("error when import applications with plugin ").append(pluginId).append("\n");
             }
