@@ -19,7 +19,7 @@ import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.repository.NormeRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
@@ -248,7 +248,7 @@ public class EnvironnementService {
                     }
                 }
             }
-        } catch (PluginException e) {
+        } catch (PluginRuntimeException e) {
             LOGGER.error("Une erreur est survenue lors de l'import des environnements : {}", e.getMessage(), e);
             environnements = new HashSet<>();
         }

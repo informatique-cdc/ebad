@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 8, 8.0.192, 9.0.x, 10, 11.0.x, 11.0.3, 12, 13 ]
+        java: [ 11.0.x, 11.0.3, 12, 13, 14 ]
     steps:
       - uses: actions/checkout@v1
       - name: Cache Maven Repo
