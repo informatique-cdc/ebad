@@ -1,11 +1,7 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.QApplication;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
@@ -29,21 +25,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationServiceTest {
@@ -394,7 +380,7 @@ public class ApplicationServiceTest {
 
         when(applicationConnectorPlugin.discoverApp()).thenThrow(new PluginRuntimeException());
         String result = applicationService.importApp();
-        assertEquals(result, "error when import applications with plugin import-plugin\n");
+        assertEquals("error when import applications with plugin import-plugin\n", result);
     }
 
     @Test
