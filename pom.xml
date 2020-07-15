@@ -17,8 +17,8 @@
     </licenses>
     <scm>
         <connection>scm:git:https://github.com/informatique-cdc/ebad.git</connection>
+        <developerConnection>scm:git:https://github.com/informatique-cdc/ebad.git</developerConnection>
         <url>https://github.com/informatique-cdc/ebad</url>
-        <tag>HEAD</tag>
     </scm>
     <groupId>fr.icdc.ebad</groupId>
     <artifactId>ebad</artifactId>
