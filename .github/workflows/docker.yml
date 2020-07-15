@@ -1,4 +1,4 @@
-name: Java CI
+name: Dockerize
 
 on: [push]
 
@@ -20,7 +20,7 @@ jobs:
       - name: Dockerize with Maven
         run: mvn -B spring-boot:build-image -Dspring-boot.build-image.imageName=informatique-cdc/ebad --file pom.xml
       - name: Publish to Registry
-        uses: nicolaspearson/docker.publish.github.action@master
+        uses: manusa/actions-publish-docker@v1.1.0
         with:
           name: informatique-cdc/ebad
           username: ${{ github.actor }}
