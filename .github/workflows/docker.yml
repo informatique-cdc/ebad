@@ -18,7 +18,7 @@ jobs:
         with:
           java-version: 14
       - name: Dockerize with Maven
-        run: mvn -B spring-boot:build-image -Dspring-boot.build-image.imageName=docker.pkg.github.com/informatique-cdc/ebad:test --file pom.xml
+        run: mvn -B spring-boot:build-image -DskipTests=true -Dspring-boot.build-image.imageName=docker.pkg.github.com/informatique-cdc/ebad:test --file pom.xml
       - name: Publish to Registry
         uses: julioarruda/pushimagetoregistry@v1
         with:
