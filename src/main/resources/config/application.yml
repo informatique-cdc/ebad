@@ -45,3 +45,4 @@ security:
     enabled: false
 logging.level:
   fr.icdc.ebad: debug
+

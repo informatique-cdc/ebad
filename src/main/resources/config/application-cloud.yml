@@ -1,4 +1,9 @@
+server.shutdown: graceful
+
+management.health.probes.enabled: true
+
 spring:
+  lifecycle.timeout-per-shutdown-phase: 60s
   datasource:
     url: ${JDBC_DATABASE_URL}
     username: ${JDBC_DATABASE_USERNAME}
@@ -7,6 +12,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: POSTGRESQL
+
 ebad:
   security:
     authentication:
