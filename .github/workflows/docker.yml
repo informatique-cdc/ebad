@@ -1,0 +1,29 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache Maven Repo
+        id: cache-maven-repo
+        uses: actions/cache@v1
+        with:
+          path: /home/runner/.m2/repository
+          key: ${{ runner.os }}-maven-repo
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Dockerize with Maven
+        run: mvn -B spring-boot:build-image -Dspring-boot.build-image.imageName=informatique-cdc/ebad --file pom.xml
+      - name: Publish to Registry
+        uses: nicolaspearson/docker.publish.github.action@master
+          with:
+            name: informatique-cdc/ebad
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+            registry: docker.pkg.github.com
+
