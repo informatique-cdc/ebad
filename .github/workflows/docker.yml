@@ -21,9 +21,9 @@ jobs:
         run: mvn -B spring-boot:build-image -Dspring-boot.build-image.imageName=informatique-cdc/ebad --file pom.xml
       - name: Publish to Registry
         uses: nicolaspearson/docker.publish.github.action@master
-          with:
-            name: informatique-cdc/ebad
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
-            registry: docker.pkg.github.com
+        with:
+          name: informatique-cdc/ebad
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
 
