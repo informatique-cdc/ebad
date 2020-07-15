@@ -9,7 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+          with:
+            token: ${{ secrets.PAT }}
       - name: Cache Maven Repo
         id: cache-maven-repo
         uses: actions/cache@v1
@@ -28,7 +30,7 @@ jobs:
         uses: julioarruda/pushimagetoregistry@v1
         with:
           acr-tokenname: ${{ github.actor }}
-          acr-token: ${{ secrets.GITHUB_TOKEN }}
+          acr-token: ${{ secrets.PAT }}
           acr-account: docker.pkg.github.com
           acr-imagename: docker.pkg.github.com/informatique-cdc/ebad/ebad:${{ env.RELEASE_VERSION }}
 
