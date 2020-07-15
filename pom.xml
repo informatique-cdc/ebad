@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
         <version>2.3.1.RELEASE</version>
-        <relativePath/>
+        <relativePath />
     </parent>
     <licenses>
         <license>
@@ -19,10 +18,11 @@
         <connection>scm:git:https://github.com/informatique-cdc/ebad.git</connection>
         <developerConnection>scm:git:https://github.com/informatique-cdc/ebad.git</developerConnection>
         <url>https://github.com/informatique-cdc/ebad</url>
-    </scm>
+      <tag>2.2.0</tag>
+  </scm>
     <groupId>fr.icdc.ebad</groupId>
     <artifactId>ebad</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>2.2.0</version>
     <packaging>jar</packaging>
 
     <name>Ebad</name>
@@ -52,9 +52,9 @@
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <pf4j-spring.version>0.6.0</pf4j-spring.version>
         <pf4j.version>3.3.1</pf4j.version>
-        <git.user/>
-        <git.password/>
-        <jacoco.agent.ut.arg/>
+        <git.user />
+        <git.password />
+        <jacoco.agent.ut.arg />
     </properties>
 
     <dependencies>
