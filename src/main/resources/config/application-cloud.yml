@@ -1,0 +1,26 @@
+server.shutdown: graceful
+
+management.health.probes.enabled: true
+
+spring:
+  lifecycle.timeout-per-shutdown-phase: 60s
+  datasource:
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
+    initialization-mode: never
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: POSTGRESQL
+
+ebad:
+  security:
+    authentication:
+      jwt:
+        secret: ${EBAD_JWT_SECRET:my-secret-token-to-change-in-production}
+        # Token is valid 24 hours
+        token-validity-in-seconds: ${EBAD_JWT_VALIDITY:86400}
+        token-validity-in-seconds-for-remember-me: ${EBAD_JWT_VALIDITY_REMEMBER_ME:2592000}
+  ssh:
+    login: ${EBAD_SSH_LOGIN:ebad}
+    private_key_path: ${EBAD_SSH_PRIVATE_KEY_PATH:src/main/resources/keys/key}

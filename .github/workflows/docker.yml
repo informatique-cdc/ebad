@@ -1,0 +1,35 @@
+name: Dockerize
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache Maven Repo
+        id: cache-maven-repo
+        uses: actions/cache@v1
+        with:
+          path: /home/runner/.m2/repository
+          key: ${{ runner.os }}-maven-repo
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Set env
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/*/}
+      - name: Dockerize with Maven
+        run: mvn -B spring-boot:build-image -DskipTests=true -Dspring-boot.build-image.imageName=docker.pkg.github.com/informatique-cdc/ebad/ebad:${{ env.RELEASE_VERSION }} --file pom.xml
+      - name: Publish to Registry
+        uses: julioarruda/pushimagetoregistry@v1
+        with:
+          acr-tokenname: ${{ github.actor }}
+          acr-token: ${{ secrets.GITHUB_TOKEN }}
+          acr-account: docker.pkg.github.com
+          acr-imagename: docker.pkg.github.com/informatique-cdc/ebad/ebad:${{ env.RELEASE_VERSION }}
+
+

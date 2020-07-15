@@ -23,4 +23,3 @@ jobs:
       - name: Build with Maven
         run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml
 
-
