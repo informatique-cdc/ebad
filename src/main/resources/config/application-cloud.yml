@@ -17,10 +17,10 @@ ebad:
   security:
     authentication:
       jwt:
-        secret: ${EBAD_JWT_SECRET:my-secret-token-to-change-in-production}
+        secret: ${EBAD_JWT_SECRET:#{'my-secret-token-to-change-in-production'}}
         # Token is valid 24 hours
-        token-validity-in-seconds: ${EBAD_JWT_VALIDITY:86400}
-        token-validity-in-seconds-for-remember-me: ${EBAD_JWT_VALIDITY_REMEMBER_ME:2592000}
+        token-validity-in-seconds: ${EBAD_JWT_VALIDITY:#{86400}}
+        token-validity-in-seconds-for-remember-me: ${EBAD_JWT_VALIDITY_REMEMBER_ME:#{2592000}}
   ssh:
-    login: ${EBAD_SSH_LOGIN:ebad}
-    private_key_path: ${EBAD_SSH_PRIVATE_KEY_PATH:src/main/resources/keys/key}
+    login: ${EBAD_SSH_LOGIN:#{'ebad'}}
+    private_key_path: ${EBAD_SSH_PRIVATE_KEY_PATH:#{'src/main/resources/keys/key'}}
