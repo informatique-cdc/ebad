@@ -3,11 +3,7 @@ package fr.icdc.ebad.service;
 import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.LogBatch;
-import fr.icdc.ebad.domain.QBatch;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
@@ -70,7 +66,7 @@ public class BatchService {
     @Transactional
     public RetourBatch runBatch(Batch batch, Environnement environnement) throws JSchException, IOException, EbadServiceException {
 
-        String params = "";
+        String params = batch.getDefaultParam();
         if (null != batch.getParams()) {
             params = batch.getParams();
         }
