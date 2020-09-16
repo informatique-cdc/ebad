@@ -66,7 +66,7 @@ public class BatchService {
     @Transactional
     public RetourBatch runBatch(Batch batch, Environnement environnement) throws JSchException, IOException, EbadServiceException {
 
-        String params = batch.getDefaultParam();
+        String params = "";
         if (null != batch.getParams()) {
             params = batch.getParams();
         }
