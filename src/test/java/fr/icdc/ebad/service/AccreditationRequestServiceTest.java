@@ -5,6 +5,7 @@ import fr.icdc.ebad.domain.AccreditationRequest;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.StateRequest;
 import fr.icdc.ebad.domain.UsageApplication;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
