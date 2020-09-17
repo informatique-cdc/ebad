@@ -3,7 +3,11 @@ package fr.icdc.ebad.service;
 import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.LogBatch;
+import fr.icdc.ebad.domain.QBatch;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
@@ -115,7 +119,7 @@ public class BatchService {
 
         logBatchRepository.save(logBatch);
 
-        notificationService.createNotification("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " vient de se terminer avec le code retour " + batchRetour.getReturnCode());
+        notificationService.createNotificationForCurrentUser("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " vient de se terminer avec le code retour " + batchRetour.getReturnCode());
         return batchRetour;
     }
 

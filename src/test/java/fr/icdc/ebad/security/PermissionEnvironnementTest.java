@@ -2,6 +2,7 @@ package fr.icdc.ebad.security;
 
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.UserRepository;
+import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.web.rest.dto.EnvironnementDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;

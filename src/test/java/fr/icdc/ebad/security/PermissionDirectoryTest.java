@@ -5,6 +5,7 @@ import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.repository.UserRepository;
+import fr.icdc.ebad.security.permission.PermissionDirectory;
 import fr.icdc.ebad.web.rest.dto.BatchEnvironnementDto;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import org.junit.Test;

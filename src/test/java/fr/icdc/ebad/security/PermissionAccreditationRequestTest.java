@@ -3,6 +3,8 @@ package fr.icdc.ebad.security;
 import fr.icdc.ebad.domain.AccreditationRequest;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
+import fr.icdc.ebad.security.permission.PermissionAccreditationRequest;
+import fr.icdc.ebad.security.permission.PermissionApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
