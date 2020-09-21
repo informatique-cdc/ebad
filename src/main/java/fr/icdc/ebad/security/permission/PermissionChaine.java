@@ -1,4 +1,4 @@
-package fr.icdc.ebad.security;
+package fr.icdc.ebad.security.permission;
 
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.User;

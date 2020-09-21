@@ -4,7 +4,7 @@ import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.security.PermissionApplication;
+import fr.icdc.ebad.security.permission.PermissionApplication;
 import fr.icdc.ebad.service.EnvironnementService;
 import org.junit.Before;
 import org.junit.Test;

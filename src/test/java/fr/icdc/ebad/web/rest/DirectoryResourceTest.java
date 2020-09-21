@@ -2,8 +2,8 @@ package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Directory;
-import fr.icdc.ebad.security.PermissionDirectory;
-import fr.icdc.ebad.security.PermissionEnvironnement;
+import fr.icdc.ebad.security.permission.PermissionDirectory;
+import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.service.DirectoryService;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
 import org.junit.Before;
