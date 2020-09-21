@@ -5,6 +5,7 @@ import fr.icdc.ebad.domain.AccreditationRequest;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.QAccreditationRequest;
 import fr.icdc.ebad.domain.StateRequest;
+import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
@@ -23,11 +24,13 @@ public class AccreditationRequestService {
     private final AccreditationRequestRepository accreditationRequestRepository;
     private final UserService userService;
     private final ApplicationRepository applicationRepository;
+    private final NotificationService notificationService;
 
-    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository) {
+    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository, NotificationService notificationService) {
         this.accreditationRequestRepository = accreditationRequestRepository;
         this.userService = userService;
         this.applicationRepository = applicationRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -41,7 +44,14 @@ public class AccreditationRequestService {
                 .wantManage(isWantManage)
                 .wantUse(isWantUse)
                 .build();
-        return accreditationRequestRepository.save(accreditationRequest);
+
+        AccreditationRequest result = accreditationRequestRepository.save(accreditationRequest);
+        application.getUsageApplications()
+                .parallelStream()
+                .filter(UsageApplication::isCanManage)
+                .forEach(usageApplication -> notificationService.createNotification("Une nouvelle demande d'accréditation vient d'être soumise", usageApplication.getUser()));
+
+        return result;
     }
 
     @Transactional(readOnly = true)

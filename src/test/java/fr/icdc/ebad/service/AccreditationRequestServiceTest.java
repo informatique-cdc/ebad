@@ -4,6 +4,7 @@ import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.AccreditationRequest;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.StateRequest;
+import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
@@ -26,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +59,9 @@ public class AccreditationRequestServiceTest {
     @Mock
     private SecurityContext securityContext;
 
+    @Mock
+    NotificationService notificationService;
+
     @Test(expected = EbadServiceException.class)
     public void requestNewAccreditationNoApplication() throws EbadServiceException {
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.empty());
@@ -72,7 +78,10 @@ public class AccreditationRequestServiceTest {
     public void requestNewAccreditation() throws EbadServiceException {
         AccreditationRequest accreditationRequest = AccreditationRequest.builder()
                 .user(User.builder().login("testlogin").build())
-                .application(Application.builder().id(1L).build())
+                .application(
+                        Application.builder().id(1L).usageApplications(
+                                Set.of(UsageApplication.builder().canManage(true).user(User.builder().build()).build())
+                        ).build())
                 .state(StateRequest.SENT)
                 .wantManage(true)
                 .wantUse(false)
@@ -91,7 +100,7 @@ public class AccreditationRequestServiceTest {
         when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").build()));
 
         when(accreditationRequestRepository.save(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
-
+        doNothing().when(notificationService).createNotification(any(), any());
         AccreditationRequest result = accreditationRequestService.requestNewAccreditation(1L, true, false);
 
         verify(accreditationRequestRepository).save(eq(accreditationRequest));

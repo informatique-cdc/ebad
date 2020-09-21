@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -22,10 +23,11 @@ import java.util.Date;
 @Entity
 @Data
 @Table(name = "t_log_batch")
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class LogBatch {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "logbatch_generator")
+    @SequenceGenerator(name = "logbatch_generator", sequenceName = "t_logbatch_id_seq")
     private Long id;
 
     @NotNull
@@ -52,7 +54,7 @@ public class LogBatch {
     private Long executionTime;
 
     @NotNull
-    @Column(unique = false, nullable = false, name="return_code")
+    @Column(unique = false, nullable = false, name = "return_code")
     private int returnCode;
 
     @Nullable
@@ -60,7 +62,7 @@ public class LogBatch {
     private String params;
 
     @NotNull
-    @Column(unique = false, nullable = false, name="date_traitement")
+    @Column(unique = false, nullable = false, name = "date_traitement")
     private Date dateTraitement;
 
 

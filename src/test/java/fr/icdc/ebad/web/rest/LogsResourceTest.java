@@ -2,7 +2,7 @@ package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.LogBatch;
-import fr.icdc.ebad.security.PermissionEnvironnement;
+import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.service.LogBatchService;
 import org.junit.Before;
 import org.junit.Test;
