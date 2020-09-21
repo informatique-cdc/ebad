@@ -102,6 +102,11 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v3/api-docs**").permitAll()
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers(
+                        "/secured/**/**",
+                        "/secured/success",
+                        "/secured/socket",
+                        "/secured/success").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .cors()
@@ -117,7 +122,7 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:3000", "https://ebad-front.herokuapp.com"));
+        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:63342", "https://ebad-front.herokuapp.com"));
         configuration.setAllowedMethods(Lists.newArrayList("GET", "POST", "OPTIONS", "HEAD", "PUT", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.addAllowedHeader("*");
