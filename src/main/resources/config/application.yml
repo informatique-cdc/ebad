@@ -4,6 +4,9 @@ server:
     context-path: /ebad
 
 spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Europe/Paris
   servlet:
     multipart:
       max-file-size: 1024MB
