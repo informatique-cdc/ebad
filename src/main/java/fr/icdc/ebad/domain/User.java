@@ -47,7 +47,7 @@ public class User extends AbstractAuditingEntity {
     private Long id;
 
     @NotNull
-    @Pattern(regexp = "^[a-z0-9]*$")
+    @Pattern(regexp = "^[a-z0-9-_]*$")
     @Size(min = 1, max = 50)
     @Column(length = 50, unique = true, nullable = false)
     private String login;
