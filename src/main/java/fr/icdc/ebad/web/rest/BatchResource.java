@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -109,5 +110,17 @@ public class BatchResource {
         LOGGER.debug("REST request to update a batch");
         Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
         return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);
+    }
+
+    /**
+     * DELETE  /batchs/id to delete a batch
+     */
+    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @PreAuthorize("@permissionBatch.canWrite(#id, principal)")
+    public ResponseEntity deleteBatch(@PathVariable Long id) {
+        LOGGER.debug("REST request to delete a batch");
+        batchService.deleteBatch(id);
+        return ResponseEntity.ok().build();
     }
 }
