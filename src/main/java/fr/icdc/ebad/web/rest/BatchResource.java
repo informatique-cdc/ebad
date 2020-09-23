@@ -104,7 +104,7 @@ public class BatchResource {
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionBatch.canWrite(#id, principal)")
-    public ResponseEntity deleteBatch(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBatch(@PathVariable Long id) {
         LOGGER.debug("REST request to delete a batch");
         batchService.deleteBatch(id);
         return ResponseEntity.ok().build();
