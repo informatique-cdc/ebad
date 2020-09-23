@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,19 +85,6 @@ public class BatchResource {
         Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
         return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);
     }
-
-    /**
-     * POST  /batchs/delete to delete a batch
-     */
-    @PostMapping(value = "/delete/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Timed
-    @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
-    public ResponseEntity removeBatch(@RequestBody BatchDto batchDto) {
-        LOGGER.debug("REST request to remove a  batch");
-        batchService.deleteBatch(batchDto.getId());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
 
     /**
      * PATCH  /batchs to update a batch

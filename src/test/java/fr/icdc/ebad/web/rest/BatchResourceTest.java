@@ -187,10 +187,10 @@ public class BatchResourceTest {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/batchs/delete/1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete("/batchs/1")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(batchDto));
-        when(permissionBatch.canWrite(any(BatchDto.class), any())).thenReturn(true);
+        when(permissionBatch.canWrite(eq(1L), any())).thenReturn(true);
         doNothing().when(batchService).deleteBatch(eq(2L));
 
         restMvc.perform(builder)
