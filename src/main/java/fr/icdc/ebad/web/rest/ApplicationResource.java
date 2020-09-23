@@ -75,7 +75,7 @@ public class ApplicationResource {
     @PostMapping(value = "/import-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity importAll() {
+    public ResponseEntity<Void> importAll() {
         LOGGER.debug("REST request to import all Application ");
         applicationService.importApp();
         return ResponseEntity.ok().build();

@@ -7,7 +7,6 @@ import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.UsageApplicationId;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
-import fr.icdc.ebad.repository.UsageApplicationRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -36,18 +35,15 @@ import java.util.Set;
 public class UserService {
 
     private static final int NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS = 30;
-    private static final String FIELD_LOGIN_USER = "login";
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
-    private final UsageApplicationRepository usageApplicationRepository;
 
-    public UserService(PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, UserRepository userRepository, UsageApplicationRepository usageApplicationRepository) {
+    public UserService(PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
         this.userRepository = userRepository;
-        this.usageApplicationRepository = usageApplicationRepository;
     }
 
     @Transactional
