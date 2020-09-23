@@ -26,7 +26,7 @@ public interface ChaineRepository extends JpaRepository<Chaine, Long>, QuerydslP
                 .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
     }
 
-    @EntityGraph(attributePaths = {"chaineAssociations", "chaineAssociations.batch.environnements"})
+    @EntityGraph(attributePaths = {"chaineAssociations", "environnement"})
     @Override
     Page<Chaine> findAll(Predicate predicate, Pageable pageable);
 
