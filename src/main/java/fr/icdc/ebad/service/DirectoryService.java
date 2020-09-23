@@ -9,6 +9,7 @@ import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,12 +35,25 @@ public class DirectoryService {
     }
 
     @Transactional
-    public List<FilesDto> listAllFiles(Long idDirectory) throws EbadServiceException {
+    public List<FilesDto> listAllFiles(Long idDirectory, String subDirectory) throws EbadServiceException {
         List<FilesDto> filesDtoList = new ArrayList<>();
         Directory directory = directoryRepository.getOne(idDirectory);
+        String subDir = subDirectory;
+        if (StringUtils.isEmpty(subDir)) {
+            subDir = "";
+        }
         try {
-            List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory);
-            files.stream().filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename())).forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime())));
+            List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory, subDir);
+            files
+                    .stream()
+                    .filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename()))
+                    .filter(file -> {
+                        if (file.getAttrs().isDir()) {
+                            return directory.isCanExplore();
+                        }
+                        return true;
+                    })
+                    .forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime(), file.getAttrs().isDir())));
         } catch (SftpException | JSchException e) {
             throw new EbadServiceException("Impossible de lister les fichiers sur le serveur distant du répertoire " + directory.getName(), e);
         }
@@ -73,7 +87,7 @@ public class DirectoryService {
 
     @Transactional
     public void uploadFile(MultipartFile multipartFile, Long directoryId) throws EbadServiceException {
-        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0);
+        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0, false);
 
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");

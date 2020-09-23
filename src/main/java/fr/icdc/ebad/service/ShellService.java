@@ -107,7 +107,7 @@ public class ShellService {
         }
     }
 
-    public List<ChannelSftp.LsEntry> getListFiles(Directory directory) throws JSchException, SftpException {
+    public List<ChannelSftp.LsEntry> getListFiles(Directory directory, String subDirectory) throws JSchException, SftpException {
         Session session = null;
         ChannelSftp channelSftp = null;
         try {
@@ -122,7 +122,7 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath();
+            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + subDirectory;
             LOGGER.debug("consultation du dossier {}", path);
             @SuppressWarnings("unchecked")
             List<ChannelSftp.LsEntry> lsEntries = channelSftp.ls(path);

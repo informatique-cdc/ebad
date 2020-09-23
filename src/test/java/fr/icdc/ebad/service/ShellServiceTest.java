@@ -87,7 +87,7 @@ public class ShellServiceTest {
         Directory directory = new Directory();
         directory.setPath("dir");
         directory.setEnvironnement(environnement);
-        List<ChannelSftp.LsEntry> results = shellService.getListFiles(directory);
+        List<ChannelSftp.LsEntry> results = shellService.getListFiles(directory, "");
 
         assertEquals(lsEntries, results);
     }

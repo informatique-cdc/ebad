@@ -5,6 +5,7 @@ import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +26,17 @@ public class PermissionDirectory {
     public PermissionDirectory(UserRepository userRepository, DirectoryRepository directoryRepository) {
         this.userRepository = userRepository;
         this.directoryRepository = directoryRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean canRead(Long directoryId, String subDirectory, UserDetails userDetails) {
+        LOGGER.debug("PermissionDirectory canRead with subdir");
+        Directory directoryFromDataBase = directoryRepository.getOne(directoryId);
+        if (!directoryFromDataBase.isCanExplore() && !StringUtils.isEmpty(subDirectory)) {
+            return false;
+        }
+        User user = userRepository.findUserFromEnv(directoryFromDataBase.getEnvironnement().getId(), userDetails.getUsername());
+        return user != null;
     }
 
     @Transactional(readOnly = true)

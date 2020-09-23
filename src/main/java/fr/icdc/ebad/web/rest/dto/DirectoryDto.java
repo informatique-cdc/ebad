@@ -19,5 +19,6 @@ public class DirectoryDto extends AbstractAuditingDto {
     private String name;
     private String path;
     private boolean canWrite;
+    private boolean canExplore;
     private BatchEnvironnementDto environnement;
 }

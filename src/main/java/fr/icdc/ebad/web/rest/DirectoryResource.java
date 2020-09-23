@@ -69,10 +69,10 @@ public class DirectoryResource {
      */
     @GetMapping(value = "/files/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionDirectory.canRead(#id, principal)")
-    public ResponseEntity<List<FilesDto>> getFilesFromDirectory(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long id) throws EbadServiceException {
+    @PreAuthorize("@permissionDirectory.canRead(#id, #subDirectory, principal)")
+    public ResponseEntity<List<FilesDto>> getFilesFromDirectory(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long id, @RequestParam(required = false) String subDirectory) throws EbadServiceException {
         LOGGER.debug("REST request to get all files from directory {}", id);
-        return new ResponseEntity<>(directoryService.listAllFiles(id), HttpStatus.OK); //TODO DTROUILLET GESTION DES ERREURS
+        return new ResponseEntity<>(directoryService.listAllFiles(id, subDirectory), HttpStatus.OK); //TODO DTROUILLET GESTION DES ERREURS
     }
 
     /**

@@ -56,8 +56,8 @@ public class DirectoryServiceTest {
         files.add(lsEntryWithGivenFilenameAndMTime("test2.txt", unixTimestampForDaysAgo(30)));
         files.add(lsEntryWithGivenFilenameAndMTime("test3.txt", unixTimestampForDaysAgo(30)));
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
-        when(shellService.getListFiles(eq(directory))).thenReturn(files);
-        List<FilesDto> result = directoryService.listAllFiles(1L);
+        when(shellService.getListFiles(eq(directory), eq(""))).thenReturn(files);
+        List<FilesDto> result = directoryService.listAllFiles(1L, null);
         assertEquals(3, result.size());
     }
 
@@ -65,8 +65,8 @@ public class DirectoryServiceTest {
     public void listAllFilesException() throws SftpException, JSchException, EbadServiceException {
         Directory directory = Directory.builder().id(1L).build();
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
-        when(shellService.getListFiles(eq(directory))).thenThrow(new SftpException(1, "erreur test"));
-        directoryService.listAllFiles(1L);
+        when(shellService.getListFiles(eq(directory), eq(""))).thenThrow(new SftpException(1, "erreur test"));
+        directoryService.listAllFiles(1L, null);
     }
 
     @Test(expected = IllegalAccessError.class)
