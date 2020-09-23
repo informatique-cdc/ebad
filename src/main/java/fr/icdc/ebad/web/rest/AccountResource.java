@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,14 +60,13 @@ public class AccountResource {
     /**
      * GET  /authenticate to check if the user is authenticated, and return its login.
      *
-     * @param request the http request
      * @return user login
      */
     @GetMapping(value = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public String isAuthenticated(HttpServletRequest request) {
+    public String isAuthenticated() {
         LOGGER.debug("REST request to check if the current user is authenticated");
-        return request.getRemoteUser();
+        return SecurityUtils.getCurrentLogin();
     }
 
     /**
