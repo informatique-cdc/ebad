@@ -68,7 +68,7 @@ public class AccountResource {
     @Timed
     public String isAuthenticated(HttpServletRequest request) {
         LOGGER.debug("REST request to check if the current user is authenticated");
-        return request.getRemoteUser();
+        return SecurityUtils.getCurrentLogin();
     }
 
     /**
