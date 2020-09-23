@@ -52,8 +52,6 @@ public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredi
     @Query("select user from User user left join fetch  user.usageApplications usageApplication left join fetch usageApplication.application application left join fetch user.authorities authorities where user.login = :login")
     Optional<User> findOneByLoginUser(@Param("login") String login);
 
-    // void delete(User t);
-
     @Query("select user from User user left join user.usageApplications usageApplication left join usageApplication.application application left join application.environnements environnement left join environnement.batchs batch where batch.id = :batch and user.login = :login and usageApplication.canUse = true")
     User findUserFromBatch(@Param("batch") Long batch, @Param("login") String login);
 

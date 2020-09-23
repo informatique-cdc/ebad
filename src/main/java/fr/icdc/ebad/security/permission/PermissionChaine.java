@@ -3,7 +3,6 @@ package fr.icdc.ebad.security.permission;
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.ChaineRepository;
-import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.web.rest.dto.ChaineDto;
 import org.slf4j.Logger;
@@ -22,7 +21,7 @@ public class PermissionChaine{
     private final UserRepository userRepository;
     private final ChaineRepository chaineRepository;
 
-    public PermissionChaine(UserRepository userRepository, ChaineRepository chaineRepository, EnvironnementRepository environnementRepository) {
+    public PermissionChaine(UserRepository userRepository, ChaineRepository chaineRepository) {
         this.userRepository = userRepository;
         this.chaineRepository = chaineRepository;
     }
