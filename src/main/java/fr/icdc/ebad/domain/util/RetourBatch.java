@@ -5,7 +5,6 @@ import lombok.Data;
 /**
  * Created by dtrouillet on 24/02/2016.
  */
-//FIXME SET AS DTO
 @Data
 public class RetourBatch {
 
