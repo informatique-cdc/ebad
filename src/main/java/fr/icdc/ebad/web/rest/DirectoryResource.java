@@ -109,11 +109,11 @@ public class DirectoryResource {
 
 
     @PostMapping(value = "/files/upload")
-    @PreAuthorize("@permissionDirectory.canWriteFile(#directory, principal)")
-    public ResponseEntity<Void> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("directory") Long directory) throws EbadServiceException {
+    @PreAuthorize("@permissionDirectory.canWriteFile(#directory, #subDirectory, principal)")
+    public ResponseEntity<Void> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("directory") Long directory, @RequestParam(value = "subDirectory", required = false) String subDirectory) throws EbadServiceException {
         LOGGER.debug("REST request to write file to directory {}", directory);
         if (!file.isEmpty()) {
-            directoryService.uploadFile(file, directory);
+            directoryService.uploadFile(file, directory, subDirectory);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

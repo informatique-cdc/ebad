@@ -82,15 +82,15 @@ public class DirectoryService {
     }
 
     @Transactional
-    public void uploadFile(MultipartFile multipartFile, Long directoryId) throws EbadServiceException {
-        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0, false, null);
+    public void uploadFile(MultipartFile multipartFile, Long directoryId, String subDirectory) throws EbadServiceException {
+        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0, false, subDirectory);
 
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
         }
 
         try {
-            shellService.uploadFile(filesDTO.getDirectory(), multipartFile.getInputStream(), filesDTO.getName());
+            shellService.uploadFile(filesDTO.getDirectory(), multipartFile.getInputStream(), filesDTO.getName(), filesDTO.getSubDirectory());
         } catch (SftpException | JSchException | IOException e) {
             throw new EbadServiceException("Erreur lors de l'écriture d'un fichier du dossiers " + filesDTO.getDirectory().getName(), e);
         }

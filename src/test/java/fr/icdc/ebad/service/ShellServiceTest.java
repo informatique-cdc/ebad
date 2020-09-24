@@ -147,7 +147,7 @@ public class ShellServiceTest {
 
         InputStream is = new ByteArrayInputStream(StandardCharsets.UTF_8.encode("test").array());
 
-        shellService.uploadFile(directory, is, "test.txt");
+        shellService.uploadFile(directory, is, "test.txt", null);
 
         verify(channelSftp).put(eq(is), eq("/home/dir/test.txt"));
     }

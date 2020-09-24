@@ -216,7 +216,7 @@ public class ShellService {
         }
     }
 
-    public void uploadFile(Directory directory, InputStream inputStream, String filename) throws JSchException, SftpException {
+    public void uploadFile(Directory directory, InputStream inputStream, String filename, String subDirectory) throws JSchException, SftpException {
         Session session = null;
         ChannelSftp channelSftp = null;
 
@@ -233,7 +233,11 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + PATH_SEPARATOR + filename;
+            String subDir = "";
+            if (!StringUtils.isEmpty(subDirectory)) {
+                subDir = PATH_SEPARATOR + subDirectory;
+            }
+            String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + subDir + PATH_SEPARATOR + filename;
             LOGGER.debug("écriture du fichier {}", dstPath);
             channelSftp.put(inputStream, dstPath);
         } finally {

@@ -106,20 +106,20 @@ public class DirectoryServiceTest {
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
-        doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
+        doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
 
-        directoryService.uploadFile(secondFile, 1L);
-        verify(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
+        directoryService.uploadFile(secondFile, 1L, null);
+        verify(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
         directory.setCanWrite(false);
-        doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
-        directoryService.uploadFile(secondFile, 1L);
+        doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
+        directoryService.uploadFile(secondFile, 1L, null);
     }
 
     @Test(expected = IllegalAccessError.class)
     public void uploadFileKo() throws EbadServiceException {
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
-        directoryService.uploadFile(secondFile, 1L);
+        directoryService.uploadFile(secondFile, 1L, null);
     }
 
     private ChannelSftp.LsEntry lsEntryWithGivenFilenameAndMTime(String filename, long mtime) {
