@@ -80,8 +80,9 @@ public class DirectoryResourceTest {
 
         FilesDto filesDTO = new FilesDto();
         filesDTO.setName("toto");
+        filesDTO.setSubDirectory("subDir5");
         when(directoryService.listAllFiles(eq(1L), anyString())).thenReturn(Collections.singletonList(filesDTO));
-        when(permissionDirectory.canRead(eq(1L), any(UserDetails.class))).thenReturn(true);
+        when(permissionDirectory.canRead(eq(1L), any(), any(UserDetails.class))).thenReturn(true);
         restMvc.perform(builder)
                 .andExpect(status().isOk());
     }

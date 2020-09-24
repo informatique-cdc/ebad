@@ -80,14 +80,14 @@ public class ShellServiceTest {
         when(session.openChannel(eq("sftp"))).thenReturn(channelSftp);
 
         Vector<ChannelSftp.LsEntry> lsEntries = createEntries();
-        when(channelSftp.ls(eq("/home/dir"))).thenReturn(lsEntries);
+        when(channelSftp.ls(eq("/home/dir/subDir4"))).thenReturn(lsEntries);
 
         Norme norme = Norme.builder().commandLine("/bin/bash $1").build();
         Environnement environnement = Environnement.builder().id(1L).host("localhost").norme(norme).homePath("/home").build();
         Directory directory = new Directory();
         directory.setPath("dir");
         directory.setEnvironnement(environnement);
-        List<ChannelSftp.LsEntry> results = shellService.getListFiles(directory, "");
+        List<ChannelSftp.LsEntry> results = shellService.getListFiles(directory, "subDir4");
 
         assertEquals(lsEntries, results);
     }
