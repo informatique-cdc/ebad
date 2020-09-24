@@ -108,6 +108,14 @@ public class ShellService {
         }
     }
 
+    private static String constructSubDir(String originalSubDirectory) {
+        String subDir = "";
+        if (!StringUtils.isEmpty(originalSubDirectory)) {
+            subDir = PATH_SEPARATOR + originalSubDirectory;
+        }
+        return subDir;
+    }
+
     public List<ChannelSftp.LsEntry> getListFiles(Directory directory, String subDirectory) throws JSchException, SftpException {
         Session session = null;
         ChannelSftp channelSftp = null;
@@ -123,11 +131,8 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String subDir = subDirectory;
-            if (StringUtils.isEmpty(subDir)) {
-                subDir = "";
-            }
-            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + PATH_SEPARATOR + subDir;
+
+            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory);
             LOGGER.debug("consultation du dossier {}", path);
             @SuppressWarnings("unchecked")
             List<ChannelSftp.LsEntry> lsEntries = channelSftp.ls(path);
@@ -157,11 +162,7 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String subDir = "";
-            if (!StringUtils.isEmpty(subDirectory)) {
-                subDir = PATH_SEPARATOR + subDirectory;
-            }
-            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + subDir + PATH_SEPARATOR + filename;
+            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("suppression du fichier {}", path);
             channelSftp.rm(path);
         } finally {
@@ -191,12 +192,7 @@ public class ShellService {
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
 
-            String subDir = "";
-            if (!StringUtils.isEmpty(subDirectory)) {
-                subDir = PATH_SEPARATOR + subDirectory;
-            }
-
-            String srcPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + subDir + PATH_SEPARATOR + filename;
+            String srcPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("lecture du fichier {}", srcPath);
             FileDownloadProgressMonitor fileDownloadProgressMonitor = new FileDownloadProgressMonitor();
 
@@ -233,11 +229,8 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String subDir = "";
-            if (!StringUtils.isEmpty(subDirectory)) {
-                subDir = PATH_SEPARATOR + subDirectory;
-            }
-            String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + subDir + PATH_SEPARATOR + filename;
+
+            String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("écriture du fichier {}", dstPath);
             channelSftp.put(inputStream, dstPath);
         } finally {
