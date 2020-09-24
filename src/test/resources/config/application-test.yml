@@ -5,7 +5,6 @@ async:
     corePoolSize: 2
     maxPoolSize: 50
     queueCapacity: 10000
-
 spring:
     profiles:
         active: test
@@ -35,8 +34,10 @@ spring:
             javax.persistence.schema-generation.drop-source: script-then-metadata
             javax.persistence.schema-generation.drop-script-source: drop-tables.sql
     main:
-      allow-bean-definition-overriding: true
-      banner-mode: "off"
+        allow-bean-definition-overriding: true
+        banner-mode: "off"
+    liquibase:
+        enabled: false
 metrics:
     jmx.enabled: false
 

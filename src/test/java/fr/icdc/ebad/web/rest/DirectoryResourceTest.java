@@ -35,6 +35,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,8 +80,9 @@ public class DirectoryResourceTest {
 
         FilesDto filesDTO = new FilesDto();
         filesDTO.setName("toto");
-        when(directoryService.listAllFiles(eq(1L))).thenReturn(Collections.singletonList(filesDTO));
-        when(permissionDirectory.canRead(eq(1L),any(UserDetails.class))).thenReturn(true);
+        filesDTO.setSubDirectory("subDir5");
+        when(directoryService.listAllFiles(eq(1L), anyString())).thenReturn(Collections.singletonList(filesDTO));
+        when(permissionDirectory.canRead(eq(1L), any(), any(UserDetails.class))).thenReturn(true);
         restMvc.perform(builder)
                 .andExpect(status().isOk());
     }

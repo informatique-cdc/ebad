@@ -49,6 +49,9 @@ public class Directory extends AbstractAuditingEntity {
     @Column(name = "can_write", unique = false, nullable = false)
     private boolean canWrite;
 
+    @NotNull
+    @Column(name = "can_explore", unique = false, nullable = false)
+    private boolean canExplore;
 
     @NotNull
     @ManyToOne

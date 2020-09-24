@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: dtrouillet
+      changes:
+        - addColumn:
+            tableName: t_directory
+            columns:
+              - column:
+                  name: can_explore
+                  type: boolean
+                  defaultValue: false
+                  afterColumn: can_write
+                  constraints:
+                    nullable: false
+

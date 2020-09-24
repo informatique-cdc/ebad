@@ -14,6 +14,7 @@ import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.service.util.FileDownloadProgressMonitor;
 import fr.icdc.ebad.service.util.SUserInfo;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -107,7 +108,15 @@ public class ShellService {
         }
     }
 
-    public List<ChannelSftp.LsEntry> getListFiles(Directory directory) throws JSchException, SftpException {
+    private static String constructSubDir(String originalSubDirectory) {
+        String subDir = "";
+        if (!StringUtils.isEmpty(originalSubDirectory)) {
+            subDir = PATH_SEPARATOR + originalSubDirectory;
+        }
+        return subDir;
+    }
+
+    public List<ChannelSftp.LsEntry> getListFiles(Directory directory, String subDirectory) throws JSchException, SftpException {
         Session session = null;
         ChannelSftp channelSftp = null;
         try {
@@ -122,7 +131,8 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath();
+
+            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory);
             LOGGER.debug("consultation du dossier {}", path);
             @SuppressWarnings("unchecked")
             List<ChannelSftp.LsEntry> lsEntries = channelSftp.ls(path);
@@ -137,7 +147,7 @@ public class ShellService {
         }
     }
 
-    public void removeFile(Directory directory, String filename) throws JSchException, SftpException {
+    public void removeFile(Directory directory, String filename, String subDirectory) throws JSchException, SftpException {
         Session session = null;
         ChannelSftp channelSftp = null;
         try {
@@ -152,7 +162,7 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + PATH_SEPARATOR + filename;
+            String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("suppression du fichier {}", path);
             channelSftp.rm(path);
         } finally {
@@ -165,7 +175,7 @@ public class ShellService {
         }
     }
 
-    public InputStream getFile(Directory directory, String filename) throws JSchException, SftpException, IOException {
+    public InputStream getFile(Directory directory, String filename, String subDirectory) throws JSchException, SftpException, IOException {
         Session session = null;
         ChannelSftp channelSftp = null;
 
@@ -181,7 +191,8 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String srcPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + PATH_SEPARATOR + filename;
+
+            String srcPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("lecture du fichier {}", srcPath);
             FileDownloadProgressMonitor fileDownloadProgressMonitor = new FileDownloadProgressMonitor();
 
@@ -201,7 +212,7 @@ public class ShellService {
         }
     }
 
-    public void uploadFile(Directory directory, InputStream inputStream, String filename) throws JSchException, SftpException {
+    public void uploadFile(Directory directory, InputStream inputStream, String filename, String subDirectory) throws JSchException, SftpException {
         Session session = null;
         ChannelSftp channelSftp = null;
 
@@ -218,7 +229,8 @@ public class ShellService {
 
             channelSftp = (ChannelSftp) session.openChannel(SFTP);
             channelSftp.connect();
-            String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + PATH_SEPARATOR + filename;
+
+            String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("écriture du fichier {}", dstPath);
             channelSftp.put(inputStream, dstPath);
         } finally {

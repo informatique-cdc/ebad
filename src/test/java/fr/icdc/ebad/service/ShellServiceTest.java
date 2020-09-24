@@ -80,14 +80,14 @@ public class ShellServiceTest {
         when(session.openChannel(eq("sftp"))).thenReturn(channelSftp);
 
         Vector<ChannelSftp.LsEntry> lsEntries = createEntries();
-        when(channelSftp.ls(eq("/home/dir"))).thenReturn(lsEntries);
+        when(channelSftp.ls(eq("/home/dir/subDir4"))).thenReturn(lsEntries);
 
         Norme norme = Norme.builder().commandLine("/bin/bash $1").build();
         Environnement environnement = Environnement.builder().id(1L).host("localhost").norme(norme).homePath("/home").build();
         Directory directory = new Directory();
         directory.setPath("dir");
         directory.setEnvironnement(environnement);
-        List<ChannelSftp.LsEntry> results = shellService.getListFiles(directory);
+        List<ChannelSftp.LsEntry> results = shellService.getListFiles(directory, "subDir4");
 
         assertEquals(lsEntries, results);
     }
@@ -103,7 +103,7 @@ public class ShellServiceTest {
         Directory directory = new Directory();
         directory.setPath("dir");
         directory.setEnvironnement(environnement);
-        shellService.removeFile(directory, "test.txt");
+        shellService.removeFile(directory, "test.txt", null);
 
         verify(channelSftp).rm(eq("/home/dir/test.txt"));
 
@@ -125,7 +125,7 @@ public class ShellServiceTest {
         InputStream is = new ByteArrayInputStream(StandardCharsets.UTF_8.encode("test").array());
         when(channelSftp.get(eq("/home/dir/test.txt"), any(SftpProgressMonitor.class))).thenReturn(is);
 
-        InputStream result = shellService.getFile(directory, "test.txt");
+        InputStream result = shellService.getFile(directory, "test.txt", null);
 
         verify(channelSftp).get(eq("/home/dir/test.txt"), any(SftpProgressMonitor.class));
         String resultStr = IOUtils.toString(result, StandardCharsets.UTF_8.name());
@@ -147,7 +147,7 @@ public class ShellServiceTest {
 
         InputStream is = new ByteArrayInputStream(StandardCharsets.UTF_8.encode("test").array());
 
-        shellService.uploadFile(directory, is, "test.txt");
+        shellService.uploadFile(directory, is, "test.txt", null);
 
         verify(channelSftp).put(eq(is), eq("/home/dir/test.txt"));
     }

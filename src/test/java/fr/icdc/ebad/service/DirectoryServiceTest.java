@@ -31,6 +31,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
@@ -56,8 +57,8 @@ public class DirectoryServiceTest {
         files.add(lsEntryWithGivenFilenameAndMTime("test2.txt", unixTimestampForDaysAgo(30)));
         files.add(lsEntryWithGivenFilenameAndMTime("test3.txt", unixTimestampForDaysAgo(30)));
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
-        when(shellService.getListFiles(eq(directory))).thenReturn(files);
-        List<FilesDto> result = directoryService.listAllFiles(1L);
+        when(shellService.getListFiles(eq(directory), eq("test"))).thenReturn(files);
+        List<FilesDto> result = directoryService.listAllFiles(1L, "test");
         assertEquals(3, result.size());
     }
 
@@ -65,8 +66,8 @@ public class DirectoryServiceTest {
     public void listAllFilesException() throws SftpException, JSchException, EbadServiceException {
         Directory directory = Directory.builder().id(1L).build();
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
-        when(shellService.getListFiles(eq(directory))).thenThrow(new SftpException(1, "erreur test"));
-        directoryService.listAllFiles(1L);
+        when(shellService.getListFiles(eq(directory), eq("subDir3"))).thenThrow(new SftpException(1, "erreur test"));
+        directoryService.listAllFiles(1L, "subDir3");
     }
 
     @Test(expected = IllegalAccessError.class)
@@ -74,8 +75,9 @@ public class DirectoryServiceTest {
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
+        filesDTO.setSubDirectory("testSub");
         when(directoryRepository.getOne(1L)).thenReturn(directory);
-        doNothing().when(shellService).removeFile(eq(directory), eq(filesDTO.getName()));
+        doNothing().when(shellService).removeFile(eq(directory), eq(filesDTO.getName()), anyString());
         directoryService.removeFile(filesDTO);
 
         directory.setCanWrite(false);
@@ -90,10 +92,10 @@ public class DirectoryServiceTest {
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
         when(directoryRepository.getOne(1L)).thenReturn(directory);
-        when(shellService.getFile(eq(directory), eq(filesDTO.getName()))).thenReturn(inputStream);
+        when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenReturn(inputStream);
         InputStream result = directoryService.readFile(filesDTO);
         assertEquals(inputStream, result);
-        when(shellService.getFile(eq(directory), eq(filesDTO.getName()))).thenThrow(new SftpException(1, "test"));
+        when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenThrow(new SftpException(1, "test"));
         directoryService.readFile(filesDTO);
     }
 
@@ -105,20 +107,20 @@ public class DirectoryServiceTest {
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
-        doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
+        doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
 
-        directoryService.uploadFile(secondFile, 1L);
-        verify(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
+        directoryService.uploadFile(secondFile, 1L, "subDir1");
+        verify(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), eq("subDir1"));
         directory.setCanWrite(false);
-        doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"));
-        directoryService.uploadFile(secondFile, 1L);
+        doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
+        directoryService.uploadFile(secondFile, 1L, "subDir2");
     }
 
     @Test(expected = IllegalAccessError.class)
     public void uploadFileKo() throws EbadServiceException {
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
-        directoryService.uploadFile(secondFile, 1L);
+        directoryService.uploadFile(secondFile, 1L, null);
     }
 
     private ChannelSftp.LsEntry lsEntryWithGivenFilenameAndMTime(String filename, long mtime) {

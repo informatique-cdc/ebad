@@ -69,10 +69,10 @@ public class DirectoryResource {
      */
     @GetMapping(value = "/files/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionDirectory.canRead(#id, principal)")
-    public ResponseEntity<List<FilesDto>> getFilesFromDirectory(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long id) throws EbadServiceException {
+    @PreAuthorize("@permissionDirectory.canRead(#id, #subDirectory, principal)")
+    public ResponseEntity<List<FilesDto>> getFilesFromDirectory(@RequestParam(value = "page", required = false) Integer offset, @RequestParam(value = "per_page", required = false) Integer limit, @PathVariable Long id, @RequestParam(required = false) String subDirectory) throws EbadServiceException {
         LOGGER.debug("REST request to get all files from directory {}", id);
-        return new ResponseEntity<>(directoryService.listAllFiles(id), HttpStatus.OK); //TODO DTROUILLET GESTION DES ERREURS
+        return new ResponseEntity<>(directoryService.listAllFiles(id, subDirectory), HttpStatus.OK); //TODO DTROUILLET GESTION DES ERREURS
     }
 
     /**
@@ -80,7 +80,7 @@ public class DirectoryResource {
      */
     @PostMapping(value = "/files/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory.id, principal)")
+    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory.id, #filesDTO.subDirectory, principal)")
     public ResponseEntity<Void> removeFileFromDirectory(@RequestBody FilesDto filesDTO) throws EbadServiceException {
         LOGGER.debug("REST request to remove file from directory {}", filesDTO.getName());
         try {
@@ -94,7 +94,7 @@ public class DirectoryResource {
 
 
     @PostMapping(value = "/files/read")
-    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory.id, principal)")
+    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory.id, #filesDTO.subDirectory, principal)")
     public void downloadFile(@RequestBody FilesDto filesDTO, HttpServletResponse httpServletResponse) throws EbadServiceException {
         LOGGER.debug("REST request to read file from directory {}", filesDTO.getName());
         try {
@@ -109,11 +109,11 @@ public class DirectoryResource {
 
 
     @PostMapping(value = "/files/upload")
-    @PreAuthorize("@permissionDirectory.canWriteFile(#directory, principal)")
-    public ResponseEntity<Void> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("directory") Long directory) throws EbadServiceException {
+    @PreAuthorize("@permissionDirectory.canWriteFile(#directory, #subDirectory, principal)")
+    public ResponseEntity<Void> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("directory") Long directory, @RequestParam(value = "subDirectory", required = false) String subDirectory) throws EbadServiceException {
         LOGGER.debug("REST request to write file to directory {}", directory);
         if (!file.isEmpty()) {
-            directoryService.uploadFile(file, directory);
+            directoryService.uploadFile(file, directory, subDirectory);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
