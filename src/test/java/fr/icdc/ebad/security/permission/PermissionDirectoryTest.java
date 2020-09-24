@@ -52,6 +52,44 @@ public class PermissionDirectoryTest {
     }
 
     @Test
+    public void canReadSubDirectory() {
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().environnement(environnement).build());
+        when(userDetails.getUsername()).thenReturn("testlogin");
+        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(User.builder().build());
+        boolean result = permissionDirectory.canRead(1L, "", userDetails);
+        assertTrue(result);
+    }
+
+    @Test
+    public void canReadSubDirectory2() {
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().environnement(environnement).canExplore(true).build());
+        when(userDetails.getUsername()).thenReturn("testlogin");
+        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(User.builder().build());
+        boolean result = permissionDirectory.canRead(1L, "subDir", userDetails);
+        assertTrue(result);
+    }
+
+    @Test
+    public void cantReadSubDirectory() {
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().environnement(environnement).build());
+        when(userDetails.getUsername()).thenReturn("testlogin");
+        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(null);
+        boolean result = permissionDirectory.canRead(1L, "", userDetails);
+        assertFalse(result);
+    }
+
+    @Test
+    public void cantReadSubDirectory1() {
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().environnement(environnement).canExplore(false).build());
+        boolean result = permissionDirectory.canRead(1L, "subDir", userDetails);
+        assertFalse(result);
+    }
+
+    @Test
     public void canRead() {
         DirectoryDto directoryDto = DirectoryDto.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(2L).build();
@@ -109,6 +147,45 @@ public class PermissionDirectoryTest {
         when(userDetails.getUsername()).thenReturn("testlogin");
         when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(User.builder().build());
         boolean result = permissionDirectory.canWriteFile(directoryDto, userDetails);
+        assertFalse(result);
+    }
+
+    @Test
+    public void canWriteFileSubDir() {
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().canWrite(true).environnement(environnement).build());
+        when(userDetails.getUsername()).thenReturn("testlogin");
+        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(User.builder().build());
+        boolean result = permissionDirectory.canWriteFile(1L, "", userDetails);
+        assertTrue(result);
+    }
+
+    @Test
+    public void canWriteFileSubDir2() {
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().canWrite(true).environnement(environnement).canExplore(true).build());
+        when(userDetails.getUsername()).thenReturn("testlogin");
+        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(User.builder().build());
+        boolean result = permissionDirectory.canWriteFile(1L, "subDir", userDetails);
+        assertTrue(result);
+    }
+
+    @Test
+    public void cantWriteFileSubDir() {
+        DirectoryDto directoryDto = DirectoryDto.builder().id(1L).canWrite(true).build();
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().canWrite(false).environnement(environnement).build());
+        when(userDetails.getUsername()).thenReturn("testlogin");
+        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(User.builder().build());
+        boolean result = permissionDirectory.canWriteFile(1L, "", userDetails);
+        assertFalse(result);
+    }
+
+    @Test
+    public void cantWriteFileSubDir2() {
+        Environnement environnement = Environnement.builder().id(2L).build();
+        when(directoryRepository.getOne(eq(1L))).thenReturn(Directory.builder().canWrite(true).environnement(environnement).canExplore(false).build());
+        boolean result = permissionDirectory.canWriteFile(1L, "subDir", userDetails);
         assertFalse(result);
     }
 
