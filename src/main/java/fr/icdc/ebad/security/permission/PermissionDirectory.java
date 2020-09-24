@@ -47,6 +47,18 @@ public class PermissionDirectory {
     }
 
     @Transactional(readOnly = true)
+    public boolean canWriteFile(Long directoryId, String subDirectory, UserDetails userDetails) {
+        LOGGER.debug("PermissionDirectory canWriteFile");
+
+        Directory directoryFromDataBase = directoryRepository.getOne(directoryId);
+        if (!directoryFromDataBase.isCanExplore() && !StringUtils.isEmpty(subDirectory)) {
+            return false;
+        }
+        User user = userRepository.findUserFromEnv(directoryFromDataBase.getEnvironnement().getId(), userDetails.getUsername());
+        return user != null && directoryFromDataBase.isCanWrite();
+    }
+
+    @Transactional(readOnly = true)
     public boolean canWriteFile(Long directoryId, UserDetails userDetails) {
         DirectoryDto directory = new DirectoryDto();
         directory.setId(directoryId);

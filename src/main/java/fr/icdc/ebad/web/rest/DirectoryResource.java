@@ -80,7 +80,7 @@ public class DirectoryResource {
      */
     @PostMapping(value = "/files/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory.id, principal)")
+    @PreAuthorize("@permissionDirectory.canWriteFile(#filesDTO.directory.id, #filesDTO.subDirectory, principal)")
     public ResponseEntity<Void> removeFileFromDirectory(@RequestBody FilesDto filesDTO) throws EbadServiceException {
         LOGGER.debug("REST request to remove file from directory {}", filesDTO.getName());
         try {
@@ -94,7 +94,7 @@ public class DirectoryResource {
 
 
     @PostMapping(value = "/files/read")
-    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory.id, principal)")
+    @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory.id, #filesDTO.subDirectory, principal)")
     public void downloadFile(@RequestBody FilesDto filesDTO, HttpServletResponse httpServletResponse) throws EbadServiceException {
         LOGGER.debug("REST request to read file from directory {}", filesDTO.getName());
         try {

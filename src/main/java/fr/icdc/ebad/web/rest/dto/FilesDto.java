@@ -19,8 +19,9 @@ public class FilesDto {
     private Date updateDate;
     private Date createDate;
     private boolean isFolder;
+    private String subDirectory;
 
-    public FilesDto(Directory directory, String name, Long size, int updateMillis, int createMillis, boolean isFolder) {
+    public FilesDto(Directory directory, String name, Long size, int updateMillis, int createMillis, boolean isFolder, String subDirectory) {
         this.directory = directory;
         this.name = name;
         this.size = size;
@@ -31,6 +32,7 @@ public class FilesDto {
         calendarCreateTime.setTimeInMillis(createMillis * 1000L);
         this.createDate = calendarCreateTime.getTime();
         this.isFolder = isFolder;
+        this.subDirectory = subDirectory;
     }
 
 }

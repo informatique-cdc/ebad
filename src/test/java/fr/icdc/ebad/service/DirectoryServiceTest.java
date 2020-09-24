@@ -31,6 +31,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doNothing;
@@ -75,7 +76,7 @@ public class DirectoryServiceTest {
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
         when(directoryRepository.getOne(1L)).thenReturn(directory);
-        doNothing().when(shellService).removeFile(eq(directory), eq(filesDTO.getName()));
+        doNothing().when(shellService).removeFile(eq(directory), eq(filesDTO.getName()), anyString());
         directoryService.removeFile(filesDTO);
 
         directory.setCanWrite(false);
@@ -90,10 +91,10 @@ public class DirectoryServiceTest {
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
         when(directoryRepository.getOne(1L)).thenReturn(directory);
-        when(shellService.getFile(eq(directory), eq(filesDTO.getName()))).thenReturn(inputStream);
+        when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenReturn(inputStream);
         InputStream result = directoryService.readFile(filesDTO);
         assertEquals(inputStream, result);
-        when(shellService.getFile(eq(directory), eq(filesDTO.getName()))).thenThrow(new SftpException(1, "test"));
+        when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenThrow(new SftpException(1, "test"));
         directoryService.readFile(filesDTO);
     }
 

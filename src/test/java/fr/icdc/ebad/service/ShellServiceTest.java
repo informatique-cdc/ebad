@@ -103,7 +103,7 @@ public class ShellServiceTest {
         Directory directory = new Directory();
         directory.setPath("dir");
         directory.setEnvironnement(environnement);
-        shellService.removeFile(directory, "test.txt");
+        shellService.removeFile(directory, "test.txt", null);
 
         verify(channelSftp).rm(eq("/home/dir/test.txt"));
 
@@ -125,7 +125,7 @@ public class ShellServiceTest {
         InputStream is = new ByteArrayInputStream(StandardCharsets.UTF_8.encode("test").array());
         when(channelSftp.get(eq("/home/dir/test.txt"), any(SftpProgressMonitor.class))).thenReturn(is);
 
-        InputStream result = shellService.getFile(directory, "test.txt");
+        InputStream result = shellService.getFile(directory, "test.txt", null);
 
         verify(channelSftp).get(eq("/home/dir/test.txt"), any(SftpProgressMonitor.class));
         String resultStr = IOUtils.toString(result, StandardCharsets.UTF_8.name());
