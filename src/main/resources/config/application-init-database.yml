@@ -1,3 +1,0 @@
-spring:
-  datasource:
-    initialization-mode: always
