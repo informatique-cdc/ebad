@@ -6,7 +6,6 @@ spring:
     username: sa
     password: password
     platform: h2
-    data: classpath:data-h2.sql
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
 

@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: dtrouillet
+      changes:
+        - insert:
+            tableName: t_global_setting
+            columns:
+              - column:
+                  name: key
+                  value: APPLICATION_IMPORT_ENABLED
+              - column:
+                  name: value
+                  value: false
+              - column:
+                  name: description
+                  value: Allow to import applications from plugin
+              - column:
+                  name: label
+                  value: Application import enabled
+        - insert:
+            tableName: t_global_setting
+            columns:
+              - column:
+                  name: key
+                  value: ENVIRONMENT_IMPORT_ENABLED
+              - column:
+                  name: value
+                  value: false
+              - column:
+                  name: description
+                  value: Allow to import environments from plugin
+              - column:
+                  name: label
+                  value: Environment import enabled
+        - insert:
+            tableName: t_global_setting
+            columns:
+              - column:
+                  name: key
+                  value: ENVIRONMENT_CREATE_ENABLED
+              - column:
+                  name: value
+                  value: true
+              - column:
+                  name: description
+                  value: Allow to create new environment
+              - column:
+                  name: label
+                  value: Environment creation enabled
+        - insert:
+            tableName: t_global_setting
+            columns:
+              - column:
+                  name: key
+                  value: APPLICATION_CREATE_ENABLED
+              - column:
+                  name: value
+                  value: true
+              - column:
+                  name: description
+                  value: Allow to create new application
+              - column:
+                  name: label
+                  value: Application creation enabled
+
+
