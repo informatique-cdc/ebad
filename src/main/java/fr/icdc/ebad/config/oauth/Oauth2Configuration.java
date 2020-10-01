@@ -85,9 +85,11 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
                 .antMatchers("/csrf").permitAll()
                 .antMatchers("/news/public").permitAll()
                 .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/v3/api-docs/**").permitAll()
+                .antMatchers("/v3/api-docs**").permitAll()
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
-                .antMatchers("/swagger-ui/index.html").permitAll()
+                .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .cors();

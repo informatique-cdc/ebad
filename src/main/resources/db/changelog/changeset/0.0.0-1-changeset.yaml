@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: dtrouillet
+      changes:
+        - insert:
+            tableName: t_authority
+            columns:
+              - column:
+                  name: name
+                  value: ROLE_USER
+        - insert:
+            tableName: t_authority
+            columns:
+              - column:
+                  name: name
+                  value: ROLE_ADMIN
+        - insert:
+            tableName: t_user
+            columns:
+              - column:
+                  name: created_by
+                  value: SYSTEM
+              - column:
+                  name: created_date
+                  value: NOW()
+              - column:
+                  name: activated
+                  value: true
+              - column:
+                  name: email
+                  value: admin@localhost
+              - column:
+                  name: first_name
+                  value: admin
+              - column:
+                  name: lang_key
+                  value: FR_fr
+              - column:
+                  name: last_name
+                  value: admin
+              - column:
+                  name: login
+                  value: admin
+              - column:
+                  name: password
+                  value: $2a$10$bPgTE7J0KkKC00Ep7i4w4.YhPgBklTDn1W4idlkv9tV5zcc1r54eq
+        - insert:
+            tableName: t_user_authority
+            columns:
+              - column:
+                  name: authority_name
+                  value: ROLE_ADMIN
+              - column:
+                  name: user_id
+                  valueComputed: (SELECT id  from t_user where login = 'admin')

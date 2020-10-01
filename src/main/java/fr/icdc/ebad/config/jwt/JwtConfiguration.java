@@ -99,6 +99,7 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/csrf").permitAll()
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/v3/api-docs/**").permitAll()
                 .antMatchers("/v3/api-docs**").permitAll()
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
