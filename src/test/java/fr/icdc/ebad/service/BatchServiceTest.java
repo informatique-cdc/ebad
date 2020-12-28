@@ -319,6 +319,7 @@ public class BatchServiceTest {
     @Test
     public void testDeleteBatchById() {
         batchService.deleteBatch(1L);
+        verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(batchRepository).deleteById(eq(1L));
     }
 
@@ -329,6 +330,7 @@ public class BatchServiceTest {
 
         batchService.deleteBatch(batch);
 
+        verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(batchRepository).delete(eq(batch));
     }
 }
