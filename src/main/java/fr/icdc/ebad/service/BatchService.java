@@ -174,11 +174,13 @@ public class BatchService {
 
     @Transactional
     public void deleteBatch(Long id) {
+        logBatchRepository.deleteAllByBatchId(id);
         batchRepository.deleteById(id);
     }
 
     @Transactional
     public void deleteBatch(Batch batch) {
+        logBatchRepository.deleteAllByBatchId(batch.getId());
         batchRepository.delete(batch);
     }
 }
