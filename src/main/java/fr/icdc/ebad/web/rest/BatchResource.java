@@ -24,11 +24,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -84,6 +86,23 @@ public class BatchResource {
         LOGGER.debug("REST request to add a new batch");
         Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
         return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);
+    }
+
+    /**
+     * POST  /batchs/import to add a new batch
+     */
+    @PostMapping(value = "/import", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @PreAuthorize("@permissionApplication.canManage(#applicationId, principal)")
+    public ResponseEntity<Void> addBatch(@RequestParam Long applicationId, @RequestParam("file") MultipartFile file) {
+        LOGGER.debug("REST request to add a new batch");
+        try {
+            batchService.importBatchs(applicationId, file.getInputStream());
+        } catch (IOException e) {
+            LOGGER.error("Error when get inputstream", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     /**

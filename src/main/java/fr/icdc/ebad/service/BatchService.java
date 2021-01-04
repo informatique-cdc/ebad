@@ -1,6 +1,9 @@
 package fr.icdc.ebad.service;
 
 import com.jcraft.jsch.JSchException;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
@@ -12,6 +15,7 @@ import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.security.SecurityUtils;
+import fr.icdc.ebad.service.csv.BatchCsv;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BatchService {
@@ -182,5 +189,21 @@ public class BatchService {
     public void deleteBatch(Batch batch) {
         logBatchRepository.deleteAllByBatchId(batch.getId());
         batchRepository.delete(batch);
+    }
+
+    public void importBatchs(Long applicationId, InputStream inputStream) {
+        Page<Environnement> pageEnv = environnementService.getEnvironmentFromApp(applicationId, null, Pageable.unpaged());
+        List<Long> environnements = pageEnv.getContent().stream().map(environnement -> environnement.getId()).collect(Collectors.toList());
+
+        HeaderColumnNameMappingStrategy<BatchCsv> strategy = new HeaderColumnNameMappingStrategy<>();
+        strategy.setType(BatchCsv.class);
+
+        CsvToBean<BatchCsv> csvToBean = new CsvToBeanBuilder<BatchCsv>(new InputStreamReader(inputStream))
+                .withMappingStrategy(strategy)
+                .withIgnoreLeadingWhiteSpace(true)
+                .build();
+
+        List<BatchCsv> batchsCsv = csvToBean.parse();
+        batchsCsv.stream().filter(batchCsv -> environnements.contains(batchCsv.getEnvironnements()));
     }
 }
