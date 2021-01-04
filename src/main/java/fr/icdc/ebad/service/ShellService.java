@@ -33,7 +33,6 @@ import java.util.List;
 @Service
 public class ShellService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellService.class);
-    private static final int SSH_PORT = 22;
     private static final String SHELL = "exec";
     private static final String SFTP = "sftp";
     private static final String PROPERTY_CHECK_HOST = "StrictHostKeyChecking";
@@ -57,7 +56,7 @@ public class ShellService {
         Session session = null;
         ChannelExec channelExec = null;
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), environnement.getHost(), SSH_PORT);
+            session = jsch.getSession(ebadProperties.getSsh().getLogin(), environnement.getHost(), ebadProperties.getSsh().getPort());
             UserInfo ui = new SUserInfo("", null);// password = "" for unit test must try in integration if work
 
             java.util.Properties config = new java.util.Properties();
@@ -120,7 +119,7 @@ public class ShellService {
         Session session = null;
         ChannelSftp channelSftp = null;
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), SSH_PORT);
+            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
             UserInfo ui = new SUserInfo(null, null);
             java.util.Properties config = new java.util.Properties();
             config.put(PROPERTY_CHECK_HOST, OPTION_NO);
@@ -151,7 +150,7 @@ public class ShellService {
         Session session = null;
         ChannelSftp channelSftp = null;
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), SSH_PORT);
+            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
             UserInfo ui = new SUserInfo(null, null);
             java.util.Properties config = new java.util.Properties();
             config.put(PROPERTY_CHECK_HOST, OPTION_NO);
@@ -180,7 +179,7 @@ public class ShellService {
         ChannelSftp channelSftp = null;
 
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), SSH_PORT);
+            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
             UserInfo ui = new SUserInfo(null, null);
             java.util.Properties config = new java.util.Properties();
             config.put(PROPERTY_CHECK_HOST, OPTION_NO);
@@ -217,7 +216,7 @@ public class ShellService {
         ChannelSftp channelSftp = null;
 
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), SSH_PORT);
+            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
 
             UserInfo ui = new SUserInfo(null, null);
             java.util.Properties config = new java.util.Properties();

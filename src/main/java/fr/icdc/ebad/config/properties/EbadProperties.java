@@ -68,6 +68,7 @@ public class EbadProperties {
     public static class SshProperties {
         @NotNull
         private String login;
+        private int port = 22;
         @NotNull
         private String privateKeyPath;
         private String privateKeyPassphrase;
