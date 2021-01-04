@@ -6,9 +6,12 @@ import fr.icdc.ebad.repository.NotificationRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import org.joda.time.DateTime;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +27,19 @@ public class NotificationService {
     public NotificationService(NotificationRepository notificationRepository, UserRepository userRepository) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
+    }
+
+    @EventListener
+    public void handleSessionSubscribeEvent(SessionSubscribeEvent event) {
+        GenericMessage message = (GenericMessage) event.getMessage();
+        String simpDestination = (String) message.getHeaders().get("simpDestination");
+
+        System.err.println("SUB : simpDestination");
+
+        if (simpDestination.startsWith("/user/queue/test")) {
+            System.err.println(event.getSource());
+            System.err.println("new sub /user/queue/test");
+        }
     }
 
     @Transactional

@@ -8,34 +8,33 @@ import org.springframework.security.config.annotation.web.socket.AbstractSecurit
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
+import static org.springframework.messaging.simp.SimpMessageType.CONNECT;
+import static org.springframework.messaging.simp.SimpMessageType.DISCONNECT;
+import static org.springframework.messaging.simp.SimpMessageType.UNSUBSCRIBE;
+
 @Configuration
 @EnableWebSocketMessageBroker
 @ComponentScan("fr.icdc.ebad.web.rest")
 public class SocketBrokerConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
-    public static final String SECURED_CHAT_HISTORY = "/secured/history";
-    public static final String SECURED_CHAT = "/secured/chat";
-    public static final String SECURED_CHAT_ROOM = "/secured/room";
-    public static final String SECURED_CHAT_SPECIFIC_USER = "/secured/user/queue/specific-user";
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker(SECURED_CHAT_HISTORY, SECURED_CHAT_SPECIFIC_USER);
+        config.enableSimpleBroker("/topic/", "/queue/");
         config.setApplicationDestinationPrefixes("/ebad");
-        config.setUserDestinationPrefix("/secured/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint(SECURED_CHAT_ROOM).setAllowedOrigins("*").withSockJS();
-        registry.addEndpoint(SECURED_CHAT).setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/ws").setAllowedOrigins("*");
     }
+
 
     @Override
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
         messages
-                .simpDestMatchers("/secured/**", "/secured/**/**").permitAll()
-                .anyMessage().permitAll();
+                .simpTypeMatchers(CONNECT, UNSUBSCRIBE, DISCONNECT).permitAll()
+                .anyMessage().authenticated();
     }
+
 
     @Override
     protected boolean sameOriginDisabled() {

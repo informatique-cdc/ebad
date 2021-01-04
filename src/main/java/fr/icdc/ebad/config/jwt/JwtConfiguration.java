@@ -91,6 +91,7 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/register").permitAll()
+                .antMatchers("/ws").permitAll()
                 .antMatchers("/news/public").permitAll()
                 .antMatchers("/activate").permitAll()
                 .antMatchers("/authenticate").permitAll()
@@ -102,11 +103,6 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v3/api-docs**").permitAll()
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers(
-                        "/secured/**/**",
-                        "/secured/success",
-                        "/secured/socket",
-                        "/secured/success").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .cors()
