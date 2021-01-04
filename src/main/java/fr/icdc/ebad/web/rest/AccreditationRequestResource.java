@@ -62,7 +62,7 @@ public class AccreditationRequestResource {
 
     @PostMapping("/response")
     @PreAuthorize("@permissionAccreditationRequest.canAcceptAccreditationRequest(#responseAccreditationRequestDto.id, principal)")
-    public ResponseEntity answerRequest(@RequestBody @Valid ResponseAccreditationRequestDto responseAccreditationRequestDto, BindingResult result) throws EbadServiceException {
+    public ResponseEntity<Void> answerRequest(@RequestBody @Valid ResponseAccreditationRequestDto responseAccreditationRequestDto, BindingResult result) throws EbadServiceException {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }

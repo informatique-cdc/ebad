@@ -124,7 +124,7 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotification(any());
+        doNothing().when(notificationService).createNotificationForCurrentUser(any());
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
         batchService.runBatch(batch,environnementIntegration);
 
@@ -154,7 +154,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService,times(1)).createNotification(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
+        verify(notificationService, times(1)).createNotificationForCurrentUser(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
     }
 
     @Test
@@ -223,7 +223,7 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotification(any());
+        doNothing().when(notificationService).createNotificationForCurrentUser(any());
 
         when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
         when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
@@ -258,7 +258,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotification(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
+        verify(notificationService, times(1)).createNotificationForCurrentUser(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
     }
 
 
@@ -319,6 +319,7 @@ public class BatchServiceTest {
     @Test
     public void testDeleteBatchById() {
         batchService.deleteBatch(1L);
+        verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(batchRepository).deleteById(eq(1L));
     }
 
@@ -329,6 +330,7 @@ public class BatchServiceTest {
 
         batchService.deleteBatch(batch);
 
+        verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(batchRepository).delete(eq(batch));
     }
 }

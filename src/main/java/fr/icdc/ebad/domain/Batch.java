@@ -8,6 +8,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -63,7 +64,7 @@ public class Batch extends AbstractAuditingEntity {
     @Column(name = "default_param")
     private String defaultParam;
 
-    @OneToMany(mappedBy = "batch", orphanRemoval = true)
+    @OneToMany(mappedBy = "batch", orphanRemoval = true, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ChaineAssociation> chaineAssociations = new ArrayList<>();
 

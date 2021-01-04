@@ -1,7 +1,8 @@
-package fr.icdc.ebad.security;
+package fr.icdc.ebad.security.permission;
 
 import fr.icdc.ebad.domain.AccreditationRequest;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
+import fr.icdc.ebad.security.SecurityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 

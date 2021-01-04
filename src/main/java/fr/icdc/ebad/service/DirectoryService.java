@@ -34,12 +34,22 @@ public class DirectoryService {
     }
 
     @Transactional
-    public List<FilesDto> listAllFiles(Long idDirectory) throws EbadServiceException {
+    public List<FilesDto> listAllFiles(Long idDirectory, String subDirectory) throws EbadServiceException {
         List<FilesDto> filesDtoList = new ArrayList<>();
         Directory directory = directoryRepository.getOne(idDirectory);
+
         try {
-            List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory);
-            files.stream().filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename())).forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime())));
+            List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory, subDirectory);
+            files
+                    .stream()
+                    .filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename()))
+                    .filter(file -> {
+                        if (file.getAttrs().isDir()) {
+                            return directory.isCanExplore();
+                        }
+                        return true;
+                    })
+                    .forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime(), file.getAttrs().isDir(), subDirectory)));
         } catch (SftpException | JSchException e) {
             throw new EbadServiceException("Impossible de lister les fichiers sur le serveur distant du répertoire " + directory.getName(), e);
         }
@@ -54,7 +64,7 @@ public class DirectoryService {
         }
 
         try {
-            shellService.removeFile(directory, filesDTO.getName());
+            shellService.removeFile(directory, filesDTO.getName(), filesDTO.getSubDirectory());
         } catch (SftpException | JSchException e) {
             throw new EbadServiceException("Impossible de supprimer le fichier " + filesDTO.getName());
         }
@@ -64,7 +74,7 @@ public class DirectoryService {
     public InputStream readFile(FilesDto filesDTO) throws EbadServiceException {
         Directory directory = directoryRepository.getOne(filesDTO.getDirectory().getId());
         try {
-            return shellService.getFile(directory, filesDTO.getName());
+            return shellService.getFile(directory, filesDTO.getName(), filesDTO.getSubDirectory());
         } catch (SftpException | JSchException | IOException e) {
             throw new EbadServiceException("Impossible de lire le fichier " + filesDTO.getName(), e);
 
@@ -72,15 +82,15 @@ public class DirectoryService {
     }
 
     @Transactional
-    public void uploadFile(MultipartFile multipartFile, Long directoryId) throws EbadServiceException {
-        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0);
+    public void uploadFile(MultipartFile multipartFile, Long directoryId, String subDirectory) throws EbadServiceException {
+        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0, false, subDirectory);
 
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
         }
 
         try {
-            shellService.uploadFile(filesDTO.getDirectory(), multipartFile.getInputStream(), filesDTO.getName());
+            shellService.uploadFile(filesDTO.getDirectory(), multipartFile.getInputStream(), filesDTO.getName(), filesDTO.getSubDirectory());
         } catch (SftpException | JSchException | IOException e) {
             throw new EbadServiceException("Erreur lors de l'écriture d'un fichier du dossiers " + filesDTO.getDirectory().getName(), e);
         }

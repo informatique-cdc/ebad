@@ -44,14 +44,14 @@ public class NotificationServiceTest {
 
     @Test
     @WithMockUser(username = "user")
-    public void createNotification() throws Exception {
+    public void createNotificationForCurrentUser() throws Exception {
         User user = new User();
         user.setId(1L);
         user.setLogin("user");
         when(userRepository.findOneByLoginUser(eq("user"))).thenReturn(Optional.of(user));
         when(notificationRepository.save(any())).thenReturn(null);
 
-        notificationService.createNotification("ceci est un test");
+        notificationService.createNotificationForCurrentUser("ceci est un test");
 
         ArgumentCaptor<Notification> argument = ArgumentCaptor.forClass(Notification.class);
 

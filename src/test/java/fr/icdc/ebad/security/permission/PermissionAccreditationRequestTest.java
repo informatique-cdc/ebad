@@ -1,4 +1,4 @@
-package fr.icdc.ebad.security;
+package fr.icdc.ebad.security.permission;
 
 import fr.icdc.ebad.domain.AccreditationRequest;
 import fr.icdc.ebad.domain.Application;
