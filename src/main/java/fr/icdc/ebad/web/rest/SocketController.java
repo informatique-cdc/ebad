@@ -12,16 +12,8 @@ import java.sql.Date;
 import java.time.Instant;
 
 @Controller
+//FIXME DTROUILLET REMOVE THIS TEST
 public class SocketController {
-
-//    @MessageMapping("/secured/chat")
-//    @SendTo("/secured/history")
-//    public OutputMessage send(Message msg) throws Exception {
-//        return new OutputMessage(
-//                msg.getFrom(),
-//                msg.getText(),
-//                new SimpleDateFormat("HH:mm").format(new Date()));
-//    }
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -31,19 +23,11 @@ public class SocketController {
 
     @MessageMapping("/chat")
     public void processMessage(Principal principal, @Payload Message chatMessage) {
-        try {
-            System.err.println("DAMIEN");
-            System.err.println(principal.getName());
-            System.err.println(chatMessage);
-            System.err.println(chatMessage.getTo());
-            messagingTemplate.convertAndSendToUser(
-                    chatMessage.getTo(), "/queue/test",
-                    new OutputMessage(
-                            chatMessage.getFrom(),
-                            chatMessage.getText(),
-                            Date.from(Instant.now()).toString()));
-        } catch (Exception e) {
-            System.err.println(e);
-        }
+        messagingTemplate.convertAndSendToUser(
+                chatMessage.getTo(), "/queue/test",
+                new OutputMessage(
+                        chatMessage.getFrom(),
+                        chatMessage.getText(),
+                        Date.from(Instant.now()).toString()));
     }
 }
