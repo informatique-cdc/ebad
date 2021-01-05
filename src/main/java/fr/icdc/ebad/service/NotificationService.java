@@ -29,8 +29,6 @@ public class NotificationService {
         this.messagingTemplate = messagingTemplate;
     }
 
-
-
     @Transactional
     public void createNotificationForCurrentUser(String message) {
         Optional<User> user = userRepository.findOneByLoginUser(SecurityUtils.getCurrentLogin());
@@ -50,9 +48,8 @@ public class NotificationService {
         notification.setCreatedDate(DateTime.now());
         notification.setReceiver(user);
 
-        notificationRepository.save(notification);
-        Notification[] notifications = {notification};
-        this.messagingTemplate.convertAndSendToUser(user.getLogin(),"/queue/notifications", notifications);
+        Notification result = notificationRepository.save(notification);
+        this.messagingTemplate.convertAndSendToUser(user.getLogin(), "/queue/notifications", result);
     }
 
     @Transactional(readOnly = true)
