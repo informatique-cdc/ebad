@@ -110,12 +110,12 @@ public class AccreditationRequestService {
             }
         }
 
-        AccreditationRequestDto[] sendNotif = {mapperFacade.map(accreditationRequest, AccreditationRequestDto.class)};
+        AccreditationRequestDto[] accreditationRequestDtos = {mapperFacade.map(accreditationRequest, AccreditationRequestDto.class)};
         accreditationRequest.getApplication().getUsageApplications()
                 .parallelStream()
                 .filter(UsageApplication::isCanManage)
                 .forEach(usageApplication -> {
-                    messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditationsResponses", sendNotif);
+                    messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditationsResponses", accreditationRequestDtos);
                 });
     }
 
