@@ -114,9 +114,9 @@ public class AccreditationRequestService {
         accreditationRequest.getApplication().getUsageApplications()
                 .parallelStream()
                 .filter(UsageApplication::isCanManage)
-                .forEach(usageApplication -> {
-                    messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditationsResponses", accreditationRequestDtos);
-                });
+                .forEach(usageApplication ->
+                        messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditationsResponses", accreditationRequestDtos)
+                );
     }
 
 }

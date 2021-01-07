@@ -324,11 +324,15 @@ public class AccreditationRequestServiceTest {
 
     @Test
     public void answerToRequestAcceptNoUser() throws EbadServiceException {
+        User user = User.builder().login("user").build();
+        UsageApplication usageApplication = UsageApplication.builder().user(user).canManage(true).build();
+        Set<UsageApplication> usageApplications = new HashSet<>();
+        usageApplications.add(usageApplication);
         AccreditationRequest accreditationRequest = AccreditationRequest
                 .builder()
                 .id(1L)
                 .state(StateRequest.SENT)
-                .application(Application.builder().usageApplications(new HashSet<>()).id(2L).build())
+                .application(Application.builder().usageApplications(usageApplications).id(2L).build())
                 .user(User.builder().login("testlogin").build())
                 .wantManage(true)
                 .build();
