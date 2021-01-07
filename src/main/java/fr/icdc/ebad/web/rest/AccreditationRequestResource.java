@@ -13,7 +13,6 @@ import ma.glasnost.orika.MapperFacade;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +31,7 @@ public class AccreditationRequestResource {
     private final AccreditationRequestService accreditationRequestService;
     private final MapperFacade mapperFacade;
 
-    public AccreditationRequestResource(AccreditationRequestService accreditationRequestService, MapperFacade mapperFacade, SimpMessagingTemplate messagingTemplate) {
+    public AccreditationRequestResource(AccreditationRequestService accreditationRequestService, MapperFacade mapperFacade) {
         this.accreditationRequestService = accreditationRequestService;
         this.mapperFacade = mapperFacade;
     }
