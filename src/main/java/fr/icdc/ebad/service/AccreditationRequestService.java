@@ -11,10 +11,13 @@ import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import fr.icdc.ebad.web.rest.dto.AccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +28,16 @@ public class AccreditationRequestService {
     private final UserService userService;
     private final ApplicationRepository applicationRepository;
     private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final MapperFacade mapperFacade;
 
-    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository, NotificationService notificationService) {
+    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository, NotificationService notificationService, SimpMessagingTemplate messagingTemplate, MapperFacade mapperFacade) {
         this.accreditationRequestRepository = accreditationRequestRepository;
         this.userService = userService;
         this.applicationRepository = applicationRepository;
         this.notificationService = notificationService;
+        this.messagingTemplate = messagingTemplate;
+        this.mapperFacade = mapperFacade;
     }
 
     @Transactional
@@ -46,10 +53,15 @@ public class AccreditationRequestService {
                 .build();
 
         AccreditationRequest result = accreditationRequestRepository.save(accreditationRequest);
+
+        AccreditationRequestDto[] sendNotif = {mapperFacade.map(result, AccreditationRequestDto.class)};
         application.getUsageApplications()
                 .parallelStream()
                 .filter(UsageApplication::isCanManage)
-                .forEach(usageApplication -> notificationService.createNotification("Une nouvelle demande d'accréditation vient d'être soumise", usageApplication.getUser()));
+                .forEach(usageApplication -> {
+                    notificationService.createNotification("Une nouvelle demande d'accréditation vient d'être soumise", usageApplication.getUser());
+                    messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditations", sendNotif);
+                });
 
         return result;
     }
@@ -85,18 +97,26 @@ public class AccreditationRequestService {
         if (!isAccepted) {
             accreditationRequest.setState(StateRequest.REJECTED);
             accreditationRequestRepository.save(accreditationRequest);
-            return;
+        } else {
+
+            AuthorityApplicationDTO authorityApplicationDTO = new AuthorityApplicationDTO();
+            authorityApplicationDTO.setLoginUser(accreditationRequest.getUser().getLogin());
+            authorityApplicationDTO.setIdApplication(accreditationRequest.getApplication().getId());
+            authorityApplicationDTO.setAddModo(accreditationRequest.isWantManage());
+            authorityApplicationDTO.setAddUser(accreditationRequest.isWantUse());
+            if (null != userService.changeAutorisationApplication(authorityApplicationDTO)) {
+                accreditationRequest.setState(StateRequest.ACCEPTED);
+                accreditationRequestRepository.save(accreditationRequest);
+            }
         }
 
-        AuthorityApplicationDTO authorityApplicationDTO = new AuthorityApplicationDTO();
-        authorityApplicationDTO.setLoginUser(accreditationRequest.getUser().getLogin());
-        authorityApplicationDTO.setIdApplication(accreditationRequest.getApplication().getId());
-        authorityApplicationDTO.setAddModo(accreditationRequest.isWantManage());
-        authorityApplicationDTO.setAddUser(accreditationRequest.isWantUse());
-        if (null != userService.changeAutorisationApplication(authorityApplicationDTO)) {
-            accreditationRequest.setState(StateRequest.ACCEPTED);
-            accreditationRequestRepository.save(accreditationRequest);
-        }
+        AccreditationRequestDto[] accreditationRequestDtos = {mapperFacade.map(accreditationRequest, AccreditationRequestDto.class)};
+        accreditationRequest.getApplication().getUsageApplications()
+                .parallelStream()
+                .filter(UsageApplication::isCanManage)
+                .forEach(usageApplication ->
+                        messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditationsResponses", accreditationRequestDtos)
+                );
     }
 
 }

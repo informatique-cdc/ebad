@@ -91,6 +91,7 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/register").permitAll()
+                .antMatchers("/ws").permitAll()
                 .antMatchers("/news/public").permitAll()
                 .antMatchers("/activate").permitAll()
                 .antMatchers("/authenticate").permitAll()
@@ -118,7 +119,7 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:3000", "https://ebad-front.herokuapp.com"));
+        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:63342", "https://ebad-front.herokuapp.com"));
         configuration.setAllowedMethods(Lists.newArrayList("GET", "POST", "OPTIONS", "HEAD", "PUT", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.addAllowedHeader("*");

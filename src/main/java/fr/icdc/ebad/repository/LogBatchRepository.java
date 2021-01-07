@@ -31,7 +31,10 @@ public interface LogBatchRepository extends JpaRepository<LogBatch, Long>, Query
             "count(logBatch), " +
             "avg(logBatch.executionTime)" +
             ")" +
-            " from LogBatch logBatch where logBatch.logDate  >= :date group by function('to_char',logBatch.logDate,'YYYY-MM-DD') order by function('to_char',logBatch.logDate,'YYYY-MM-DD') desc")
+            " from LogBatch logBatch " +
+            "where logBatch.logDate  >= :date " +
+            "group by function('to_char',logBatch.logDate,'YYYY-MM-DD') , logBatch.logDate " +
+            "order by function('to_char',logBatch.logDate,'YYYY-MM-DD') desc")
     List<StatisticByDayDto> countBatchByDay(@Param("date") Date date);
 
     @Query("select avg(logBatch.executionTime) from LogBatch logBatch")
