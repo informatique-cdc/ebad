@@ -1,7 +1,6 @@
 package fr.icdc.ebad.config.websocket;
 
 import fr.icdc.ebad.security.jwt.TokenProvider;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.MessageChannel;
@@ -11,10 +10,10 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,12 +21,12 @@ import java.util.List;
 @EnableWebSocketMessageBroker
 public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     private final TokenProvider tokenProvider;
-    private final UserInfoTokenServices userInfoTokenServices;
+    private final ResourceServerTokenServices resourceServerTokenServices;
     private final Environment environment;
 
-    public WebsocketConfig(TokenProvider tokenProvider, @Nullable UserInfoTokenServices userInfoTokenServices, Environment environment) {
+    public WebsocketConfig(TokenProvider tokenProvider, ResourceServerTokenServices resourceServerTokenServices, Environment environment) {
         this.tokenProvider = tokenProvider;
-        this.userInfoTokenServices = userInfoTokenServices;
+        this.resourceServerTokenServices = resourceServerTokenServices;
         this.environment = environment;
     }
 
@@ -53,7 +52,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (Arrays.stream(environment.getActiveProfiles()).anyMatch(env -> (env.equalsIgnoreCase("jwt")))) {
                         authentication = tokenProvider.getAuthentication(token);
                     } else {
-                        authentication = userInfoTokenServices.loadAuthentication(token);
+                        authentication = resourceServerTokenServices.loadAuthentication(token);
                     }
                     accessor.setUser(authentication);
                 }
