@@ -84,6 +84,7 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/csrf").permitAll()
                 .antMatchers("/news/public").permitAll()
+                .antMatchers("/ws").permitAll()
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/v3/api-docs/**").permitAll()

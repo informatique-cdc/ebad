@@ -415,6 +415,12 @@
             <artifactId>liquibase-core</artifactId>
             <version>3.10.2</version>
         </dependency>
+
+        <!-- WEBSOCKET -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

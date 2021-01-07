@@ -9,6 +9,7 @@ import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import ma.glasnost.orika.MapperFacade;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -60,7 +63,13 @@ public class AccreditationRequestServiceTest {
     private SecurityContext securityContext;
 
     @Mock
-    NotificationService notificationService;
+    private MapperFacade mapperFacade;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Mock
+    private NotificationService notificationService;
 
     @Test(expected = EbadServiceException.class)
     public void requestNewAccreditationNoApplication() throws EbadServiceException {
@@ -104,6 +113,7 @@ public class AccreditationRequestServiceTest {
         AccreditationRequest result = accreditationRequestService.requestNewAccreditation(1L, true, false);
 
         verify(accreditationRequestRepository).save(eq(accreditationRequest));
+        verify(messagingTemplate).convertAndSendToUser(any(), eq("/queue/accreditations"), any());
         assertEquals(accreditationRequestWithId, result);
 
     }
@@ -250,7 +260,7 @@ public class AccreditationRequestServiceTest {
                 .builder()
                 .id(1L)
                 .state(StateRequest.SENT)
-                .application(Application.builder().id(2L).build())
+                .application(Application.builder().usageApplications(new HashSet<>()).id(2L).build())
                 .user(User.builder().login("test").build())
                 .wantManage(true)
                 .build();
@@ -259,7 +269,7 @@ public class AccreditationRequestServiceTest {
                 .builder()
                 .id(1L)
                 .state(StateRequest.REJECTED)
-                .application(Application.builder().id(2L).build())
+                .application(Application.builder().usageApplications(new HashSet<>()).id(2L).build())
                 .user(User.builder().login("test").build())
                 .wantManage(true)
                 .build();
@@ -275,7 +285,7 @@ public class AccreditationRequestServiceTest {
                 .builder()
                 .id(1L)
                 .state(StateRequest.SENT)
-                .application(Application.builder().id(2L).build())
+                .application(Application.builder().usageApplications(new HashSet<>()).id(2L).build())
                 .user(User.builder().login("testlogin").build())
                 .wantManage(true)
                 .build();
@@ -284,7 +294,7 @@ public class AccreditationRequestServiceTest {
                 .builder()
                 .id(1L)
                 .state(StateRequest.ACCEPTED)
-                .application(Application.builder().id(2L).build())
+                .application(Application.builder().usageApplications(new HashSet<>()).id(2L).build())
                 .user(User.builder().login("testlogin").build())
                 .wantManage(true)
                 .build();
@@ -314,11 +324,15 @@ public class AccreditationRequestServiceTest {
 
     @Test
     public void answerToRequestAcceptNoUser() throws EbadServiceException {
+        User user = User.builder().login("user").build();
+        UsageApplication usageApplication = UsageApplication.builder().user(user).canManage(true).build();
+        Set<UsageApplication> usageApplications = new HashSet<>();
+        usageApplications.add(usageApplication);
         AccreditationRequest accreditationRequest = AccreditationRequest
                 .builder()
                 .id(1L)
                 .state(StateRequest.SENT)
-                .application(Application.builder().id(2L).build())
+                .application(Application.builder().usageApplications(usageApplications).id(2L).build())
                 .user(User.builder().login("testlogin").build())
                 .wantManage(true)
                 .build();
