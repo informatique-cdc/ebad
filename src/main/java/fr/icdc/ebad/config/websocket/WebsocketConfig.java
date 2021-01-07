@@ -37,26 +37,28 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
             @Override
             public org.springframework.messaging.Message<?> preSend(org.springframework.messaging.Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-                if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    List tokenList = accessor.getNativeHeader("Authorization");
-                    String token;
-                    if (tokenList == null || tokenList.size() < 1) {
-                        return message;
-                    } else {
-                        token = (String) tokenList.get(0);
-                        if (token == null) {
-                            return message;
-                        }
-                    }
-
-                    Authentication authentication = null;
-                    if (Arrays.stream(environment.getActiveProfiles()).anyMatch(env -> (env.equalsIgnoreCase("jwt")))) {
-                        authentication = tokenProvider.getAuthentication(token);
-                    } else if (resourceServerTokenServices != null) {
-                        authentication = resourceServerTokenServices.loadAuthentication(token);
-                    }
-                    accessor.setUser(authentication);
+                if (accessor == null || !StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    return message;
                 }
+
+                List<String> tokenList = accessor.getNativeHeader("Authorization");
+                String token;
+                if (tokenList == null || tokenList.isEmpty()) {
+                    return message;
+                }
+
+                token = tokenList.get(0);
+                if (token == null) {
+                    return message;
+                }
+
+                Authentication authentication = null;
+                if (Arrays.stream(environment.getActiveProfiles()).anyMatch(env -> (env.equalsIgnoreCase("jwt")))) {
+                    authentication = tokenProvider.getAuthentication(token);
+                } else if (resourceServerTokenServices != null) {
+                    authentication = resourceServerTokenServices.loadAuthentication(token);
+                }
+                accessor.setUser(authentication);
                 return message;
             }
         });
