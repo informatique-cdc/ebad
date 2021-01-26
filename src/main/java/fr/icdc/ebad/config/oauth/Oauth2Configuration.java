@@ -7,7 +7,6 @@ import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.EbadUserDetailsService;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +15,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -32,21 +29,19 @@ import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 @Profile("!jwt")
 @Configuration
-@EnableOAuth2Client
-@EnableResourceServer
+//@EnableOAuth2Client
+//@EnableResourceServer
 @Import(SecurityProblemSupport.class)
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
-    private final ResourceServerProperties resourceServerProperties;
+public class Oauth2Configuration extends WebSecurityConfigurerAdapter {
     private final EbadUserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final SecurityProblemSupport problemSupport;
     private final AuthorityRepository authorityRepository;
     private final EbadProperties ebadProperties;
 
-    public Oauth2Configuration(ResourceServerProperties resourceServerProperties, UserRepository userRepository, SecurityProblemSupport problemSupport, AuthorityRepository authorityRepository, EbadUserDetailsService userDetailsService, EbadProperties ebadProperties) {
-        this.resourceServerProperties = resourceServerProperties;
+    public Oauth2Configuration(UserRepository userRepository, SecurityProblemSupport problemSupport, AuthorityRepository authorityRepository, EbadUserDetailsService userDetailsService, EbadProperties ebadProperties) {
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
         this.problemSupport = problemSupport;
@@ -92,8 +87,9 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
-                .and()
-                .cors();
+                .and().oauth2ResourceServer()
+                .and().oauth2Client()
+                .and().cors();
 
     }
 
