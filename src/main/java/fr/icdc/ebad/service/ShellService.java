@@ -178,7 +178,7 @@ public class ShellService {
         try {
             session.connect();
             Channel channel = session.openChannel(type);
-            if (type == SHELL && command != null) {
+            if (SHELL.equals(type) && command != null) {
                 ((ChannelExec) channel).setCommand(command);
             }
             channel.connect();
