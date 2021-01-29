@@ -1,5 +1,6 @@
 package fr.icdc.ebad.service;
 
+import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -11,6 +12,7 @@ import fr.icdc.ebad.config.properties.EbadProperties;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.service.util.FileDownloadProgressMonitor;
 import fr.icdc.ebad.service.util.SUserInfo;
 import org.apache.commons.io.FileUtils;
@@ -49,37 +51,27 @@ public class ShellService {
     }
 
 
-    public RetourBatch runCommand(Environnement environnement, String command) throws JSchException, IOException {
+    public RetourBatch runCommand(Environnement environnement, String command) throws EbadServiceException {
         LOGGER.debug("run command {}", command);
         Long start = System.currentTimeMillis();
 
-        Session session = null;
         ChannelExec channelExec = null;
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), environnement.getHost(), ebadProperties.getSsh().getPort());
-            UserInfo ui = new SUserInfo("", null);// password = "" for unit test must try in integration if work
-
-            java.util.Properties config = new java.util.Properties();
-            config.put(PROPERTY_CHECK_HOST, OPTION_NO);
-
-            session.setConfig(config);
-            session.setUserInfo(ui);
-            session.connect();
-
-            channelExec = (ChannelExec) session.openChannel(SHELL);
+            channelExec = (ChannelExec) connect(ebadProperties.getSsh().getLogin(), environnement.getHost(), ebadProperties.getSsh().getPort(), SHELL);
             StringBuilder commandOut = new StringBuilder();
+
+            String commandWithInterpreteur = environnement.getNorme().getCommandLine().replace("$1", command);
+            channelExec = (ChannelExec) connect(ebadProperties.getSsh().getLogin(), environnement.getHost(), ebadProperties.getSsh().getPort(), SHELL, commandWithInterpreteur);
+
             try (InputStream in = channelExec.getInputStream()) {
-
-                String commandWithInterpreteur = environnement.getNorme().getCommandLine().replace("$1", command);
-                channelExec.setCommand(commandWithInterpreteur);
-                channelExec.connect();
-
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
                 String line;
                 while ((line = reader.readLine()) != null) {
                     commandOut.append(line);
                 }
+            } catch (IOException e) {
+                throw new EbadServiceException("Error when trying to get output from execution on the remote server", e);
             }
 
             int exitStatus = channelExec.getExitStatus();
@@ -98,12 +90,7 @@ public class ShellService {
             LOGGER.debug("Command out : {}", commandOut);
             return new RetourBatch(commandOut.toString(), exitStatus, end - start);
         } finally {
-            if (channelExec != null) {
-                channelExec.disconnect();
-            }
-            if (session != null) {
-                session.disconnect();
-            }
+            disconnect(channelExec);
         }
     }
 
@@ -115,81 +102,42 @@ public class ShellService {
         return subDir;
     }
 
-    public List<ChannelSftp.LsEntry> getListFiles(Directory directory, String subDirectory) throws JSchException, SftpException {
-        Session session = null;
+    public List<ChannelSftp.LsEntry> getListFiles(Directory directory, String subDirectory) throws EbadServiceException {
         ChannelSftp channelSftp = null;
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
-            UserInfo ui = new SUserInfo(null, null);
-            java.util.Properties config = new java.util.Properties();
-            config.put(PROPERTY_CHECK_HOST, OPTION_NO);
-
-            session.setConfig(config);
-            session.setUserInfo(ui);
-            session.connect();
-
-            channelSftp = (ChannelSftp) session.openChannel(SFTP);
-            channelSftp.connect();
-
+            channelSftp = (ChannelSftp) connect(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort(), SFTP);
             String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory);
             LOGGER.debug("consultation du dossier {}", path);
             @SuppressWarnings("unchecked")
             List<ChannelSftp.LsEntry> lsEntries = channelSftp.ls(path);
             return lsEntries;
+        } catch (SftpException e) {
+            throw new EbadServiceException("Error when try to list files on the server", e);
         } finally {
-            if (channelSftp != null) {
-                channelSftp.disconnect();
-            }
-            if (session != null) {
-                session.disconnect();
-            }
+            disconnect(channelSftp);
         }
     }
 
-    public void removeFile(Directory directory, String filename, String subDirectory) throws JSchException, SftpException {
-        Session session = null;
+    public void removeFile(Directory directory, String filename, String subDirectory) throws EbadServiceException {
         ChannelSftp channelSftp = null;
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
-            UserInfo ui = new SUserInfo(null, null);
-            java.util.Properties config = new java.util.Properties();
-            config.put(PROPERTY_CHECK_HOST, OPTION_NO);
+            channelSftp = (ChannelSftp) connect(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort(), SFTP);
 
-            session.setConfig(config);
-            session.setUserInfo(ui);
-            session.connect();
-
-            channelSftp = (ChannelSftp) session.openChannel(SFTP);
-            channelSftp.connect();
             String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("suppression du fichier {}", path);
             channelSftp.rm(path);
+        } catch (SftpException e) {
+            throw new EbadServiceException("Error when try to remove file on the server", e);
         } finally {
-            if (channelSftp != null) {
-                channelSftp.disconnect();
-            }
-            if (session != null) {
-                session.disconnect();
-            }
+            disconnect(channelSftp);
         }
     }
 
-    public InputStream getFile(Directory directory, String filename, String subDirectory) throws JSchException, SftpException, IOException {
-        Session session = null;
+    public InputStream getFile(Directory directory, String filename, String subDirectory) throws EbadServiceException {
+
         ChannelSftp channelSftp = null;
-
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
-            UserInfo ui = new SUserInfo(null, null);
-            java.util.Properties config = new java.util.Properties();
-            config.put(PROPERTY_CHECK_HOST, OPTION_NO);
-
-            session.setConfig(config);
-            session.setUserInfo(ui);
-            session.connect();
-
-            channelSftp = (ChannelSftp) session.openChannel(SFTP);
-            channelSftp.connect();
+            channelSftp = (ChannelSftp) connect(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort(), SFTP);
 
             String srcPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
             LOGGER.debug("lecture du fichier {}", srcPath);
@@ -200,45 +148,70 @@ public class ShellService {
                 FileUtils.copyInputStreamToFile(inputStream, tmpFile);
                 tmpFile.deleteOnExit();
                 return new FileInputStream(tmpFile);
+
+            } catch (IOException | SftpException e) {
+                throw new EbadServiceException("Error when try to retrieve file on the server", e);
             }
         } finally {
-            if (channelSftp != null) {
-                channelSftp.disconnect();
-            }
-            if (session != null) {
-                session.disconnect();
-            }
+            disconnect(channelSftp);
         }
     }
 
-    public void uploadFile(Directory directory, InputStream inputStream, String filename, String subDirectory) throws JSchException, SftpException {
+    private Channel connect(String login, String host, int port, String type) throws EbadServiceException {
+        return connect(login, host, port, type, null);
+    }
+
+    private Channel connect(String login, String host, int port, String type, String command) throws EbadServiceException {
         Session session = null;
-        ChannelSftp channelSftp = null;
-
         try {
-            session = jsch.getSession(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort());
-
-            UserInfo ui = new SUserInfo(null, null);
-            java.util.Properties config = new java.util.Properties();
-            config.put(PROPERTY_CHECK_HOST, OPTION_NO);
-
-            session.setConfig(config);
-            session.setUserInfo(ui);
-            session.connect();
-
-            channelSftp = (ChannelSftp) session.openChannel(SFTP);
-            channelSftp.connect();
-
-            String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
-            LOGGER.debug("écriture du fichier {}", dstPath);
-            channelSftp.put(inputStream, dstPath);
-        } finally {
-            if (channelSftp != null) {
-                channelSftp.disconnect();
-            }
-            if (session != null) {
-                session.disconnect();
-            }
+            session = jsch.getSession(login, host, port);
+        } catch (JSchException e) {
+            throw new EbadServiceException("Unable to connect to the server", e);
         }
+
+        UserInfo ui = new SUserInfo(null, null);
+        java.util.Properties config = new java.util.Properties();
+        config.put(PROPERTY_CHECK_HOST, OPTION_NO);
+
+        session.setConfig(config);
+        session.setUserInfo(ui);
+        try {
+            session.connect();
+            Channel channel = session.openChannel(type);
+            if (SHELL.equals(type) && command != null) {
+                ((ChannelExec) channel).setCommand(command);
+            }
+            channel.connect();
+            return channel;
+        } catch (JSchException e) {
+            throw new EbadServiceException("Unable to connect to the server", e);
+        }
+    }
+
+    private void disconnect(Channel channel) throws EbadServiceException {
+        if (channel != null) {
+            channel.disconnect();
+            try {
+                Session session = channel.getSession();
+                if (session != null) {
+                    session.disconnect();
+                }
+            } catch (JSchException e) {
+                throw new EbadServiceException("Unable to disconnect properly to the server", e);
+            }
+
+        }
+    }
+
+    public void uploadFile(Directory directory, InputStream inputStream, String filename, String subDirectory) throws EbadServiceException {
+        ChannelSftp channelSftp = (ChannelSftp) connect(ebadProperties.getSsh().getLogin(), directory.getEnvironnement().getHost(), ebadProperties.getSsh().getPort(), SFTP);
+        String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
+        LOGGER.debug("écriture du fichier {}", dstPath);
+        try {
+            channelSftp.put(inputStream, dstPath);
+        } catch (SftpException e) {
+            throw new EbadServiceException("Error when send file to the server", e);
+        }
+        disconnect(channelSftp);
     }
 }

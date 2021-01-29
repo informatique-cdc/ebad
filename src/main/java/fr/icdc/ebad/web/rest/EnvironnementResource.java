@@ -78,7 +78,7 @@ public class EnvironnementResource {
     }
 
     /**
-     * GET  /environnement/{env} to get oneenvironnement.
+     * GET  /environnement/{env} to get one environnement.
      */
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal) or @permissionEnvironnement.canWrite(#env, principal)")
     @GetMapping(value = "/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -92,7 +92,7 @@ public class EnvironnementResource {
 
     @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal)")
     @GetMapping(value = "/purgeLog/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> purgeLog(@PathVariable Long env) {
+    public ResponseEntity<Void> purgeLog(@PathVariable Long env) throws EbadServiceException {
         LOGGER.debug("REST request to purge log");
         environnementService.purgerLogs(env);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -100,7 +100,7 @@ public class EnvironnementResource {
 
     @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal)")
     @GetMapping(value = "/purgeArchive/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> purgeArchive(@PathVariable Long env) {
+    public ResponseEntity<Void> purgeArchive(@PathVariable Long env) throws EbadServiceException {
         LOGGER.debug("REST request to purge log");
         environnementService.purgerArchive(env);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -112,12 +112,10 @@ public class EnvironnementResource {
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
     @GetMapping(value = "/dateTraitement/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<String> changeDateTraitement(@PathVariable Long env, @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date dateTraitement) {
+    public ResponseEntity<String> changeDateTraitement(@PathVariable Long env, @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date dateTraitement) throws EbadServiceException {
         LOGGER.debug("REST request to set new date traitement of environnement");
-        if (environnementService.changeDateTraiement(env, dateTraitement)) {
-            return ResponseEntity.status(HttpStatus.OK).body(null);
-        }
-        return ResponseEntity.badRequest().build();
+        environnementService.changeDateTraiement(env, dateTraitement);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     /**

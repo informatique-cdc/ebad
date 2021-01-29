@@ -95,12 +95,13 @@ public class ExceptionTranslator implements ProblemHandling {
 
     @ExceptionHandler(EbadServiceException.class)
     public ResponseEntity<Problem> handleEbadServiceException(EbadServiceException ex, NativeWebRequest request) {
-        LOGGER.warn("EbadServiceException !", ex);
+        LOGGER.warn("EbadServiceException ! {}", ex.getMessage());
 
         Problem problem = Problem.builder()
-                .withStatus(Status.BAD_REQUEST)
+                .withStatus(Status.INTERNAL_SERVER_ERROR)
+                .withTitle("Error")
                 .withDetail(ex.getMessage())
-                .with(MESSAGE_KEY, ErrorConstants.ERR_CLIENT_FAILURE)
+                .with(MESSAGE_KEY, ErrorConstants.ERR_SERVER_FAILURE)
                 .build();
         return create(ex, problem, request);
     }
