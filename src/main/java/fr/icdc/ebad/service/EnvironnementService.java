@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Environnement;
@@ -33,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -105,24 +103,18 @@ public class EnvironnementService {
                 return dateTraitement;
             }
             return null;
-        } catch (JSchException | IOException | ParseException e) {
+        } catch (EbadServiceException | ParseException e) {
             LOGGER.warn("Erreur lors de la récupération de la date traitement", e);
             return null;
         }
     }
 
     @Transactional(readOnly = true)
-    public boolean changeDateTraiement(Long environnementId, Date dateTraitement) {
+    public void changeDateTraiement(Long environnementId, Date dateTraitement) throws EbadServiceException {
         Environnement environnement = getEnvironnement(environnementId);
-        try {
-            SimpleDateFormat dateFormatCtrlM = new SimpleDateFormat(Optional.ofNullable(environnement.getApplication().getDateFichierPattern()).orElse(FR_DATE_FORMAT));
-            String date = dateFormatCtrlM.format(dateTraitement);
-            RetourBatch retourBatch = shellService.runCommand(environnement, "echo " + date + " > " + environnement.getHomePath() + "/" + environnement.getNorme().getCtrlMDate());
-            return retourBatch.getReturnCode() == CODE_SUCCESS;
-        } catch (JSchException | IOException e) {
-            LOGGER.warn("Erreur lors de la modification de la date traitement", e);
-            return false;
-        }
+        SimpleDateFormat dateFormatCtrlM = new SimpleDateFormat(Optional.ofNullable(environnement.getApplication().getDateFichierPattern()).orElse(FR_DATE_FORMAT));
+        String date = dateFormatCtrlM.format(dateTraitement);
+        shellService.runCommand(environnement, "echo " + date + " > " + environnement.getHomePath() + "/" + environnement.getNorme().getCtrlMDate());
     }
 
     //FIXME Mise en place norme
@@ -137,7 +129,7 @@ public class EnvironnementService {
                 return retourBatch.getLogOut().replace("%", "");
             }
             return SANS_REPONSE;
-        } catch (JSchException | IOException e) {
+        } catch (EbadServiceException e) {
             LOGGER.warn("Erreur lors de la récupération de l'espace disque", e);
             return SANS_REPONSE;
         }
@@ -145,35 +137,28 @@ public class EnvironnementService {
 
     //FIXME Mise en place norme
     @Transactional(readOnly = true)
-    public void purgerLogs(Long id) {
+    public void purgerLogs(Long id) throws EbadServiceException {
         Environnement environnement = getEnvironnement(id);
 
-        try {
-            RetourBatch retourBatch = shellService.runCommand(environnement, "find " + environnement.getHomePath() + "/logctm -type f -exec rm -v  {} ';'");
-            if (retourBatch.getReturnCode() == CODE_SUCCESS) {
-                LOGGER.debug("Purge logctm OK {}", retourBatch.getLogOut());
-                return;
-            }
-            LOGGER.warn("Purge logctm KO {}", retourBatch.getLogOut());
-        } catch (JSchException | IOException e) {
-            LOGGER.warn("Erreur lors de la purge logctm", e);
+        RetourBatch retourBatch = shellService.runCommand(environnement, "find " + environnement.getHomePath() + "/logctm -type f -exec rm -v  {} ';'");
+        if (retourBatch.getReturnCode() == CODE_SUCCESS) {
+            LOGGER.debug("Purge logctm OK {}", retourBatch.getLogOut());
+            return;
         }
+        LOGGER.warn("Purge logctm KO {}", retourBatch.getLogOut());
+
     }
 
     //FIXME Mise en place norme
     @Transactional
-    public void purgerArchive(Long id) {
+    public void purgerArchive(Long id) throws EbadServiceException {
         Environnement environnement = getEnvironnement(id);
-        try {
-            RetourBatch retourBatch = shellService.runCommand(environnement, "find " + environnement.getHomePath() + "/archive -type f -exec rm -v  {} ';'");
-            if (retourBatch.getReturnCode() == CODE_SUCCESS) {
-                LOGGER.debug("Purge archive OK {}", retourBatch.getLogOut());
-                return;
-            }
-            LOGGER.warn("Purge archive KO {}", retourBatch.getLogOut());
-        } catch (JSchException | IOException e) {
-            LOGGER.warn("Erreur lors de la purge archive", e);
+        RetourBatch retourBatch = shellService.runCommand(environnement, "find " + environnement.getHomePath() + "/archive -type f -exec rm -v  {} ';'");
+        if (retourBatch.getReturnCode() == CODE_SUCCESS) {
+            LOGGER.debug("Purge archive OK {}", retourBatch.getLogOut());
+            return;
         }
+        LOGGER.warn("Purge archive KO {}", retourBatch.getLogOut());
     }
 
     @Transactional

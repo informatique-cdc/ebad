@@ -23,7 +23,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -63,15 +62,15 @@ public class DirectoryServiceTest {
     }
 
     @Test(expected = EbadServiceException.class)
-    public void listAllFilesException() throws SftpException, JSchException, EbadServiceException {
+    public void listAllFilesException() throws EbadServiceException {
         Directory directory = Directory.builder().id(1L).build();
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
-        when(shellService.getListFiles(eq(directory), eq("subDir3"))).thenThrow(new SftpException(1, "erreur test"));
+        when(shellService.getListFiles(eq(directory), eq("subDir3"))).thenThrow(new EbadServiceException("erreur test"));
         directoryService.listAllFiles(1L, "subDir3");
     }
 
     @Test(expected = IllegalAccessError.class)
-    public void removeFile() throws SftpException, JSchException, EbadServiceException {
+    public void removeFile() throws EbadServiceException {
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
@@ -86,7 +85,7 @@ public class DirectoryServiceTest {
     }
 
     @Test(expected = EbadServiceException.class)
-    public void readFile() throws SftpException, JSchException, IOException, EbadServiceException {
+    public void readFile() throws EbadServiceException {
         InputStream inputStream = IOUtils.toInputStream("hello", Charset.forName("UTF-8"));
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
         FilesDto filesDTO = new FilesDto();
@@ -95,13 +94,13 @@ public class DirectoryServiceTest {
         when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenReturn(inputStream);
         InputStream result = directoryService.readFile(filesDTO);
         assertEquals(inputStream, result);
-        when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenThrow(new SftpException(1, "test"));
+        when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenThrow(new EbadServiceException("test"));
         directoryService.readFile(filesDTO);
     }
 
 
     @Test(expected = EbadServiceException.class)
-    public void uploadFile() throws SftpException, JSchException, EbadServiceException, IOException {
+    public void uploadFile() throws EbadServiceException {
 
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
         when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
@@ -112,7 +111,7 @@ public class DirectoryServiceTest {
         directoryService.uploadFile(secondFile, 1L, "subDir1");
         verify(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), eq("subDir1"));
         directory.setCanWrite(false);
-        doThrow(new SftpException(1, "test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
+        doThrow(new EbadServiceException("test")).when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
         directoryService.uploadFile(secondFile, 1L, "subDir2");
     }
 
