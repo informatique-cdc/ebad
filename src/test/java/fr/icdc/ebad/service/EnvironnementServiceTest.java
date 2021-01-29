@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Batch;
@@ -38,7 +37,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,7 +46,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -181,7 +178,7 @@ public class EnvironnementServiceTest {
     }
 
     @Test
-    public void testChangeDateTraiement() throws IOException, JSchException {
+    public void testChangeDateTraiement() throws EbadServiceException {
 
         RetourBatch retourBatch = new RetourBatch();
         retourBatch.setReturnCode(0);
@@ -191,29 +188,27 @@ public class EnvironnementServiceTest {
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
         when(shellService.runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenReturn(retourBatch);
         when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
-        boolean result = environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
+        environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
 
         verify(shellService).runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"));
-        assertTrue(result);
     }
 
-    @Test
-    public void testChangeDateTraiementError() throws IOException, JSchException {
+    @Test(expected = EbadServiceException.class)
+    public void testChangeDateTraiementError() throws EbadServiceException {
         RetourBatch retourBatch = new RetourBatch();
         retourBatch.setReturnCode(0);
 
         Norme norme = Norme.builder().ctrlMDate("date.tr").build();
         Application application = Application.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
-        when(shellService.runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenThrow(new JSchException());
+        when(shellService.runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenThrow(new EbadServiceException());
         when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
 
-        boolean result = environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
-        assertFalse(result);
+        environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
     }
 
     @Test
-    public void testGetEspaceDisque() throws IOException, JSchException {
+    public void testGetEspaceDisque() throws EbadServiceException {
 
         RetourBatch retourBatch = new RetourBatch();
         retourBatch.setReturnCode(0);
@@ -231,7 +226,7 @@ public class EnvironnementServiceTest {
     }
 
     @Test
-    public void testPurgerLog() throws IOException, JSchException {
+    public void testPurgerLog() throws EbadServiceException {
 
         RetourBatch retourBatch = new RetourBatch();
         retourBatch.setReturnCode(0);
@@ -247,7 +242,7 @@ public class EnvironnementServiceTest {
     }
 
     @Test
-    public void testPurgerArchive() throws IOException, JSchException {
+    public void testPurgerArchive() throws EbadServiceException {
 
         RetourBatch retourBatch = new RetourBatch();
         retourBatch.setReturnCode(0);

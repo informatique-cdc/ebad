@@ -1,8 +1,6 @@
 package fr.icdc.ebad.service;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.QDirectory;
@@ -38,21 +36,18 @@ public class DirectoryService {
         List<FilesDto> filesDtoList = new ArrayList<>();
         Directory directory = directoryRepository.getOne(idDirectory);
 
-        try {
-            List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory, subDirectory);
-            files
-                    .stream()
-                    .filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename()))
-                    .filter(file -> {
-                        if (file.getAttrs().isDir()) {
-                            return directory.isCanExplore();
-                        }
-                        return true;
-                    })
-                    .forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime(), file.getAttrs().isDir(), subDirectory)));
-        } catch (SftpException | JSchException e) {
-            throw new EbadServiceException("Impossible de lister les fichiers sur le serveur distant du répertoire " + directory.getName(), e);
-        }
+        List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory, subDirectory);
+        files
+                .stream()
+                .filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename()))
+                .filter(file -> {
+                    if (file.getAttrs().isDir()) {
+                        return directory.isCanExplore();
+                    }
+                    return true;
+                })
+                .forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime(), file.getAttrs().isDir(), subDirectory)));
+
         return filesDtoList;
     }
 
@@ -62,23 +57,13 @@ public class DirectoryService {
         if (!directory.isCanWrite()) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
         }
-
-        try {
-            shellService.removeFile(directory, filesDTO.getName(), filesDTO.getSubDirectory());
-        } catch (SftpException | JSchException e) {
-            throw new EbadServiceException("Impossible de supprimer le fichier " + filesDTO.getName());
-        }
+        shellService.removeFile(directory, filesDTO.getName(), filesDTO.getSubDirectory());
     }
 
     @Transactional
     public InputStream readFile(FilesDto filesDTO) throws EbadServiceException {
         Directory directory = directoryRepository.getOne(filesDTO.getDirectory().getId());
-        try {
-            return shellService.getFile(directory, filesDTO.getName(), filesDTO.getSubDirectory());
-        } catch (SftpException | JSchException | IOException e) {
-            throw new EbadServiceException("Impossible de lire le fichier " + filesDTO.getName(), e);
-
-        }
+        return shellService.getFile(directory, filesDTO.getName(), filesDTO.getSubDirectory());
     }
 
     @Transactional
@@ -91,7 +76,7 @@ public class DirectoryService {
 
         try {
             shellService.uploadFile(filesDTO.getDirectory(), multipartFile.getInputStream(), filesDTO.getName(), filesDTO.getSubDirectory());
-        } catch (SftpException | JSchException | IOException e) {
+        } catch (IOException e) {
             throw new EbadServiceException("Erreur lors de l'écriture d'un fichier du dossiers " + filesDTO.getDirectory().getName(), e);
         }
     }
