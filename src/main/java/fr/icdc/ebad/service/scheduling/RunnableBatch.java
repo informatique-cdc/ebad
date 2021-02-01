@@ -1,22 +1,38 @@
 package fr.icdc.ebad.service.scheduling;
 
-import java.util.Date;
+import com.jcraft.jsch.JSchException;
+import fr.icdc.ebad.domain.Scheduling;
+import fr.icdc.ebad.service.BatchService;
+import fr.icdc.ebad.service.util.EbadServiceException;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
+
+@Component
+@Scope("prototype")
 public class RunnableBatch implements Runnable {
-    private final String message;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RunnableBatch.class);
+    private final BatchService batchService;
+    @Setter
+    private Scheduling scheduling;
 
-    public RunnableBatch(String message) {
-        this.message = message;
+    public RunnableBatch(BatchService batchService) {
+        this.batchService = batchService;
     }
 
     @Override
     public void run() {
-        System.out.println(new Date() + "STARRRT Runnable Task with " + message + " on thread " + Thread.currentThread().getName());
+        LOGGER.debug("RUN BATCH SCHEDULING - START - " + scheduling.getBatch().getId() + " with parameters " + scheduling.getParameters() + " on env " + scheduling.getEnvironnement().getName());
         try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            batchService.runBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters());
+        } catch (JSchException | EbadServiceException | IOException e) {
+            LOGGER.error("Error when trying to run batch scheduling", e);
         }
-        System.out.println(new Date() + "ENDDDD Runnable Task with " + message + " on thread " + Thread.currentThread().getName());
+        LOGGER.debug("RUN BATCH SCHEDULING - END - " + scheduling.getBatch().getId() + " with parameters " + scheduling.getParameters() + " on env " + scheduling.getEnvironnement().getName());
     }
 }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -121,9 +122,20 @@ public class ExceptionTranslator implements ProblemHandling {
         LOGGER.error("ConcurrencyFailureException !", ex);
 
         Problem problem = Problem.builder()
-            .withStatus(Status.CONFLICT)
-            .with(MESSAGE_KEY, ErrorConstants.ERR_CONCURRENCY_FAILURE)
-            .build();
+                .withStatus(Status.CONFLICT)
+                .with(MESSAGE_KEY, ErrorConstants.ERR_CONCURRENCY_FAILURE)
+                .build();
+        return create(ex, problem, request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Problem> handleAccessDenied(AccessDeniedException ex, NativeWebRequest request) {
+        LOGGER.error("AccessDeniedException !", ex);
+
+        Problem problem = Problem.builder()
+                .withStatus(Status.FORBIDDEN)
+                .with(MESSAGE_KEY, ErrorConstants.ERR_FORBIDDEN)
+                .build();
         return create(ex, problem, request);
     }
 }

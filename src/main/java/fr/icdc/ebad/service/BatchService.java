@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BatchService {
@@ -75,6 +76,39 @@ public class BatchService {
             params = batch.getParams();
         }
         Date dateTraitement = environnementService.getDateTraiement(environnement.getId());
+        String realParams = getParameters(environnement, params, dateTraitement);
+
+        String command = environnement.getHomePath() + "/" + normeService.getShellPath(environnement.getNorme(), environnement.getApplication().getCode()) + environnement.getPrefix() + batch.getPath() + " " + realParams;
+
+        LOGGER.debug("Execute batch with command : '{}'", command);
+
+        RetourBatch batchRetour = shellService.runCommand(environnement, command);
+        LogBatch logBatch = new LogBatch();
+        logBatch.setBatch(batch);
+        logBatch.setEnvironnement(environnement);
+        logBatch.setDateTraitement(dateTraitement);
+        if (dateTraitement == null) {
+            logBatch.setDateTraitement(Date.from(Instant.now()));
+        }
+        logBatch.setLogDate(Calendar.getInstance().getTime());
+        logBatch.setParams(realParams);
+        logBatch.setReturnCode(batchRetour.getReturnCode());
+        logBatch.setExecutionTime(batchRetour.getExecutionTime());
+        try {
+            User user = userService.getUserWithAuthorities();
+            logBatch.setUser(user);
+            logBatchRepository.save(logBatch);
+            notificationService.createNotificationForCurrentUser("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " vient de se terminer avec le code retour " + batchRetour.getReturnCode());
+        } catch (EbadServiceException e) {
+            Optional<User> user = userService.getUser("ebad");
+            logBatch.setUser(user.get());
+            logBatchRepository.save(logBatch);
+        }
+
+        return batchRetour;
+    }
+
+    private String getParameters(Environnement environnement, String params, Date dateTraitement) {
         String[] paramsArray = params.split(" ");
         StringBuilder realParams = new StringBuilder();
         for (String param : paramsArray) {
@@ -95,32 +129,7 @@ public class BatchService {
                 realParams.append(param).append(" ");
             }
         }
-
-
-        String command = environnement.getHomePath() + "/" + normeService.getShellPath(environnement.getNorme(), environnement.getApplication().getCode()) + environnement.getPrefix() + batch.getPath() + " " + realParams;
-
-
-        LOGGER.debug("Execute batch with command : '{}'", command);
-
-        RetourBatch batchRetour = shellService.runCommand(environnement, command);
-        LogBatch logBatch = new LogBatch();
-        logBatch.setBatch(batch);
-        logBatch.setEnvironnement(environnement);
-        logBatch.setDateTraitement(dateTraitement);
-        if (dateTraitement == null) {
-            logBatch.setDateTraitement(Date.from(Instant.now()));
-        }
-        logBatch.setLogDate(Calendar.getInstance().getTime());
-        logBatch.setParams(realParams.toString());
-        logBatch.setReturnCode(batchRetour.getReturnCode());
-        logBatch.setExecutionTime(batchRetour.getExecutionTime());
-        User user = userService.getUserWithAuthorities();
-        logBatch.setUser(user);
-
-        logBatchRepository.save(logBatch);
-
-        notificationService.createNotificationForCurrentUser("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " vient de se terminer avec le code retour " + batchRetour.getReturnCode());
-        return batchRetour;
+        return realParams.toString();
     }
 
     /**
