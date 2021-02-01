@@ -101,7 +101,7 @@ public class BatchService {
             notificationService.createNotificationForCurrentUser("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " vient de se terminer avec le code retour " + batchRetour.getReturnCode());
         } catch (EbadServiceException e) {
             Optional<User> user = userService.getUser("ebad");
-            logBatch.setUser(user.get());
+            logBatch.setUser(user.orElseThrow());
             logBatchRepository.save(logBatch);
         }
 
