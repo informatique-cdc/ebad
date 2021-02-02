@@ -166,6 +166,11 @@ public class SchedulingServiceTest {
 
         when(taskScheduler.schedule(any(RunnableBatch.class), any(CronTrigger.class))).thenReturn(new CronScheduledFuture(null, null));
         schedulingService.run(scheduling);
+
+        ArgumentCaptor<CronTrigger> argument = ArgumentCaptor.forClass(CronTrigger.class);
+        verify(taskScheduler).schedule(any(RunnableBatch.class), argument.capture());
+
+        assertEquals(cron, argument.getValue().getExpression());
     }
 
     @Test(expected = EbadServiceException.class)
