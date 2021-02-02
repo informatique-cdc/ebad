@@ -29,7 +29,5 @@ public class EnvironnementDto extends AbstractAuditingEntity {
     private String prefix;
     private float diskSpace;
     private Date dateTraitement;
-    //    private Set<BatchDto> batchs;
-//    private Set<LogBatchDto> logBatchs;
     private NormeDto norme;
 }
