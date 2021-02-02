@@ -1,8 +1,11 @@
 package fr.icdc.ebad.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -32,6 +35,9 @@ import java.util.Set;
  */
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false, exclude = {"chaineAssociations", "environnements"})
 @ToString(exclude = {"chaineAssociations", "environnements"})
 @Table(name = "t_batch")

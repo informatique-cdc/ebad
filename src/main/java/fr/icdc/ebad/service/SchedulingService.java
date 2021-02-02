@@ -54,10 +54,12 @@ public class SchedulingService {
         return null;
     }
 
+    @Transactional
     public Page<Scheduling> listByEnvironment(Long environmentId, Pageable pageable) {
         return schedulingRepository.findAllByEnvironnementId(environmentId, pageable);
     }
 
+    @Transactional
     public Page<Scheduling> listAll(Pageable pageable) {
         return schedulingRepository.findAll(pageable);
     }
@@ -105,6 +107,7 @@ public class SchedulingService {
         tasks.put(scheduling.getId(), scheduledFuture);
     }
 
+    @Transactional
     public Scheduling get(Long schedulingId) {
         return schedulingRepository.getOne(schedulingId);
     }
