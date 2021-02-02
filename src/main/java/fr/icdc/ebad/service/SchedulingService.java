@@ -8,6 +8,7 @@ import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.service.scheduling.RunnableBatch;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Lookup;
@@ -78,6 +79,8 @@ public class SchedulingService {
 
         Scheduling scheduling = schedulingRepository.save(newScheduling);
         run(scheduling);
+        Hibernate.initialize(scheduling.getBatch());
+        Hibernate.initialize(scheduling.getEnvironnement());
         return scheduling;
     }
 
