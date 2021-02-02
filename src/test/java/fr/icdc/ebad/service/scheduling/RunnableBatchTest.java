@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -34,6 +33,6 @@ public class RunnableBatchTest {
 
         runnableBatch.setScheduling(scheduling);
         runnableBatch.run();
-        verify(batchService).runBatch(eq(batch.getId()), eq(environnement.getId()), eq("test"));
+        verify(batchService).runBatch(batch.getId(), environnement.getId(), "test");
     }
 }

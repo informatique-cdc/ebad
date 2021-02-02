@@ -98,7 +98,7 @@ public class SchedulingResourceTest {
 
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
 
-        when(schedulingService.saveAndRun(eq(1L), eq(2L), eq(parameters), eq(cron))).thenReturn(scheduling);
+        when(schedulingService.saveAndRun(1L, 2L, parameters, cron)).thenReturn(scheduling);
 
         restMvc.perform(builder)
                 .andExpect(status().isCreated())
@@ -228,7 +228,7 @@ public class SchedulingResourceTest {
                 .cron(cron)
                 .build();
 
-        when(schedulingService.get(eq(1L))).thenReturn(scheduling);
+        when(schedulingService.get(1L)).thenReturn(scheduling);
         when(permissionScheduling.canRead(eq(1L), any())).thenReturn(true);
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -248,6 +248,6 @@ public class SchedulingResourceTest {
 
         restMvc.perform(builder).andExpect(status().isOk());
 
-        verify(schedulingService).remove(eq(1L));
+        verify(schedulingService).remove(1L);
     }
 }

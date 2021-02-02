@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,7 +37,7 @@ public class PermissionSchedulingTest {
     @Test
     public void canRead() {
         when(userDetails.getUsername()).thenReturn("testlogin");
-        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(User.builder().build());
+        when(userRepository.findUserFromEnv(2L, "testlogin")).thenReturn(User.builder().build());
 
         Batch batch = Batch.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(2L).build();
@@ -67,7 +66,7 @@ public class PermissionSchedulingTest {
     @Test
     public void canReadFalse2() {
         when(userDetails.getUsername()).thenReturn("testlogin");
-        when(userRepository.findUserFromEnv(eq(2L), eq("testlogin"))).thenReturn(null);
+        when(userRepository.findUserFromEnv(2L, "testlogin")).thenReturn(null);
 
         Batch batch = Batch.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(2L).build();
