@@ -59,7 +59,6 @@ public class PermissionSchedulingTest {
 
     @Test
     public void canReadFalse1() {
-        when(userDetails.getUsername()).thenReturn("testlogin");
         when(schedulingRepository.findById(3L)).thenReturn(Optional.empty());
         boolean result = permissionScheduling.canRead(3L, userDetails);
         assertFalse(result);
