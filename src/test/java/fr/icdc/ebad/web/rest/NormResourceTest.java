@@ -47,7 +47,6 @@ public class NormResourceTest {
     @Autowired
     private NormResource normResource;
 
-
     @Autowired
     private QuerydslPredicateArgumentResolver querydslPredicateArgumentResolver;
 

@@ -1,0 +1,110 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: dtrouillet
+      changes:
+        - createSequence:
+            cacheSize: 1
+            cycle: false
+            incrementBy: 50
+            maxValue: 9223372036854775807
+            minValue: 1
+            sequenceName: t_scheduling_id_seq
+            startValue: 1
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: t_scheduling_pkey
+                  name: id
+                  type: BIGINT
+                  defaultValueSequenceNext: t_scheduling_id_seq
+              - column:
+                  name: parameters
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: cron
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: environment_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: batch_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_by
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+              - column:
+                  name: last_modified_by
+                  type: VARCHAR(50)
+              - column:
+                  name: last_modified_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+            tableName: t_scheduling
+        - addForeignKeyConstraint:
+            baseColumnNames: environment_id
+            baseTableName: t_scheduling
+            constraintName: t_scheduling_environment_id
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: t_environnement
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: batch_id
+            baseTableName: t_scheduling
+            constraintName: t_scheduling_batch_id
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: t_batch
+            validate: true
+        - insert:
+            tableName: t_user
+            columns:
+              - column:
+                  name: created_by
+                  value: SYSTEM
+              - column:
+                  name: created_date
+                  value: NOW()
+              - column:
+                  name: activated
+                  value: false
+              - column:
+                  name: email
+                  value: ebad@localhost
+              - column:
+                  name: first_name
+                  value: ebad
+              - column:
+                  name: lang_key
+                  value: FR_fr
+              - column:
+                  name: last_name
+                  value: ebad
+              - column:
+                  name: login
+                  value: ebad
+              - column:
+                  name: password
+                  value: NOPASSWORD
