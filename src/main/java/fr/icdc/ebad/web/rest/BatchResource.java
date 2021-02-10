@@ -1,16 +1,17 @@
 package fr.icdc.ebad.web.rest;
 
-import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.BatchService;
-import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
+import fr.icdc.ebad.web.rest.dto.JobDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
+import org.jobrunr.jobs.JobId;
+import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -30,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/batchs")
 @Tag(name = "Batch", description = "the batch API")
@@ -41,10 +40,12 @@ public class BatchResource {
 
     private final BatchService batchService;
     private final MapperFacade mapper;
+    private final JobScheduler jobScheduler;
 
-    public BatchResource(BatchService batchService, MapperFacade mapper) {
+    public BatchResource(BatchService batchService, MapperFacade mapper, JobScheduler jobScheduler) {
         this.batchService = batchService;
         this.mapper = mapper;
+        this.jobScheduler = jobScheduler;
     }
 
     /**
@@ -64,14 +65,11 @@ public class BatchResource {
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
     @GetMapping(value = "/run/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<RetourBatch> runBatch(@PathVariable Long id, @RequestParam(value = "param", required = false) String param, @RequestParam Long env) throws EbadServiceException {
+    public ResponseEntity<JobDto> runBatch(@PathVariable long id, @RequestParam(value = "param", required = false) String param, @RequestParam long env) {
         LOGGER.debug("REST request to run batch");
-        try {
-            return new ResponseEntity<>(batchService.runBatch(id, env, param), HttpStatus.OK);
-        } catch (JSchException | IOException e) {
-            LOGGER.error("Erreur lors de l'exécution du batch", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        JobId jobId = jobScheduler.enqueue(() -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin()));
+        LOGGER.debug("job id is " + jobId);
+        return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
     }
 
     /**

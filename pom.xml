@@ -52,13 +52,24 @@
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <pf4j-spring.version>0.6.0</pf4j-spring.version>
         <pf4j.version>3.3.1</pf4j.version>
+        <jobrunr.version>1.3.0</jobrunr.version>
         <git.user />
         <git.password />
         <jacoco.agent.ut.arg />
     </properties>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.jobrunr</groupId>
+            <artifactId>jobrunr-spring-boot-starter</artifactId>
+            <version>${jobrunr.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>

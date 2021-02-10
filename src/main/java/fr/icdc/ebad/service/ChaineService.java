@@ -44,7 +44,7 @@ public class ChaineService {
 
     //TODO Gestion des retours
     //TODO Modification des parametres de chaque batch à l'enregistrement de la chaine?
-    public RetourBatch runChaine(Chaine chaine) throws IOException, JSchException, EbadServiceException {
+    public RetourBatch runChaine(Chaine chaine) throws EbadServiceException {
         LOGGER.debug("runChaine {}", chaine);
         RetourBatch retourChaine = new RetourBatch();
         retourChaine.setExecutionTime(0L);

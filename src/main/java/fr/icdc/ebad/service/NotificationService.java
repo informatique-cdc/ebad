@@ -52,6 +52,10 @@ public class NotificationService {
         this.messagingTemplate.convertAndSendToUser(user.getLogin(), "/queue/notifications", result);
     }
 
+    public void sendMailNotification(String title, String body, User user) {
+
+    }
+
     @Transactional(readOnly = true)
     public List<Notification> getNewNotificationsForCurrentUser() {
         return getNewNotificationsForUser(SecurityUtils.getCurrentLogin());

@@ -230,7 +230,7 @@ public class BatchServiceTest {
 
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
 
-        batchService.runBatch(batch.getId(), environnementIntegration.getId(), batch.getParams());
+//        batchService.runBatch(batch.getId(), environnementIntegration.getId(), batch.getParams());
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
