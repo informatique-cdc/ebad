@@ -73,7 +73,7 @@ public class BatchResource {
         } else {
             jobId = jobScheduler.enqueue(() -> batchService.jobRunBatch(id, env, SecurityUtils.getCurrentLogin()));
         }
-        LOGGER.debug("job id is " + jobId);
+        LOGGER.debug("job id is {}", jobId);
         return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
     }
 

@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
@@ -63,7 +61,7 @@ public class BatchService {
 
     @Transactional
     @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
-    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws JSchException, IOException, EbadServiceException {
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
         if (params != null) {
             batch.setParams(params);
@@ -74,7 +72,7 @@ public class BatchService {
 
     @Transactional
     @Job(name = "Batch %0, Env %1, User %2", retries = 0)
-    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws JSchException, IOException, EbadServiceException {
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
         Environnement environnement = environnementService.getEnvironnement(environnementId);
         return runBatch(batch, environnement, login);

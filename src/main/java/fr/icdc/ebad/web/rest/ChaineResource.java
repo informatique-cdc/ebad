@@ -73,7 +73,7 @@ public class ChaineResource {
     public ResponseEntity<JobDto> runChaine(@PathVariable Long id) {
         LOGGER.debug("REST request to run chaine");
         JobId jobId = jobScheduler.enqueue(() -> chaineService.jobRunChaine(id, SecurityUtils.getCurrentLogin()));
-        LOGGER.debug("job id is " + jobId);
+        LOGGER.debug("job id is {}", jobId);
 
         return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
     }

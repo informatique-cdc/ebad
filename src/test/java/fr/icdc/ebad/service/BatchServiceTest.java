@@ -125,9 +125,9 @@ public class BatchServiceTest {
 
         doNothing().when(notificationService).createNotification(any(), any());
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
-        when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
-        when(userService.getUser(eq("user"))).thenReturn(Optional.of(user));
-        when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
+        when(batchRepository.getOne(batch.getId())).thenReturn(batch);
+        when(userService.getUser("user")).thenReturn(Optional.of(user));
+        when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
         batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), null, "user");
 
         verify(environnementService, times(1)).getDateTraiement(
@@ -155,7 +155,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotification(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"), eq(user));
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user);
     }
 
     @Test
@@ -230,7 +230,7 @@ public class BatchServiceTest {
 
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
 
-        when(userService.getUser(eq("user"))).thenReturn(Optional.of(user));
+        when(userService.getUser("user")).thenReturn(Optional.of(user));
         batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), batch.getParams(), "user");
 
         verify(environnementService, times(1)).getDateTraiement(
@@ -259,7 +259,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotification(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"), eq(user));
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user);
     }
 
 

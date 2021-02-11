@@ -118,7 +118,7 @@ public class ChaineResourceTest {
 
         RetourBatch retourBatch = new RetourBatch("noout", 2, 111L);
 
-        when(chaineService.jobRunChaine(eq(1L), eq("user"))).thenReturn(retourBatch);
+        when(chaineService.jobRunChaine(1L, "user")).thenReturn(retourBatch);
         when(permissionChaine.canRead(eq(1L), any())).thenReturn(true);
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -134,7 +134,7 @@ public class ChaineResourceTest {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/chains/1/run").principal(mockPrincipal);
 
 
-        when(chaineService.jobRunChaine(eq(1L), eq("user"))).thenThrow(new EbadServiceException());
+        when(chaineService.jobRunChaine(1L, "user")).thenThrow(new EbadServiceException());
         when(permissionChaine.canRead(eq(1L), any())).thenReturn(true);
         restMvc.perform(builder)
                 .andExpect(status().isOk());
