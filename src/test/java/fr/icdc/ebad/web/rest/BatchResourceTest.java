@@ -3,7 +3,6 @@ package fr.icdc.ebad.web.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.jcraft.jsch.JSchException;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Environnement;
@@ -11,6 +10,7 @@ import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.security.permission.PermissionBatch;
 import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.service.BatchService;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
 import fr.icdc.ebad.web.rest.dto.BatchEnvironnementDto;
 import org.junit.Before;
@@ -122,7 +122,7 @@ public class BatchResourceTest {
     public void runBatchError() throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/batchs/run/1?env=2");
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
-        when(batchService.jobRunBatch(1L, 2L, null, "user")).thenThrow(new JSchException());
+        when(batchService.jobRunBatch(1L, 2L, null, "user")).thenThrow(new EbadServiceException());
 
         restMvc.perform(builder)
                 .andExpect(status().isOk());
