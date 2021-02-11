@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service.scheduling;
 
-import com.jcraft.jsch.JSchException;
 import fr.icdc.ebad.domain.Scheduling;
 import fr.icdc.ebad.service.BatchService;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -9,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 
 @Component
@@ -30,7 +27,7 @@ public class RunnableBatch implements Runnable {
         LOGGER.debug("RUN BATCH SCHEDULING - START - {} with parameters {} on env {}", scheduling.getBatch().getId(), scheduling.getParameters(), scheduling.getEnvironnement().getName());
         try {
             batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters(), "ebad");
-        } catch (JSchException | EbadServiceException | IOException e) {
+        } catch (EbadServiceException e) {
             LOGGER.error("Error when trying to run batch scheduling", e);
         }
         LOGGER.debug("RUN BATCH SCHEDULING - END - {} with parameters {} on env {}", scheduling.getBatch().getId(), scheduling.getParameters(), scheduling.getEnvironnement().getName());
