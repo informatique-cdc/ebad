@@ -81,7 +81,7 @@ public class ChaineServiceTest {
         when(batchService.runBatch(eq(batch1), eq(environnement))).thenReturn(retourBatch1);
         when(batchService.runBatch(eq(batch2), eq(environnement))).thenReturn(retourBatch2);
 
-        chaineService.runChaine(chaine);
+        chaineService.runChaine(chaine, "");
 
         verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement));
         verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement));
