@@ -53,3 +53,7 @@ ebad:
         login: ebad
         private_key_path: src/test/resources/key
 
+org:
+    jobrunr:
+        dashboard:
+            enabled: false

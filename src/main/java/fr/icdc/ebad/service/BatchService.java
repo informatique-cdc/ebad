@@ -63,25 +63,23 @@ public class BatchService {
 
     @Transactional
     @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
-    public RetourBatch jobRunBatch(long batchId, long environnementId, String params, String login) throws JSchException, IOException, EbadServiceException {
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws JSchException, IOException, EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
-        batch.setParams(params);
+        if (params != null) {
+            batch.setParams(params);
+        }
         Environnement environnement = environnementService.getEnvironnement(environnementId);
         return runBatch(batch, environnement, login);
     }
 
     @Transactional
-    public RetourBatch runBatch(Long batchId, Long environnementId, String params) throws JSchException, IOException, EbadServiceException {
+    @Job(name = "Batch %0, Env %1, User %2", retries = 0)
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws JSchException, IOException, EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
-        batch.setParams(params);
         Environnement environnement = environnementService.getEnvironnement(environnementId);
-        return runBatch(batch, environnement);
+        return runBatch(batch, environnement, login);
     }
 
-    @Transactional
-    public RetourBatch runBatch(Batch batch, Environnement environnement) throws EbadServiceException {
-        return runBatch(batch, environnement, "null");
-    }
 
     @Transactional
     public RetourBatch runBatch(Batch batch, Environnement environnement, String login) throws EbadServiceException {

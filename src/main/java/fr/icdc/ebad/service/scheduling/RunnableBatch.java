@@ -29,7 +29,7 @@ public class RunnableBatch implements Runnable {
     public void run() {
         LOGGER.debug("RUN BATCH SCHEDULING - START - {} with parameters {} on env {}", scheduling.getBatch().getId(), scheduling.getParameters(), scheduling.getEnvironnement().getName());
         try {
-            batchService.runBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters());
+            batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters(), "ebad");
         } catch (JSchException | EbadServiceException | IOException e) {
             LOGGER.error("Error when trying to run batch scheduling", e);
         }

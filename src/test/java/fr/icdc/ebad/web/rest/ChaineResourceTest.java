@@ -8,6 +8,7 @@ import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.security.permission.PermissionChaine;
 import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.service.ChaineService;
+import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.BatchEnvironnementDto;
 import fr.icdc.ebad.web.rest.dto.ChaineDto;
 import org.junit.Before;
@@ -31,11 +32,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -117,13 +118,11 @@ public class ChaineResourceTest {
 
         RetourBatch retourBatch = new RetourBatch("noout", 2, 111L);
 
-        when(chaineService.runChaine(eq(1L))).thenReturn(retourBatch);
+        when(chaineService.jobRunChaine(eq(1L), eq("user"))).thenReturn(retourBatch);
         when(permissionChaine.canRead(eq(1L), any())).thenReturn(true);
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.returnCode", is(2)))
-                .andExpect(jsonPath("$.logOut", is("noout")))
-                .andExpect(jsonPath("$.executionTime", is(111)));
+                .andExpect(jsonPath("$.id", anything()));
 
     }
 
@@ -134,13 +133,11 @@ public class ChaineResourceTest {
         when(mockPrincipal.getName()).thenReturn("user");
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/chains/1/run").principal(mockPrincipal);
 
-        RetourBatch retourBatch = new RetourBatch("noout", 2, 111L);
 
-        when(chaineService.runChaine(eq(1L))).thenThrow(new IOException());
+        when(chaineService.jobRunChaine(eq(1L), eq("user"))).thenThrow(new EbadServiceException());
         when(permissionChaine.canRead(eq(1L), any())).thenReturn(true);
         restMvc.perform(builder)
-                .andExpect(status().isInternalServerError());
-
+                .andExpect(status().isOk());
     }
 
     @Test

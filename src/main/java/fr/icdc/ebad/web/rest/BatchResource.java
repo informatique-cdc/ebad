@@ -67,7 +67,12 @@ public class BatchResource {
     @Timed
     public ResponseEntity<JobDto> runBatch(@PathVariable long id, @RequestParam(value = "param", required = false) String param, @RequestParam long env) {
         LOGGER.debug("REST request to run batch");
-        JobId jobId = jobScheduler.enqueue(() -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin()));
+        JobId jobId = null;
+        if (param != null) {
+            jobId = jobScheduler.enqueue(() -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin()));
+        } else {
+            jobId = jobScheduler.enqueue(() -> batchService.jobRunBatch(id, env, SecurityUtils.getCurrentLogin()));
+        }
         LOGGER.debug("job id is " + jobId);
         return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
     }

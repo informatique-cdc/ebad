@@ -34,12 +34,6 @@ public class ChaineService {
         this.chaineRepository = chaineRepository;
     }
 
-    @Transactional
-    public RetourBatch runChaine(Long id) throws EbadServiceException {
-        Chaine chaine = getChaine(id);
-        return runChaine(chaine, SecurityUtils.getCurrentLogin());
-    }
-
     @Job(name = "Chain %0, User %1", retries = 0)
     @Transactional
     public RetourBatch jobRunChaine(Long chaineId, String login) throws EbadServiceException {

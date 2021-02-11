@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,13 +109,11 @@ public class BatchResourceTest {
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/batchs/run/1?env=2");
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
-        when(batchService.runBatch(eq(1L), eq(2L), eq(null))).thenReturn(retourBatch);
+        when(batchService.jobRunBatch(eq(1L), eq(2L), eq(null), eq("user"))).thenReturn(retourBatch);
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.logOut", is("this is ok")))
-                .andExpect(jsonPath("$.returnCode", is(0)))
-                .andExpect(jsonPath("$.executionTime", is(123)));
+                .andExpect(jsonPath("$.id", anything()));
     }
 
 
@@ -123,10 +122,10 @@ public class BatchResourceTest {
     public void runBatchError() throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/batchs/run/1?env=2");
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
-        when(batchService.runBatch(eq(1L), eq(2L), eq(null))).thenThrow(new JSchException());
+        when(batchService.jobRunBatch(eq(1L), eq(2L), eq(null), eq("user"))).thenThrow(new JSchException());
 
         restMvc.perform(builder)
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isOk());
     }
 
     @Test

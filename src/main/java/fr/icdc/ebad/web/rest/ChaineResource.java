@@ -5,7 +5,6 @@ import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.ChaineService;
-import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ChaineDto;
 import fr.icdc.ebad.web.rest.dto.ChaineSimpleDto;
 import fr.icdc.ebad.web.rest.dto.JobDto;
@@ -71,7 +70,7 @@ public class ChaineResource {
     @PreAuthorize("@permissionChaine.canRead(#id,principal)")
     @PostMapping(value = "/{id}/run", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<JobDto> runChaine(@PathVariable Long id) throws EbadServiceException {
+    public ResponseEntity<JobDto> runChaine(@PathVariable Long id) {
         LOGGER.debug("REST request to run chaine");
         JobId jobId = jobScheduler.enqueue(() -> chaineService.jobRunChaine(id, SecurityUtils.getCurrentLogin()));
         LOGGER.debug("job id is " + jobId);

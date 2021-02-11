@@ -33,6 +33,6 @@ public class RunnableBatchTest {
 
         runnableBatch.setScheduling(scheduling);
         runnableBatch.run();
-        verify(batchService).runBatch(batch.getId(), environnement.getId(), "test");
+        verify(batchService).jobRunBatch(batch.getId(), environnement.getId(), "test", "ebad");
     }
 }
