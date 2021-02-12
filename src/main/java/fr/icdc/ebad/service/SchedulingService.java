@@ -6,53 +6,31 @@ import fr.icdc.ebad.domain.Scheduling;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.repository.SchedulingRepository;
-import fr.icdc.ebad.service.scheduling.RunnableBatch;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.hibernate.Hibernate;
+import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
 
 @Service
 public class SchedulingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingService.class);
-    private final Map<Long, ScheduledFuture<?>> tasks = new HashMap<>();
-    private final ThreadPoolTaskScheduler taskScheduler;
     private final BatchRepository batchRepository;
+    private final BatchService batchService;
     private final EnvironnementRepository environnementRepository;
     private final SchedulingRepository schedulingRepository;
+    private final JobScheduler jobScheduler;
 
-    public SchedulingService(ThreadPoolTaskScheduler taskScheduler, BatchRepository batchRepository, EnvironnementRepository environnementRepository, SchedulingRepository schedulingRepository) {
-        this.taskScheduler = taskScheduler;
+    public SchedulingService(BatchRepository batchRepository, BatchService batchService, EnvironnementRepository environnementRepository, SchedulingRepository schedulingRepository, JobScheduler jobScheduler) {
         this.batchRepository = batchRepository;
+        this.batchService = batchService;
         this.environnementRepository = environnementRepository;
         this.schedulingRepository = schedulingRepository;
-    }
-
-    @PostConstruct
-    private void initScheduling() throws EbadServiceException {
-        LOGGER.info("START INIT SCHEDULING");
-        List<Scheduling> schedulings = schedulingRepository.findAll();
-        for (Scheduling scheduling : schedulings) {
-            run(scheduling);
-        }
-    }
-
-    @Lookup
-    public RunnableBatch getRunnableBatch() {
-        return null;
+        this.jobScheduler = jobScheduler;
     }
 
     @Transactional
@@ -87,9 +65,7 @@ public class SchedulingService {
     @Transactional
     public void remove(Long schedulingId) {
         Scheduling scheduling = schedulingRepository.getOne(schedulingId);
-        ScheduledFuture<?> scheduledFuture = tasks.get(schedulingId);
-        scheduledFuture.cancel(false);
-        tasks.remove(schedulingId);
+        jobScheduler.delete(String.valueOf(scheduling.getId()));
         schedulingRepository.delete(scheduling);
     }
 
@@ -98,16 +74,13 @@ public class SchedulingService {
             throw new EbadServiceException("Batch or environment doesn't exist");
         }
 
-        RunnableBatch runnableBatch = getRunnableBatch();
-        runnableBatch.setScheduling(scheduling);
-
-        CronTrigger cronTrigger = new CronTrigger(scheduling.getCron());
-        ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(
-                runnableBatch,
-                cronTrigger
-        );
-
-        tasks.put(scheduling.getId(), scheduledFuture);
+        String id;
+        if (scheduling.getParameters() == null) {
+            id = jobScheduler.scheduleRecurrently(scheduling.getId().toString(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), "ebad"), scheduling.getCron());
+        } else {
+            id = jobScheduler.scheduleRecurrently(scheduling.getId().toString(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters(), "ebad"), scheduling.getCron());
+        }
+        LOGGER.warn("id is {}", id);
     }
 
     @Transactional

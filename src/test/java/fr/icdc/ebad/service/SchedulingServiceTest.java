@@ -7,9 +7,9 @@ import fr.icdc.ebad.domain.Scheduling;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.EnvironnementRepository;
 import fr.icdc.ebad.repository.SchedulingRepository;
-import fr.icdc.ebad.service.scheduling.RunnableBatch;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import org.apache.logging.log4j.core.config.CronScheduledFuture;
+import org.jobrunr.jobs.lambdas.JobLambda;
+import org.jobrunr.scheduling.JobScheduler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -19,8 +19,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -28,11 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,12 +50,7 @@ public class SchedulingServiceTest {
     private EnvironnementRepository environnementRepository;
 
     @MockBean
-    private ThreadPoolTaskScheduler taskScheduler;
-
-    @Test
-    public void getRunnableBatch() {
-        assertNotNull(schedulingService.getRunnableBatch());
-    }
+    private JobScheduler jobScheduler;
 
     @Test
     public void listByEnvironment() {
@@ -96,7 +87,7 @@ public class SchedulingServiceTest {
         Batch batch = Batch.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(2L).build();
         String parameters = "testParams";
-        String cron = "10 * * * * ?";
+        String cron = "10 * * * * *";
 
         Scheduling scheduling = Scheduling.builder()
                 .id(3L)
@@ -109,7 +100,6 @@ public class SchedulingServiceTest {
         when(batchRepository.getOne(1L)).thenReturn(batch);
         when(environnementRepository.getOne(2L)).thenReturn(environnement);
         when(schedulingRepository.save(any())).thenReturn(scheduling);
-        when(taskScheduler.schedule(any(RunnableBatch.class), any(CronTrigger.class))).thenReturn(new CronScheduledFuture(null, null));
         Scheduling result = schedulingService.saveAndRun(1L, 2L, parameters, cron);
 
         assertEquals(scheduling, result);
@@ -128,7 +118,7 @@ public class SchedulingServiceTest {
         Batch batch = Batch.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(2L).build();
         String parameters = "testParams";
-        String cron = "10 * * * * ?";
+        String cron = "10 * * * * *";
 
         Scheduling scheduling = Scheduling.builder()
                 .id(3L)
@@ -138,8 +128,6 @@ public class SchedulingServiceTest {
                 .cron(cron)
                 .build();
 
-        CronScheduledFuture mock = mock(CronScheduledFuture.class);
-        when(taskScheduler.schedule(any(RunnableBatch.class), any(CronTrigger.class))).thenReturn(mock);
         schedulingService.run(scheduling);
 
         when(schedulingRepository.getOne(3L)).thenReturn(scheduling);
@@ -154,7 +142,7 @@ public class SchedulingServiceTest {
         Batch batch = Batch.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(2L).build();
         String parameters = "testParams";
-        String cron = "10 * * * * ?";
+        String cron = "10 * * * * *";
 
         Scheduling scheduling = Scheduling.builder()
                 .id(3L)
@@ -164,20 +152,18 @@ public class SchedulingServiceTest {
                 .cron(cron)
                 .build();
 
-        when(taskScheduler.schedule(any(RunnableBatch.class), any(CronTrigger.class))).thenReturn(new CronScheduledFuture(null, null));
+        when(jobScheduler.scheduleRecurrently(eq(scheduling.getId().toString()), any(JobLambda.class), eq(cron))).thenReturn("myId");
         schedulingService.run(scheduling);
+        verify(jobScheduler).scheduleRecurrently(eq(scheduling.getId().toString()), any(JobLambda.class), eq(cron));
 
-        ArgumentCaptor<CronTrigger> argument = ArgumentCaptor.forClass(CronTrigger.class);
-        verify(taskScheduler).schedule(any(RunnableBatch.class), argument.capture());
 
-        assertEquals(cron, argument.getValue().getExpression());
     }
 
     @Test(expected = EbadServiceException.class)
     public void runError1() throws EbadServiceException {
         Environnement environnement = Environnement.builder().id(2L).build();
         String parameters = "testParams";
-        String cron = "10 * * * * ?";
+        String cron = "10 * * * * *";
 
         Scheduling scheduling = Scheduling.builder()
                 .id(3L)
@@ -193,7 +179,7 @@ public class SchedulingServiceTest {
     public void runError2() throws EbadServiceException {
         Batch batch = Batch.builder().id(1L).build();
         String parameters = "testParams";
-        String cron = "10 * * * * ?";
+        String cron = "10 * * * * *";
 
         Scheduling scheduling = Scheduling.builder()
                 .id(3L)
