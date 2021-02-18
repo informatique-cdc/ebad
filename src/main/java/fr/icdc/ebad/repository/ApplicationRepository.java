@@ -60,6 +60,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
 
     Optional<Application> findAllByExternalIdAndPluginId(String externalId, String pluginId);
 
+    Optional<Application> findByName(String name);
+
 
     @Query("select application from Application application" +
             " left join application.usageApplications usageApplications" +
