@@ -78,14 +78,14 @@ public class ChaineServiceTest {
         RetourBatch retourBatch1 = new RetourBatch("ok1", 0, 100L);
         RetourBatch retourBatch2 = new RetourBatch("ko1", 1, 200L);
 
-        when(batchService.runBatch(eq(batch1), eq(environnement))).thenReturn(retourBatch1);
-        when(batchService.runBatch(eq(batch2), eq(environnement))).thenReturn(retourBatch2);
+        when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"))).thenReturn(retourBatch1);
+        when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"))).thenReturn(retourBatch2);
 
-        chaineService.runChaine(chaine);
+        chaineService.runChaine(chaine, "user");
 
-        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement));
-        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement));
-        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement));
+        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement), eq("user"));
+        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement), eq("user"));
+        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement), eq("user"));
     }
 
     @Test
@@ -123,15 +123,15 @@ public class ChaineServiceTest {
         RetourBatch retourBatch1 = new RetourBatch("ok1", 0, 100L);
         RetourBatch retourBatch2 = new RetourBatch("ko1", 1, 200L);
 
-        when(batchService.runBatch(eq(batch1), eq(environnement))).thenReturn(retourBatch1);
-        when(batchService.runBatch(eq(batch2), eq(environnement))).thenReturn(retourBatch2);
+        when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"))).thenReturn(retourBatch1);
+        when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"))).thenReturn(retourBatch2);
 
         when(chaineService.getChaine(1L)).thenReturn(chaine);
-        chaineService.runChaine(1L);
+        chaineService.jobRunChaine(1L, "user");
 
-        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement));
-        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement));
-        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement));
+        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement), eq("user"));
+        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement), eq("user"));
+        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement), eq("user"));
     }
 
     @Test

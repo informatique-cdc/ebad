@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
@@ -13,6 +12,7 @@ import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import org.jobrunr.jobs.annotations.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
@@ -61,15 +60,27 @@ public class BatchService {
 
 
     @Transactional
-    public RetourBatch runBatch(Long batchId, Long environnementId, String params) throws JSchException, IOException, EbadServiceException {
+    @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
-        batch.setParams(params);
+        if (params != null) {
+            batch.setParams(params);
+        }
         Environnement environnement = environnementService.getEnvironnement(environnementId);
-        return runBatch(batch, environnement);
+        return runBatch(batch, environnement, login);
     }
 
     @Transactional
-    public RetourBatch runBatch(Batch batch, Environnement environnement) throws JSchException, IOException, EbadServiceException {
+    @Job(name = "Batch %0, Env %1, User %2", retries = 0)
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
+        Batch batch = batchRepository.getOne(batchId);
+        Environnement environnement = environnementService.getEnvironnement(environnementId);
+        return runBatch(batch, environnement, login);
+    }
+
+
+    @Transactional
+    public RetourBatch runBatch(Batch batch, Environnement environnement, String login) throws EbadServiceException {
 
         String params = "";
         if (null != batch.getParams()) {
@@ -95,10 +106,10 @@ public class BatchService {
         logBatch.setReturnCode(batchRetour.getReturnCode());
         logBatch.setExecutionTime(batchRetour.getExecutionTime());
         try {
-            User user = userService.getUserWithAuthorities();
+            User user = userService.getUser(login).orElseThrow(EbadServiceException::new);
             logBatch.setUser(user);
             logBatchRepository.save(logBatch);
-            notificationService.createNotificationForCurrentUser("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " vient de se terminer avec le code retour " + batchRetour.getReturnCode());
+            notificationService.createNotification("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " vient de se terminer avec le code retour " + batchRetour.getReturnCode(), user);
         } catch (EbadServiceException e) {
             Optional<User> user = userService.getUser("ebad");
             logBatch.setUser(user.orElseThrow());

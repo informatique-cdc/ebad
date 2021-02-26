@@ -1,6 +1,5 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.ChaineAssociation;
@@ -10,6 +9,7 @@ import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.ChaineRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import org.jobrunr.jobs.annotations.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -17,8 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
 
 /**
  * Created by dtrouillet on 03/03/2016.
@@ -36,15 +34,16 @@ public class ChaineService {
         this.chaineRepository = chaineRepository;
     }
 
+    @Job(name = "Chain %0, User %1", retries = 0)
     @Transactional
-    public RetourBatch runChaine(Long id) throws IOException, JSchException, EbadServiceException {
-        Chaine chaine = getChaine(id);
-        return runChaine(chaine);
+    public RetourBatch jobRunChaine(Long chaineId, String login) throws EbadServiceException {
+        Chaine chaine = getChaine(chaineId);
+        return runChaine(chaine, login);
     }
 
     //TODO Gestion des retours
     //TODO Modification des parametres de chaque batch à l'enregistrement de la chaine?
-    public RetourBatch runChaine(Chaine chaine) throws IOException, JSchException, EbadServiceException {
+    public RetourBatch runChaine(Chaine chaine, String login) throws EbadServiceException {
         LOGGER.debug("runChaine {}", chaine);
         RetourBatch retourChaine = new RetourBatch();
         retourChaine.setExecutionTime(0L);
@@ -52,7 +51,7 @@ public class ChaineService {
         RetourBatch retourBatch;
         for (ChaineAssociation chaineAssociation : chaine.getChaineAssociations()) {
             chaineAssociation.getBatch().setParams(chaineAssociation.getBatch().getDefaultParam());
-            retourBatch = batchService.runBatch(chaineAssociation.getBatch(), chaine.getEnvironnement());
+            retourBatch = batchService.runBatch(chaineAssociation.getBatch(), chaine.getEnvironnement(), login);
             retourChaine.setLogOut(retourChaine.getLogOut().concat(" " + retourBatch.getLogOut()));
             retourChaine.setExecutionTime(retourChaine.getExecutionTime() + retourBatch.getExecutionTime());
             if (retourBatch.getReturnCode() > 0) {

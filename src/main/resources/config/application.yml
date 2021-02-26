@@ -49,3 +49,6 @@ security:
 logging.level:
   fr.icdc.ebad: warn
 
+org.jobrunr:
+  background-job-server.enabled: true
+  dashboard.enabled: true

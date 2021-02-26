@@ -1,18 +1,19 @@
 package fr.icdc.ebad.web.rest;
 
-import com.jcraft.jsch.JSchException;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Chaine;
 import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.ChaineService;
-import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ChaineDto;
 import fr.icdc.ebad.web.rest.dto.ChaineSimpleDto;
+import fr.icdc.ebad.web.rest.dto.JobDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
+import org.jobrunr.jobs.JobId;
+import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -32,8 +33,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/chains")
 @Tag(name = "Chaines", description = "the chaines API")
@@ -43,10 +42,12 @@ public class ChaineResource {
 
     private final ChaineService chaineService;
     private final MapperFacade mapper;
+    private final JobScheduler jobScheduler;
 
-    public ChaineResource(ChaineService chaineService, MapperFacade mapper) {
+    public ChaineResource(ChaineService chaineService, MapperFacade mapper, JobScheduler jobScheduler) {
         this.chaineService = chaineService;
         this.mapper = mapper;
+        this.jobScheduler = jobScheduler;
     }
 
     /**
@@ -69,14 +70,12 @@ public class ChaineResource {
     @PreAuthorize("@permissionChaine.canRead(#id,principal)")
     @PostMapping(value = "/{id}/run", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<RetourBatch> runChaine(@PathVariable Long id) throws EbadServiceException {
+    public ResponseEntity<JobDto> runChaine(@PathVariable Long id) {
         LOGGER.debug("REST request to run chaine");
-        try {
-            return new ResponseEntity<>(chaineService.runChaine(id), HttpStatus.OK);
-        } catch (JSchException | IOException e) {
-            LOGGER.error("Erreur lors de l'exécution du chaine", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        JobId jobId = jobScheduler.enqueue(() -> chaineService.jobRunChaine(id, SecurityUtils.getCurrentLogin()));
+        LOGGER.debug("job id is {}", jobId);
+
+        return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
     }
 
     /**

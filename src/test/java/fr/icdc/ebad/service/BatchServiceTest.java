@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -106,8 +107,6 @@ public class BatchServiceTest {
                 eq(environnementIntegration), eq(commandExpected))
         ).thenReturn(retourBatch);
 
-        when(userService.getUserWithAuthorities()).thenReturn(user);
-
         when(logBatchRepository.save(
                 argThat(logBatch -> {
                             try {
@@ -124,20 +123,22 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotificationForCurrentUser(any());
+        doNothing().when(notificationService).createNotification(any(), any());
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
-        batchService.runBatch(batch,environnementIntegration);
+        when(batchRepository.getOne(batch.getId())).thenReturn(batch);
+        when(userService.getUser("user")).thenReturn(Optional.of(user));
+        when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), null, "user");
 
-        verify(environnementService,times(1)).getDateTraiement(
+        verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
         );
 
-        verify(shellService,times(1)).runCommand(
+        verify(shellService, times(1)).runCommand(
                 argThat(environnement -> environnement.getId().equals(environnementIntegration.getId())
                 ), eq(commandExpected)
         );
 
-        verify(userService,times(1)).getUserWithAuthorities();
         verify(logBatchRepository,times(1)).save(
                 argThat(logBatch -> {
                             try {
@@ -154,7 +155,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotificationForCurrentUser(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user);
     }
 
     @Test
@@ -205,7 +206,6 @@ public class BatchServiceTest {
                 eq(environnementIntegration), eq(commandExpected))
         ).thenReturn(retourBatch);
 
-        when(userService.getUserWithAuthorities()).thenReturn(user);
 
         when(logBatchRepository.save(
                 argThat(logBatch -> {
@@ -223,14 +223,15 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotificationForCurrentUser(any());
+        doNothing().when(notificationService).createNotification(any(), any());
 
         when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
         when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
 
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
 
-        batchService.runBatch(batch.getId(), environnementIntegration.getId(), batch.getParams());
+        when(userService.getUser("user")).thenReturn(Optional.of(user));
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), batch.getParams(), "user");
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
@@ -241,24 +242,24 @@ public class BatchServiceTest {
                 ), eq(commandExpected)
         );
 
-        verify(userService, times(1)).getUserWithAuthorities();
+        verify(userService, times(0)).getUserWithAuthorities();
         verify(logBatchRepository, times(1)).save(
                 argThat(logBatch -> {
-                            try {
-                                return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
-                                        && logBatch.getBatch().getId().equals(batch.getId())
-                                        && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
-                                        && logBatch.getUser().getId().equals(user.getId())
-                                        && logBatch.getReturnCode() == retourBatch.getReturnCode();
-                            } catch (ParseException e) {
-                                e.printStackTrace();
+                    try {
+                        return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
+                                && logBatch.getBatch().getId().equals(batch.getId())
+                                && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
+                                && logBatch.getUser().getId().equals(user.getId())
+                                && logBatch.getReturnCode() == retourBatch.getReturnCode();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                             }
                             return false;
                         }
                 )
         );
 
-        verify(notificationService, times(1)).createNotificationForCurrentUser(eq("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5"));
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user);
     }
 
 
