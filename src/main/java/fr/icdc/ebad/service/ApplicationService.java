@@ -131,6 +131,13 @@ public class ApplicationService {
                     Application application = applicationRepository
                             .findAllByExternalIdAndPluginId(applicationDiscoverDto.getId(), pluginId)
                             .orElse(new Application());
+                    Optional<Application> applicationByNameOptional = applicationRepository.findByName(applicationDiscoverDto.getName());
+                    if (applicationByNameOptional.isPresent()) {
+                        Application applicationByName = applicationByNameOptional.get();
+                        if (!applicationByName.getExternalId().equals(applicationDiscoverDto.getId()) || !applicationByName.getPluginId().equals(pluginId)) {
+                            continue;
+                        }
+                    }
                     application.setName(applicationDiscoverDto.getName());
                     application.setCode(applicationDiscoverDto.getCode());
                     application.setDateParametrePattern("yyyyMMdd");

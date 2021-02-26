@@ -282,6 +282,89 @@ public class ApplicationServiceTest {
     }
 
     @Test
+    public void testImportApp2() throws PluginRuntimeException {
+        List<ApplicationDiscoverDto> applicationDiscoverDtoList = new ArrayList<>();
+        ApplicationDiscoverDto applicationDiscoverDto1 = ApplicationDiscoverDto.builder()
+                .code("aa2")
+                .id("2")
+                .name("appa")
+                .build();
+        ApplicationDiscoverDto applicationDiscoverDto2 = ApplicationDiscoverDto.builder()
+                .code("aa3")
+                .id("3")
+                .name("appa3")
+                .build();
+
+        applicationDiscoverDtoList.add(applicationDiscoverDto1);
+        applicationDiscoverDtoList.add(applicationDiscoverDto2);
+
+        PluginDescriptor pluginDescriptor = new PluginDescriptor() {
+            @Override
+            public String getPluginId() {
+                return "import-plugin";
+            }
+
+            @Override
+            public String getPluginDescription() {
+                return null;
+            }
+
+            @Override
+            public String getPluginClass() {
+                return null;
+            }
+
+            @Override
+            public String getVersion() {
+                return null;
+            }
+
+            @Override
+            public String getRequires() {
+                return null;
+            }
+
+            @Override
+            public String getProvider() {
+                return null;
+            }
+
+            @Override
+            public String getLicense() {
+                return null;
+            }
+
+            @Override
+            public List<PluginDependency> getDependencies() {
+                return null;
+            }
+        };
+        PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
+        when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
+
+        Application applicationExist = Application.builder().id(2L).externalId("2").pluginId("import-plugin").name("appa").build();
+        Application applicationExist2 = Application.builder().id(3L).externalId("3").pluginId("import-plugin2").name("appa3").build();
+        when(applicationRepository.findAllByExternalIdAndPluginId(eq("2"), eq("import-plugin"))).thenReturn(Optional.of(applicationExist));
+        when(applicationRepository.findAllByExternalIdAndPluginId(eq("3"), eq("import-plugin"))).thenReturn(Optional.of(applicationExist2));
+
+
+        when(applicationRepository.findByName("appa")).thenReturn(Optional.of(applicationExist));
+        when(applicationRepository.findByName("appa3")).thenReturn(Optional.of(applicationExist2));
+        when(applicationConnectorPlugin.discoverApp()).thenReturn(applicationDiscoverDtoList);
+        applicationService.importApp();
+        verify(applicationRepository).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto1.getName())
+                        && app.getCode().equals(applicationDiscoverDto1.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto1.getId())
+        ));
+        verify(applicationRepository, times(0)).save(argThat((app) ->
+                app.getName().equals(applicationDiscoverDto2.getName())
+                        && app.getCode().equals(applicationDiscoverDto2.getCode())
+                        && app.getExternalId().equals(applicationDiscoverDto2.getId())
+        ));
+    }
+
+    @Test
     public void testUpdateApplication() throws EbadServiceException {
         Application oldApplication = Application.builder()
                 .id(1L)
