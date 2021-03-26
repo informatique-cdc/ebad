@@ -1,0 +1,17 @@
+spring.security.oauth2.client:
+  provider:
+    keycloak:
+      issuer-uri: http://localhost:8083/auth/realms/opensource
+  registration:
+    keycloak:
+      client-id: ebad
+      scope: openid
+      client-secret: tochange
+      provider: keycloak
+
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

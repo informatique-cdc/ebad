@@ -1,11 +1,11 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Authority;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.UsageApplicationId;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.config.newoauth.LocalUser;
+import fr.icdc.ebad.config.newoauth.exception.OAuth2AuthenticationProcessingException;
+import fr.icdc.ebad.config.newoauth.userinfo.OAuth2UserInfo;
+import fr.icdc.ebad.config.newoauth.userinfo.OAuth2UserInfoFactory;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.SecurityUtils;
@@ -18,14 +18,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 
 /**
  * Service class for managing users.
@@ -40,7 +43,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
 
-    public UserService(PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, UserRepository userRepository) {
+    public UserService(@Nullable PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
         this.userRepository = userRepository;
@@ -281,5 +284,39 @@ public class UserService {
         }
 
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public LocalUser processUserRegistration(String registrationId, Map<String, Object> attributes, OidcIdToken idToken, OidcUserInfo userInfo) {
+        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, attributes);
+        if (StringUtils.isEmpty(oAuth2UserInfo.getName())) {
+            throw new OAuth2AuthenticationProcessingException("Name not found from OAuth2 provider");
+        } else if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
+            throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
+        }
+//        SignUpRequest userDetails = toUserRegistrationObject(registrationId, oAuth2UserInfo);
+        User user = userRepository.findOneByEmail(oAuth2UserInfo.getEmail()).get();
+//        if (user != null) {
+//            if (!user.getProvider().equals(registrationId) && !user.getProvider().equals(SocialProvider.LOCAL.getProviderType())) {
+//                throw new OAuth2AuthenticationProcessingException(
+//                        "Looks like you're signed up with " + user.getProvider() + " account. Please use your " + user.getProvider() + " account to login.");
+//            }
+//            user = updateUser(user, oAuth2UserInfo);
+//        } else {
+//            user = registerNewUser(userDetails);
+//        }
+
+        return LocalUser.create(user, attributes, idToken, userInfo);
+    }
+
+    @Transactional
+    public LocalUser createLocalUser(String userId) {
+
+        User user = userRepository.getOne(Long.valueOf(userId));
+        List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
+        for (Authority authority : user.getAuthorities()) {
+            grantedAuthorityList.add(new SimpleGrantedAuthority(authority.getName()));
+        }
+        return new LocalUser(user.getLogin(), user.getPassword(), user.isActivated(), true, true, true, grantedAuthorityList, user);
     }
 }
