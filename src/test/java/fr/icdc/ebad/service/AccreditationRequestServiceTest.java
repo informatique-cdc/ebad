@@ -95,7 +95,7 @@ public class AccreditationRequestServiceTest {
         when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").build()));
 
         when(accreditationRequestRepository.save(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
-        doNothing().when(notificationService).createNotification(any(), any(), false);
+        doNothing().when(notificationService).createNotification(any(), any(), eq(false));
         AccreditationRequest result = accreditationRequestService.requestNewAccreditation(1L, true, false);
 
         verify(accreditationRequestRepository).save(eq(accreditationRequest));

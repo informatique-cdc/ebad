@@ -113,7 +113,7 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotification(any(), any(), false);
+        doNothing().when(notificationService).createNotification(any(), any(), eq(true));
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
         when(batchRepository.getOne(batch.getId())).thenReturn(batch);
         when(userService.getUser("user")).thenReturn(Optional.of(user));
@@ -145,7 +145,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user, false);
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user, true);
     }
 
     @Test
@@ -213,7 +213,7 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotification(any(), any(), false);
+        doNothing().when(notificationService).createNotification(any(), any(), eq(true));
 
         when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
         when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
@@ -249,7 +249,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user, false);
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user, true);
     }
 
 
