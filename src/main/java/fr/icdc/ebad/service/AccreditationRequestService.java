@@ -1,12 +1,7 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.AccreditationRequest;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.QAccreditationRequest;
-import fr.icdc.ebad.domain.StateRequest;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.security.SecurityUtils;
@@ -59,7 +54,7 @@ public class AccreditationRequestService {
                 .parallelStream()
                 .filter(UsageApplication::isCanManage)
                 .forEach(usageApplication -> {
-                    notificationService.createNotification("Une nouvelle demande d'accréditation vient d'être soumise", usageApplication.getUser());
+                    notificationService.createNotification("Une nouvelle demande d'accréditation vient d'être soumise", usageApplication.getUser(), false);
                     messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditations", sendNotif);
                 });
 

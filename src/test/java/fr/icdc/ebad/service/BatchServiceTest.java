@@ -1,11 +1,6 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.LogBatch;
-import fr.icdc.ebad.domain.Norme;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
@@ -22,13 +17,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by DTROUILLET on 12/03/2018.
@@ -123,7 +113,7 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotification(any(), any());
+        doNothing().when(notificationService).createNotification(any(), any(), false);
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
         when(batchRepository.getOne(batch.getId())).thenReturn(batch);
         when(userService.getUser("user")).thenReturn(Optional.of(user));
@@ -155,7 +145,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user);
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user, false);
     }
 
     @Test
@@ -223,7 +213,7 @@ public class BatchServiceTest {
                 )
         )).thenReturn(logBatchExpected);
 
-        doNothing().when(notificationService).createNotification(any(), any());
+        doNothing().when(notificationService).createNotification(any(), any(), false);
 
         when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
         when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
@@ -259,7 +249,7 @@ public class BatchServiceTest {
                 )
         );
 
-        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user);
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user, false);
     }
 
 

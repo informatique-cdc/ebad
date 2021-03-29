@@ -1,11 +1,7 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.AccreditationRequest;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.StateRequest;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -25,22 +21,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccreditationRequestServiceTest {
@@ -109,7 +95,7 @@ public class AccreditationRequestServiceTest {
         when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").build()));
 
         when(accreditationRequestRepository.save(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
-        doNothing().when(notificationService).createNotification(any(), any());
+        doNothing().when(notificationService).createNotification(any(), any(), false);
         AccreditationRequest result = accreditationRequestService.requestNewAccreditation(1L, true, false);
 
         verify(accreditationRequestRepository).save(eq(accreditationRequest));

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: notification_danger
+      author: dtrouillet
+      changes:
+        - addColumn:
+            tableName: t_notification
+            columns:
+              - column:
+                  name: is_danger
+                  type: boolean
+                  defaultValue: false
+                  afterColumn: user_id
+                  constraints:
+                    nullable: false
+
