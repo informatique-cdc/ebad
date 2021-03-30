@@ -22,9 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by DTROUILLET on 22/03/2018.
@@ -55,7 +53,7 @@ public class NotificationServiceTest {
         when(userRepository.findOneByLoginUser(eq("user"))).thenReturn(Optional.of(user));
         when(notificationRepository.save(any())).thenReturn(null);
 
-        notificationService.createNotificationForCurrentUser("ceci est un test");
+        notificationService.createNotification("ceci est un test", user, false);
 
         ArgumentCaptor<Notification> argument = ArgumentCaptor.forClass(Notification.class);
 
