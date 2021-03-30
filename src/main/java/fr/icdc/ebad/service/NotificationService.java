@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by dtrouillet on 21/03/2018.
@@ -30,16 +29,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public void createNotificationForCurrentUser(String message) {
-        Optional<User> user = userRepository.findOneByLoginUser(SecurityUtils.getCurrentLogin());
-        if (!user.isPresent()) {
-            throw new IllegalStateException("User not found");
-        }
-        createNotification(message, user.get());
-    }
-
-    @Transactional
-    public void createNotification(String message, User user) {
+    public void createNotification(String message, User user, boolean isDanger) {
         if (null == user) {
             throw new IllegalStateException("User not found");
         }
@@ -47,7 +37,7 @@ public class NotificationService {
         notification.setContent(message);
         notification.setCreatedDate(DateTime.now());
         notification.setReceiver(user);
-
+        notification.setDanger(isDanger);
         Notification result = notificationRepository.save(notification);
         this.messagingTemplate.convertAndSendToUser(user.getLogin(), "/queue/notifications", result);
     }
