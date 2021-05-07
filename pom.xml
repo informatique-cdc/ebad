@@ -46,7 +46,7 @@
         <metrics-spark-reporter.version>1.2</metrics-spark-reporter.version>
         <metrics-spring.version>3.1.3</metrics-spring.version>
         <run.addResources>false</run.addResources>
-        <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>3.9.0.2155</sonar-maven-plugin.version>
         <spring-security-oauth2.version>2.5.0.RELEASE</spring-security-oauth2.version>
         <usertype-core.version>7.0.0.CR1</usertype-core.version>
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
@@ -517,7 +517,7 @@
             <plugin>
                 <groupId>com.amashchenko.maven.plugin</groupId>
                 <artifactId>gitflow-maven-plugin</artifactId>
-                <version>1.14.0</version>
+                <version>1.16.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -575,12 +575,6 @@
             </plugins>
         </pluginManagement>
     </build>
-    <repositories>
-        <repository>
-            <id>bintray</id>
-            <url>https://jcenter.bintray.com/</url>
-        </repository>
-    </repositories>
     <reporting>
         <plugins>
             <plugin>
@@ -597,4 +591,11 @@
             </plugin>
         </plugins>
     </reporting>
+    <repositories>
+        <repository>
+            <id>github-public</id>
+            <url>https://public:&#103;hp_at5lTCzZAN2gVucCp2dXKCCsb1yGGf3N11MF@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
+        </repository>
+    </repositories>
 </project>
+
