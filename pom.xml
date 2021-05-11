@@ -591,13 +591,13 @@
             </plugin>
         </plugins>
     </reporting>
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>github-public</id>-->
-<!--            <url>https://public:&#103;hp_xjVpUqXiZCapNnEZO7TxTNfvspOuoe2K8UQk@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>-->
-<!--            <releases><enabled>true</enabled></releases>-->
-<!--            <snapshots><enabled>false</enabled></snapshots>-->
-<!--        </repository>-->
-<!--    </repositories>-->
+    <repositories>
+        <repository>
+            <id>github-public</id>
+            <url>https://public:&#103;hp_xjVpUqXiZCapNnEZO7TxTNfvspOuoe2K8UQk@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+    </repositories>
 </project>
 
