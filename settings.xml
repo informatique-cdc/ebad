@@ -1,0 +1,22 @@
+<settings>
+    <profiles>
+        <profile>
+            <id>github-public</id>
+            <repositories>
+                <repository>
+                    <id>github-public</id>
+                    <name>GitHub Ebad Maven Packages</name>
+                    <url>https://maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <servers>
+        <server>
+            <id>github-public</id>
+            <username>${env.GITHUB_USERNAME}</username>
+            <password>${env.GITHUB_TOKEN}</password>
+        </server>
+    </servers>
+</settings>
