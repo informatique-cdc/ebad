@@ -8,6 +8,8 @@ import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import fr.icdc.ebad.service.util.MyApplyJobFilter;
+import fr.icdc.ebad.service.util.MyJobFilter;
 import org.jobrunr.jobs.annotations.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +58,7 @@ public class BatchService {
 
 
     @Transactional
-    @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
+    @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0, jobFilters = {MyJobFilter.class, MyApplyJobFilter.class})
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
         if (params != null) {
@@ -67,7 +69,7 @@ public class BatchService {
     }
 
     @Transactional
-    @Job(name = "Batch %0, Env %1, User %2", retries = 0)
+    @Job(name = "Batch %0, Env %1, User %2", retries = 0,  jobFilters = {MyJobFilter.class, MyApplyJobFilter.class})
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
         Environnement environnement = environnementService.getEnvironnement(environnementId);
