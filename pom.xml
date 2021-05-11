@@ -594,7 +594,7 @@
     <repositories>
         <repository>
             <id>github-public</id>
-            <url>https://read_public_ebad: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@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
+            <url>https://public:&#103;hp_xjVpUqXiZCapNnEZO7TxTNfvspOuoe2K8UQk@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
         </repository>
     </repositories>
 </project>
