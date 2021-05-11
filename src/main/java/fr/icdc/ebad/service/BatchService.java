@@ -8,8 +8,7 @@ import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import fr.icdc.ebad.service.util.MyApplyJobFilter;
-import fr.icdc.ebad.service.util.MyJobFilter;
+
 import org.jobrunr.jobs.annotations.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
