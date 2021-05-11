@@ -1,0 +1,33 @@
+<settings>
+    <profiles>
+        <profile>
+            <id>github</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Ebad Maven Packages</name>
+                    <url>https://maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>false</enabled></snapshots>
+                </repository>
+            </repositories>
+
+        </profile>
+    </profiles>
+
+    <servers>
+        <server>
+            <id>github-public</id>
+            <username>read-public-ebad</username>
+            <password>&#103;&#104;&#112;&#95;&#120;&#106;&#86;&#112;&#85;&#113;&#88;&#105;&#90;&#67;&#97;&#112;&#78;&#110;&#69;&#90;&#79;&#55;&#84;&#120;&#84;&#78;&#102;&#118;&#115;&#112;&#79;&#117;&#111;&#101;&#50;&#75;&#56;&#85;&#81;&#107;</password>
+        </server>
+        <server>
+            <id>github</id>
+            <username>read-public-ebad</username>
+            <password>&#103;&#104;&#112;&#95;&#120;&#106;&#86;&#112;&#85;&#113;&#88;&#105;&#90;&#67;&#97;&#112;&#78;&#110;&#69;&#90;&#79;&#55;&#84;&#120;&#84;&#78;&#102;&#118;&#115;&#112;&#79;&#117;&#111;&#101;&#50;&#75;&#56;&#85;&#81;&#107;</password>
+        </server>
+    </servers>
+</settings>
