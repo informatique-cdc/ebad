@@ -21,5 +21,8 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Maven
-        run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml
+        run: mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent  package --file pom.xml --settings settings.xml
+        env:
+          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
