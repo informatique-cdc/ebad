@@ -10,8 +10,11 @@
                     <id>github</id>
                     <name>GitHub Ebad Maven Packages</name>
                     <url>https://maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>false</enabled></snapshots>
                 </repository>
             </repositories>
+
         </profile>
     </profiles>
 
