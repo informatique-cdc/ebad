@@ -152,9 +152,9 @@ public class SchedulingServiceTest {
                 .cron(cron)
                 .build();
 
-        when(jobScheduler.scheduleRecurrently(eq(scheduling.getId().toString()), any(JobLambda.class), eq(cron))).thenReturn("myId");
+        when(jobScheduler.scheduleRecurrently(eq(scheduling.getId().toString()), eq(cron), any(JobLambda.class))).thenReturn("myId");
         schedulingService.run(scheduling);
-        verify(jobScheduler).scheduleRecurrently(eq(scheduling.getId().toString()), any(JobLambda.class), eq(cron));
+        verify(jobScheduler).scheduleRecurrently(eq(scheduling.getId().toString()), eq(cron), any(JobLambda.class));
 
 
     }
