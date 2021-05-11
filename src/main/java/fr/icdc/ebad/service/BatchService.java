@@ -58,7 +58,7 @@ public class BatchService {
 
 
     @Transactional
-    @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0, jobFilters = {MyJobFilter.class, MyApplyJobFilter.class})
+    @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
         if (params != null) {
@@ -69,7 +69,7 @@ public class BatchService {
     }
 
     @Transactional
-    @Job(name = "Batch %0, Env %1, User %2", retries = 0,  jobFilters = {MyJobFilter.class, MyApplyJobFilter.class})
+    @Job(name = "Batch %0, Env %1, User %2", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
         Batch batch = batchRepository.getOne(batchId);
         Environnement environnement = environnementService.getEnvironnement(environnementId);
