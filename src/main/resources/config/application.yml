@@ -35,6 +35,13 @@ spring:
       hibernate.jdbc.time_zone: Europe/Paris
       hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
       hibernate.javax.cache.missing_cache_strategy: create
+  thymeleaf:
+    mode: HTML5
+    encoding: UTF-8
+  mail:
+    host: localhost
+    port: 5025
+
 management:
   endpoint:
     health:
@@ -49,6 +56,7 @@ security:
 
 logging.level:
   fr.icdc.ebad: warn
+
 
 org.jobrunr:
   background-job-server:
