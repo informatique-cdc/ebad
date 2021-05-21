@@ -38,9 +38,9 @@ spring:
   thymeleaf:
     mode: HTML5
     encoding: UTF-8
-  mail:
-    host: localhost
-    port: 5025
+#  mail:
+#    host: localhost
+#    port: 5025
 
 management:
   endpoint:
