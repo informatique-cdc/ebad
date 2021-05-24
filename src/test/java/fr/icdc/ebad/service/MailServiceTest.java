@@ -1,13 +1,15 @@
 package fr.icdc.ebad.service;
 
 import fr.icdc.ebad.config.properties.EbadProperties;
-import fr.icdc.ebad.domain.Notification;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -15,11 +17,9 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -32,6 +32,9 @@ public class MailServiceTest {
     private JavaMailSender javaMailSender;
 
     @Mock
+    private ObjectProvider<JavaMailSender> objectProviderJavaMailSender;
+
+    @Mock
     private SpringTemplateEngine thymeleafTemplateEngine;
 
     @Spy
@@ -40,9 +43,13 @@ public class MailServiceTest {
     @Spy
     private MimeMessage mimeMessage = new MimeMessage((Session) null);
 
+    @Before
+    public void init(){
+        when(objectProviderJavaMailSender.getIfAvailable()).thenReturn(javaMailSender);
+    }
 
     @Test
-    public void testMailDisable() throws MessagingException {
+    public void testMailDisable() throws MessagingException, MailException {
         ebadProperties.getEmailNotification().setEnable(false);
         mailService.sendMailAccreditation("test@test.com");
         verify(javaMailSender, never()).send(any(MimeMessage.class));
