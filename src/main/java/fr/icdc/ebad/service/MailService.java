@@ -2,6 +2,7 @@ package fr.icdc.ebad.service;
 
 
 import fr.icdc.ebad.config.properties.EbadProperties;
+import org.codehaus.janino.Java;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -20,31 +21,32 @@ import java.util.HashMap;
 public class MailService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 
-    private final ObjectProvider<JavaMailSender> emailSender;
+    private final ObjectProvider<JavaMailSender> mailSenderObjectProvider;
     private final SpringTemplateEngine thymeleafTemplateEngine;
     private final EbadProperties ebadProperties;
 
     public MailService(ObjectProvider<JavaMailSender> emailSender, SpringTemplateEngine thymeleafTemplateEngine, EbadProperties ebadProperties) {
-        this.emailSender = emailSender;
+        this.mailSenderObjectProvider = emailSender;
         this.thymeleafTemplateEngine = thymeleafTemplateEngine;
         this.ebadProperties = ebadProperties;
     }
 
     public void sendMailAccreditation(String emails) throws MessagingException {
-        System.out.println(emailSender);
-        if (emailSender.getIfAvailable() == null || !ebadProperties.getEmailNotification().isEnable()) {
+        JavaMailSender emailSender = mailSenderObjectProvider.getIfAvailable();
+        if (emailSender == null || !ebadProperties.getEmailNotification().isEnable()) {
             return;
         }
+
         Context thymeleafContext = new Context();
         thymeleafContext.setVariables(new HashMap<>());
         String htmlBody = thymeleafTemplateEngine.process("mail-accreditation.html", thymeleafContext);
-        MimeMessage message = emailSender.getIfAvailable().createMimeMessage();
+        MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setTo(emails);
         helper.setFrom(ebadProperties.getEmailNotification().getFrom());
         helper.setSubject("EBAD - Demande accréditation en attente");
         helper.setText(htmlBody, true);
-        emailSender.getIfAvailable().send(message);
+        emailSender.send(message);
 
         LOGGER.debug("mail is sent to " + emails);
     }
