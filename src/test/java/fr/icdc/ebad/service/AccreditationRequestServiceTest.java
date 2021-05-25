@@ -21,6 +21,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.mail.MessagingException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -57,6 +58,9 @@ public class AccreditationRequestServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private MailService mailService;
+
     @Test(expected = EbadServiceException.class)
     public void requestNewAccreditationNoApplication() throws EbadServiceException {
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.empty());
@@ -70,12 +74,12 @@ public class AccreditationRequestServiceTest {
     }
 
     @Test
-    public void requestNewAccreditation() throws EbadServiceException {
+    public void requestNewAccreditation() throws EbadServiceException, MessagingException {
         AccreditationRequest accreditationRequest = AccreditationRequest.builder()
-                .user(User.builder().login("testlogin").build())
+                .user(User.builder().login("testlogin").email("test@test.fr").build())
                 .application(
                         Application.builder().id(1L).usageApplications(
-                                Set.of(UsageApplication.builder().canManage(true).user(User.builder().build()).build())
+                                Set.of(UsageApplication.builder().canManage(true).user(User.builder().email("modo@test.fr").build()).build())
                         ).build())
                 .state(StateRequest.SENT)
                 .wantManage(true)
@@ -84,7 +88,7 @@ public class AccreditationRequestServiceTest {
 
         AccreditationRequest accreditationRequestWithId = AccreditationRequest.builder()
                 .id(99L)
-                .user(User.builder().login("testlogin").build())
+                .user(User.builder().login("testlogin").email("test@test.fr").build())
                 .application(Application.builder().id(1L).build())
                 .state(StateRequest.SENT)
                 .wantManage(true)
@@ -92,7 +96,7 @@ public class AccreditationRequestServiceTest {
                 .build();
 
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(accreditationRequest.getApplication()));
-        when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").build()));
+        when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").email("test@test.fr").build()));
 
         when(accreditationRequestRepository.save(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
         doNothing().when(notificationService).createNotification(any(), any(), eq(false));
@@ -100,6 +104,48 @@ public class AccreditationRequestServiceTest {
 
         verify(accreditationRequestRepository).save(eq(accreditationRequest));
         verify(messagingTemplate).convertAndSendToUser(any(), eq("/queue/accreditations"), any());
+        verify(mailService).sendMailAccreditation(eq("modo@test.fr"));
+
+        assertEquals(accreditationRequestWithId, result);
+
+    }
+
+    @Test
+    public void requestNewAccreditationErrorMail() throws EbadServiceException, MessagingException {
+        AccreditationRequest accreditationRequest = AccreditationRequest.builder()
+                .user(User.builder().login("testlogin").email("test@test.fr").build())
+                .application(
+                        Application.builder().id(1L).usageApplications(
+                                Set.of(UsageApplication.builder().canManage(true).user(User.builder().email("modo@test.fr").build()).build())
+                        ).build())
+                .state(StateRequest.SENT)
+                .wantManage(true)
+                .wantUse(false)
+                .build();
+
+        AccreditationRequest accreditationRequestWithId = AccreditationRequest.builder()
+                .id(99L)
+                .user(User.builder().login("testlogin").email("test@test.fr").build())
+                .application(Application.builder().id(1L).build())
+                .state(StateRequest.SENT)
+                .wantManage(true)
+                .wantUse(false)
+                .build();
+
+        when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(accreditationRequest.getApplication()));
+        when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").email("test@test.fr").build()));
+
+        when(accreditationRequestRepository.save(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
+
+        doThrow(MessagingException.class).when(mailService).sendMailAccreditation(eq("modo@test.fr"));
+
+        doNothing().when(notificationService).createNotification(any(), any(), eq(false));
+        AccreditationRequest result = accreditationRequestService.requestNewAccreditation(1L, true, false);
+
+        verify(accreditationRequestRepository).save(eq(accreditationRequest));
+        verify(messagingTemplate).convertAndSendToUser(any(), eq("/queue/accreditations"), any());
+        verify(mailService).sendMailAccreditation(eq("modo@test.fr"));
+
         assertEquals(accreditationRequestWithId, result);
 
     }

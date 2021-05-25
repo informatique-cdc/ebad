@@ -9,6 +9,8 @@ import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.AccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
 import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,23 +18,29 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+
 
 @Service
 public class AccreditationRequestService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccreditationRequestService.class);
+
     private final AccreditationRequestRepository accreditationRequestRepository;
     private final UserService userService;
     private final ApplicationRepository applicationRepository;
     private final NotificationService notificationService;
     private final SimpMessagingTemplate messagingTemplate;
     private final MapperFacade mapperFacade;
+    private final MailService mailService;
 
-    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository, NotificationService notificationService, SimpMessagingTemplate messagingTemplate, MapperFacade mapperFacade) {
+    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository, NotificationService notificationService, SimpMessagingTemplate messagingTemplate, MapperFacade mapperFacade, MailService mailService) {
         this.accreditationRequestRepository = accreditationRequestRepository;
         this.userService = userService;
         this.applicationRepository = applicationRepository;
         this.notificationService = notificationService;
         this.messagingTemplate = messagingTemplate;
         this.mapperFacade = mapperFacade;
+        this.mailService = mailService;
     }
 
     @Transactional
@@ -56,8 +64,12 @@ public class AccreditationRequestService {
                 .forEach(usageApplication -> {
                     notificationService.createNotification("Une nouvelle demande d'accréditation vient d'être soumise", usageApplication.getUser(), false);
                     messagingTemplate.convertAndSendToUser(usageApplication.getUser().getLogin(), "/queue/accreditations", sendNotif);
+                    try {
+                        mailService.sendMailAccreditation(usageApplication.getUser().getEmail());
+                    } catch (MessagingException e) {
+                        LOGGER.warn("Error occured when try to send accreditation email to "+usageApplication.getUser().getEmail(),e);
+                    }
                 });
-
         return result;
     }
 

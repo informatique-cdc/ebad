@@ -15,6 +15,7 @@ public class EbadProperties {
     private EbadProperties.SecurityProperties security = new EbadProperties.SecurityProperties();
     private EbadProperties.SshProperties ssh = new EbadProperties.SshProperties();
     private EbadProperties.PluginProperties plugin = new EbadProperties.PluginProperties();
+    private EbadProperties.EmailNotificationProperties emailNotification = new EbadProperties.EmailNotificationProperties();
 
     @Getter
     @Setter
@@ -73,5 +74,12 @@ public class EbadProperties {
         private String privateKeyPath;
         private String privateKeyPassphrase;
 
+    }
+
+    @Getter
+    @Setter
+    public static class EmailNotificationProperties {
+        private boolean enable = true;
+        private String from = "ebad@localhost";
     }
 }
