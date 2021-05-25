@@ -3,10 +3,9 @@ package fr.icdc.ebad.service;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mail.MailException;
@@ -45,7 +44,7 @@ public class MailServiceTest {
 
     @Before
     public void init(){
-        when(objectProviderJavaMailSender.getIfAvailable()).thenReturn(javaMailSender);
+        doReturn(javaMailSender).when(objectProviderJavaMailSender).getIfAvailable();
     }
 
     @Test
@@ -56,7 +55,7 @@ public class MailServiceTest {
     }
 
     @Test
-    public void testMail() throws MessagingException, IOException {
+    public void testMail() throws MessagingException {
         ebadProperties.getEmailNotification().setEnable(true);
         ebadProperties.getEmailNotification().setFrom("ebad@localhost");
 
