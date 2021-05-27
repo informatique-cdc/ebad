@@ -257,10 +257,10 @@ public class ApplicationResourceTest {
         restMvc.perform(builder)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[1].id", is(2)))
-                .andExpect(jsonPath("$[0].login", is("test1")))
-                .andExpect(jsonPath("$[1].login", is("test2")));
+                .andExpect(jsonPath("$[0].id", is(2)))
+                .andExpect(jsonPath("$[1].id", is(1)))
+                .andExpect(jsonPath("$[0].login", is("test2")))
+                .andExpect(jsonPath("$[1].login", is("test1")));
     }
 
     @Test
@@ -280,10 +280,10 @@ public class ApplicationResourceTest {
         restMvc.perform(builder)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[1].id", is(2)))
-                .andExpect(jsonPath("$[0].login", is("test1")))
-                .andExpect(jsonPath("$[1].login", is("test2")));
+                .andExpect(jsonPath("$[0].id", is(2)))
+                .andExpect(jsonPath("$[1].id", is(1)))
+                .andExpect(jsonPath("$[0].login", is("test2")))
+                .andExpect(jsonPath("$[1].login", is("test1")));
     }
 
     @Test
