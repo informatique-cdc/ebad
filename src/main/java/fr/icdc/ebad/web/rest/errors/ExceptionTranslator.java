@@ -88,12 +88,12 @@ public class ExceptionTranslator implements ProblemHandling {
 
         BindingResult result = ex.getBindingResult();
         List<FieldErrorVM> fieldErrors = result.getFieldErrors().stream()
-            .map(f -> new FieldErrorVM(f.getObjectName(), f.getField(), f.getCode()))
+            .map(f -> new FieldErrorVM(f.getObjectName(), f.getField(), f.getDefaultMessage()))
             .collect(Collectors.toList());
 
         Problem problem = Problem.builder()
             .withType(ErrorConstants.CONSTRAINT_VIOLATION_TYPE)
-            .withTitle("Method argument not valid")
+            .withTitle(messageSource.getMessage(ErrorConstants.ERR_VALIDATION, null, LocaleContextHolder.getLocale()))
             .withStatus(defaultConstraintViolationStatus())
             .with(MESSAGE_KEY, messageSource.getMessage(ErrorConstants.ERR_VALIDATION, null, LocaleContextHolder.getLocale()))
             .with(FIELD_ERRORS_KEY, fieldErrors)
@@ -124,17 +124,6 @@ public class ExceptionTranslator implements ProblemHandling {
                 .build();
         return create(ex, problem, request);
     }
-
-//    @ExceptionHandler(EbadValidationException.class)
-//    public ResponseEntity<Problem> handleBadRequest(EbadValidationException ex, NativeWebRequest request) {
-//        LOGGER.error("EbadValidationException !", ex);
-//
-//        Problem problem = Problem.builder()
-//                .withStatus(Status.BAD_REQUEST)
-//                .with(MESSAGE_KEY, ex.getBindingResult().)
-//                .build();
-//        return create(ex, problem, request);
-//    }
 
     @ExceptionHandler(ConcurrencyFailureException.class)
     public ResponseEntity<Problem> handleConcurrencyFailure(ConcurrencyFailureException ex, NativeWebRequest request) {

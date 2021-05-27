@@ -22,6 +22,6 @@ public class CreationAccreditationRequestDto {
     @NotNull
     private boolean wantUse;
 
-    @NotNull
+    @NotNull(message = "{error.validation.notnull.application}")
     private Long applicationId;
 }

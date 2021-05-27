@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AccreditationValidator {
-    String message() default "{error.accreditation}";
+    String message() default "{error.validation.accreditation}";
     Class<?>[] groups() default { };
     Class<? extends Payload>[] payload() default { };
 }
