@@ -6,8 +6,6 @@ async:
     maxPoolSize: 50
     queueCapacity: 10000
 spring:
-    profiles:
-        active: test
     datasource:
         dataSourceClassName: org.h2.Driver
         url: jdbc:h2:mem:ebad;DB_CLOSE_DELAY=-1
@@ -15,7 +13,6 @@ spring:
         serverName:
         username:
         password:
-        data: classpath:nop.sql
 
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -32,7 +29,9 @@ spring:
             hibernate.generate_statistics: true
             javax.persistence.schema-generation.database.action: drop-and-create
             javax.persistence.schema-generation.drop-source: script-then-metadata
+            javax.persistence.schema-generation.create-source: metadata-then-script
             javax.persistence.schema-generation.drop-script-source: drop-tables.sql
+            javax.persistence.schema-generation.create-script-source: nop.sql
     main:
         allow-bean-definition-overriding: true
         banner-mode: "off"

@@ -387,7 +387,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>2.3.1.RELEASE</version>
+            <version>2.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -452,7 +452,7 @@
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-commons</artifactId>
-                <version>2.3.1.RELEASE</version>
+                <version>2.5.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
