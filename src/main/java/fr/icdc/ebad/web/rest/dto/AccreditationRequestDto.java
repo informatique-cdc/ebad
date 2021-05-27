@@ -1,6 +1,7 @@
 package fr.icdc.ebad.web.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.icdc.ebad.web.rest.validator.AccreditationValidator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
