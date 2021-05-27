@@ -50,7 +50,7 @@
         <spring-security-oauth2.version>2.5.0.RELEASE</spring-security-oauth2.version>
         <usertype-core.version>7.0.0.CR1</usertype-core.version>
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <pf4j-spring.version>0.6.0</pf4j-spring.version>
+        <pf4j-spring.version>0.7.0</pf4j-spring.version>
         <pf4j.version>3.6.0</pf4j.version>
         <jobrunr.version>3.0.0</jobrunr.version>
         <git.user />
