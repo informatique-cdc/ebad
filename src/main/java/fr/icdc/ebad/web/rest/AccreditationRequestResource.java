@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import javax.validation.Valid;
 
 @RestController
@@ -52,10 +53,7 @@ public class AccreditationRequestResource {
 
     @PutMapping
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public ResponseEntity<AccreditationRequestDto> createAccreditationRequest(@RequestBody @Valid CreationAccreditationRequestDto creationAccreditationRequestDto, BindingResult result) throws EbadServiceException {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<AccreditationRequestDto> createAccreditationRequest(@RequestBody @Valid CreationAccreditationRequestDto creationAccreditationRequestDto) throws EbadServiceException {
         AccreditationRequest accreditationRequest = accreditationRequestService.requestNewAccreditation(creationAccreditationRequestDto.getApplicationId(), creationAccreditationRequestDto.isWantManage(), creationAccreditationRequestDto.isWantUse());
         return ResponseEntity.ok(mapperFacade.map(accreditationRequest, AccreditationRequestDto.class));
     }

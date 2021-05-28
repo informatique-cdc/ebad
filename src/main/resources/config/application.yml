@@ -36,7 +36,7 @@ spring:
       hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
       hibernate.javax.cache.missing_cache_strategy: create
   thymeleaf:
-    mode: HTML5
+    mode: HTML
     encoding: UTF-8
 #  mail:
 #    host: localhost
@@ -55,7 +55,8 @@ security:
     enabled: false
 
 logging.level:
-  fr.icdc.ebad: warn
+  fr.icdc.ebad: debug
+  root: info
 
 
 org.jobrunr:
@@ -63,4 +64,3 @@ org.jobrunr:
     enabled: true
     poll-interval-in-seconds: 2
   dashboard.enabled: true
-
