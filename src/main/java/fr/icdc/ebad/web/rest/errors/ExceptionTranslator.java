@@ -4,6 +4,8 @@ package fr.icdc.ebad.web.rest.errors;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -38,8 +40,13 @@ public class ExceptionTranslator implements ProblemHandling {
 	private static final String MESSAGE_KEY = "message";
 	private static final String VIOLATIONS_KEY = "violations";
 	private static final String PATH_KEY = "path";
+    private final MessageSource messageSource;
 
-	/**
+    public ExceptionTranslator(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
+    /**
      * Post-process Problem payload to add the message key for front-end if needed
      */
     @Override
@@ -81,14 +88,14 @@ public class ExceptionTranslator implements ProblemHandling {
 
         BindingResult result = ex.getBindingResult();
         List<FieldErrorVM> fieldErrors = result.getFieldErrors().stream()
-            .map(f -> new FieldErrorVM(f.getObjectName(), f.getField(), f.getCode()))
+            .map(f -> new FieldErrorVM(f.getObjectName(), f.getField(), f.getDefaultMessage()))
             .collect(Collectors.toList());
 
         Problem problem = Problem.builder()
             .withType(ErrorConstants.CONSTRAINT_VIOLATION_TYPE)
-            .withTitle("Method argument not valid")
+            .withTitle(messageSource.getMessage(ErrorConstants.ERR_VALIDATION, null, LocaleContextHolder.getLocale()))
             .withStatus(defaultConstraintViolationStatus())
-            .with(MESSAGE_KEY, ErrorConstants.ERR_VALIDATION)
+            .with(MESSAGE_KEY, messageSource.getMessage(ErrorConstants.ERR_VALIDATION, null, LocaleContextHolder.getLocale()))
             .with(FIELD_ERRORS_KEY, fieldErrors)
             .build();
         return create(ex, problem, request);
@@ -102,7 +109,7 @@ public class ExceptionTranslator implements ProblemHandling {
                 .withStatus(Status.INTERNAL_SERVER_ERROR)
                 .withTitle("Error")
                 .withDetail(ex.getMessage())
-                .with(MESSAGE_KEY, ErrorConstants.ERR_SERVER_FAILURE)
+                .with(MESSAGE_KEY, messageSource.getMessage(ErrorConstants.ERR_SERVER_FAILURE, null, LocaleContextHolder.getLocale()))
                 .build();
         return create(ex, problem, request);
     }

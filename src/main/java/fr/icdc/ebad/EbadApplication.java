@@ -55,20 +55,6 @@ public class EbadApplication {
      */
     @PostConstruct
     public void initApplication() {
-        try {
-            Field field = Class.forName("javax.crypto.JceSecurity").getDeclaredField("isRestricted");
-
-            if (Modifier.isFinal(field.getModifiers())) {
-                Field modifiers = Field.class.getDeclaredField("modifiers");
-                modifiers.setAccessible(true);
-                modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            }
-            field.setAccessible(true);
-            field.setBoolean(null, false);
-            field.setAccessible(false);
-        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
-        	APPLICATION_LOGGER.error("Erreur when disabling JceSecurity", e);
-        }
         APPLICATION_LOGGER.info("Version Application : {}", Application.class.getPackage().getImplementationVersion());
         if (env.getActiveProfiles().length == 0) {
         	APPLICATION_LOGGER.warn("No Spring profile configured, running with default configuration");

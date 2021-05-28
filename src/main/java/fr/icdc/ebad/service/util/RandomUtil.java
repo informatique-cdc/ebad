@@ -24,14 +24,6 @@ public final class RandomUtil {
         return RandomStringUtils.random(DEF_COUNT, 0, 0, true, true, null, SECURE_RANDOM);
     }
 
-    /**
-     * Generates a password.
-     *
-     * @return the generated password
-     */
-    public static String generatePassword() {
-        return generateRandomAlphanumericString();
-    }
 
     /**
      * Generates an activation key.
