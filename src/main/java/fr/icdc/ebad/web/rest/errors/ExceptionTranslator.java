@@ -9,6 +9,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -110,6 +111,19 @@ public class ExceptionTranslator implements ProblemHandling {
                 .withTitle("Error")
                 .withDetail(ex.getMessage())
                 .with(MESSAGE_KEY, messageSource.getMessage(ErrorConstants.ERR_SERVER_FAILURE, null, LocaleContextHolder.getLocale()))
+                .build();
+        return create(ex, problem, request);
+    }
+
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    public ResponseEntity<Problem> handleInsufficientAuthenticationException(InsufficientAuthenticationException ex, NativeWebRequest request) {
+        LOGGER.warn("InsufficientAuthenticationException ! {}", ex.getMessage());
+
+        Problem problem = Problem.builder()
+                .withStatus(Status.FORBIDDEN)
+                .withTitle("Error")
+                .withDetail(ex.getMessage())
+                .with(MESSAGE_KEY, messageSource.getMessage(ErrorConstants.ERR_FORBIDDEN, null, LocaleContextHolder.getLocale()))
                 .build();
         return create(ex, problem, request);
     }

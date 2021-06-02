@@ -18,7 +18,7 @@ import static org.springframework.messaging.simp.SimpMessageType.UNSUBSCRIBE;
 public class SocketBrokerConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic/", "/queue/");
+        config.enableSimpleBroker("/topic", "/queue/");
         config.setApplicationDestinationPrefixes("/ebad");
     }
 
@@ -32,6 +32,7 @@ public class SocketBrokerConfig extends AbstractSecurityWebSocketMessageBrokerCo
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
         messages
                 .simpTypeMatchers(CONNECT, UNSUBSCRIBE, DISCONNECT).permitAll()
+                .simpDestMatchers("/topic/env/{envId}").access("@permissionEnvironnement.canRead(#envId, principal)")
                 .anyMessage().authenticated();
     }
 

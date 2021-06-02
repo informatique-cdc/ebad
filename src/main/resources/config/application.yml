@@ -4,6 +4,7 @@ server:
     context-path: /ebad
 
 spring:
+  mvc.async.request-timeout: -1
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Europe/Paris

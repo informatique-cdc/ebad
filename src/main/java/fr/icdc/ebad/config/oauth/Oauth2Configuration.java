@@ -91,6 +91,7 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
                 .antMatchers("/v3/api-docs**").permitAll()
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers("/batchs/state/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .cors();
@@ -115,17 +116,5 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
         return userInfoTokenServices;
     }
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200"));
-        configuration.setAllowedMethods(Lists.newArrayList("GET", "POST", "OPTIONS", "HEAD", "PUT", "PATCH", "DELETE"));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Lists.newArrayList("x-xsrf-token", "XSRF-TOKEN"));
-        configuration.setMaxAge(10L);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 
 }

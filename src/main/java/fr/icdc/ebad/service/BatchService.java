@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +45,9 @@ public class BatchService {
     private final LogBatchRepository logBatchRepository;
     private final NotificationService notificationService;
     private final NormeService normeService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public BatchService(LogBatchRepository logBatchRepository, ShellService shellService, BatchRepository batchRepository, EnvironnementService environnementService, UserService userService, NotificationService notificationService, NormeService normeService) {
+    public BatchService(LogBatchRepository logBatchRepository, ShellService shellService, BatchRepository batchRepository, EnvironnementService environnementService, UserService userService, NotificationService notificationService, NormeService normeService, SimpMessagingTemplate messagingTemplate) {
         this.logBatchRepository = logBatchRepository;
         this.shellService = shellService;
         this.batchRepository = batchRepository;
@@ -53,12 +55,15 @@ public class BatchService {
         this.userService = userService;
         this.notificationService = notificationService;
         this.normeService = normeService;
+        this.messagingTemplate = messagingTemplate;
     }
 
 
     @Transactional
     @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
+//        System.out.println("DAMIEN SEND MESSAGE TO /topic/env/"+environnementId);
+//        this.messagingTemplate.convertAndSend("/topic/env/"+environnementId, batchId+" RUN");
         Batch batch = batchRepository.getOne(batchId);
         if (params != null) {
             batch.setParams(params);
@@ -70,6 +75,8 @@ public class BatchService {
     @Transactional
     @Job(name = "Batch %0, Env %1, User %2", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
+//        System.out.println("DAMIEN SEND MESSAGE TO /topic/env/"+environnementId);
+//        this.messagingTemplate.convertAndSend("/topic/env/"+environnementId, batchId+" RUN");
         Batch batch = batchRepository.getOne(batchId);
         Environnement environnement = environnementService.getEnvironnement(environnementId);
         return runBatch(batch, environnement, login);
@@ -78,6 +85,8 @@ public class BatchService {
 
     @Transactional
     public RetourBatch runBatch(Batch batch, Environnement environnement, String login) throws EbadServiceException {
+        System.out.println("DAMIEN SEND MESSAGE TO /topic/env/"+environnement.getId());
+        this.messagingTemplate.convertAndSend("/topic/env/"+environnement.getId(), batch.getId()+" RUN");
 
         String params = "";
         if (null != batch.getParams()) {
@@ -112,6 +121,9 @@ public class BatchService {
             logBatch.setUser(user.orElseThrow());
             logBatchRepository.save(logBatch);
         }
+
+        System.out.println("DAMIEN FINISH    MESSAGE TO /topic/env/"+environnement.getId());
+        this.messagingTemplate.convertAndSend("/topic/env/"+environnement.getId(), batch.getId()+" FINISH");
 
         return batchRetour;
     }
