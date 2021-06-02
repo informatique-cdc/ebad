@@ -91,7 +91,6 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
                 .antMatchers("/v3/api-docs**").permitAll()
                 .antMatchers("/swagger-resources/configuration/ui").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/batchs/state/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .cors();

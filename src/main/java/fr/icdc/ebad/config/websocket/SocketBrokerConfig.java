@@ -32,7 +32,6 @@ public class SocketBrokerConfig extends AbstractSecurityWebSocketMessageBrokerCo
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
         messages
                 .simpTypeMatchers(CONNECT, UNSUBSCRIBE, DISCONNECT).permitAll()
-                .simpDestMatchers("/topic/env/{envId}").access("@permissionEnvironnement.canRead(#envId, principal)")
                 .anyMessage().authenticated();
     }
 

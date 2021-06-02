@@ -22,6 +22,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+
+import java.time.Duration;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/batchs")
@@ -104,5 +108,14 @@ public class BatchResource {
         LOGGER.debug("REST request to delete a batch");
         batchService.deleteBatch(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("@permissionEnvironnement.canRead(#id, principal)")
+    @GetMapping(path = "/state/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> streamFlux(@PathVariable Long id) {
+        return Flux.interval(Duration.ofSeconds(5))
+                .map(sequence -> {
+                    return "Flux - " + id + " " + LocalTime.now().toString();
+                });
     }
 }
