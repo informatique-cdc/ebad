@@ -50,10 +50,12 @@ public class ChaineService {
         retourChaine.setLogOut("");
         RetourBatch retourBatch;
         for (ChaineAssociation chaineAssociation : chaine.getChaineAssociations()) {
+            batchService.addJob(chaine.getEnvironnement().getId(), chaineAssociation.getBatch().getId());
             chaineAssociation.getBatch().setParams(chaineAssociation.getBatch().getDefaultParam());
             retourBatch = batchService.runBatch(chaineAssociation.getBatch(), chaine.getEnvironnement(), login);
             retourChaine.setLogOut(retourChaine.getLogOut().concat(" " + retourBatch.getLogOut()));
             retourChaine.setExecutionTime(retourChaine.getExecutionTime() + retourBatch.getExecutionTime());
+            batchService.deleteJob(chaine.getEnvironnement().getId(), chaineAssociation.getBatch().getId());
             if (retourBatch.getReturnCode() > 0) {
                 retourChaine.setReturnCode(retourBatch.getReturnCode());
                 return retourChaine;

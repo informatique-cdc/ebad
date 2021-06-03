@@ -5,6 +5,7 @@ import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.BatchService;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
+import fr.icdc.ebad.web.rest.dto.CurrentJobDto;
 import fr.icdc.ebad.web.rest.dto.JobDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
+import org.jobrunr.storage.StorageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -25,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
-import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/batchs")
@@ -112,10 +113,8 @@ public class BatchResource {
 
     @PreAuthorize("@permissionEnvironnement.canRead(#id, principal)")
     @GetMapping(path = "/state/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> streamFlux(@PathVariable Long id) {
-        return Flux.interval(Duration.ofSeconds(5))
-                .map(sequence -> {
-                    return "Flux - " + id + " " + LocalTime.now().toString();
-                });
+    public Flux<CurrentJobDto> streamFlux(@PathVariable Long id) {
+        return Flux.interval(Duration.ofSeconds(1))
+                .map(sequence -> CurrentJobDto.builder().batchs(batchService.getCurrentJobForEnv(id)).build());
     }
 }
