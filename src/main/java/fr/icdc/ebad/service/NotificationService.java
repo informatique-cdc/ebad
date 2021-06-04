@@ -3,7 +3,6 @@ package fr.icdc.ebad.service;
 import fr.icdc.ebad.domain.Notification;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.NotificationRepository;
-import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import org.joda.time.DateTime;
 import org.springframework.data.domain.Sort;
@@ -19,12 +18,10 @@ import java.util.List;
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public NotificationService(NotificationRepository notificationRepository, UserRepository userRepository, SimpMessagingTemplate messagingTemplate) {
+    public NotificationService(NotificationRepository notificationRepository, SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
-        this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
     }
 

@@ -10,7 +10,9 @@ public class ThreadPoolTaskSchedulerConfig {
     public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
         threadPoolTaskScheduler.setPoolSize(50000);
-        threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskSchedulerBatch");
+        threadPoolTaskScheduler.setThreadNamePrefix("BATCH-");
         return threadPoolTaskScheduler;
     }
+
+
 }
