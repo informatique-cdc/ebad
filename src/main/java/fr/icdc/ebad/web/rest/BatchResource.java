@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
-import org.jobrunr.storage.StorageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
