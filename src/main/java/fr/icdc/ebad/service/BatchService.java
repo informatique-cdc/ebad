@@ -8,7 +8,6 @@ import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
-
 import org.jobrunr.jobs.annotations.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class BatchService {
@@ -45,6 +41,8 @@ public class BatchService {
     private final NotificationService notificationService;
     private final NormeService normeService;
 
+    private static final Map<Long, List<Long>> currentJob = new HashMap<>();
+
     public BatchService(LogBatchRepository logBatchRepository, ShellService shellService, BatchRepository batchRepository, EnvironnementService environnementService, UserService userService, NotificationService notificationService, NormeService normeService) {
         this.logBatchRepository = logBatchRepository;
         this.shellService = shellService;
@@ -55,30 +53,54 @@ public class BatchService {
         this.normeService = normeService;
     }
 
+    public void addJob(Long env, Long batch){
+        LOGGER.debug("addJob {} on env {}", batch, env);
+        List<Long> currentJobs = currentJob.getOrDefault(env, new ArrayList<>());
+        currentJobs.add(batch);
+        currentJob.put(env, currentJobs);
+    }
+
+    public void deleteJob(Long env, Long batch) {
+        LOGGER.debug("deleteJob {} on env {}", batch, env);
+        List<Long> currentJobs = currentJob.getOrDefault(env, new ArrayList<>());
+        currentJobs.remove(batch);
+        currentJob.put(env, currentJobs);
+    }
+
+    public List<Long> getCurrentJobForEnv(Long env) {
+        LOGGER.debug("getCurrentJobForEnv on env {}",env);
+        return currentJob.getOrDefault(env, new ArrayList<>());
+    }
+
 
     @Transactional
     @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
+        addJob(environnementId, batchId);
         Batch batch = batchRepository.getOne(batchId);
         if (params != null) {
             batch.setParams(params);
         }
         Environnement environnement = environnementService.getEnvironnement(environnementId);
-        return runBatch(batch, environnement, login);
+        RetourBatch retourBatch = runBatch(batch, environnement, login);
+        deleteJob(environnementId, batchId);
+        return retourBatch;
     }
 
     @Transactional
     @Job(name = "Batch %0, Env %1, User %2", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
+        addJob(environnementId, batchId);
         Batch batch = batchRepository.getOne(batchId);
         Environnement environnement = environnementService.getEnvironnement(environnementId);
-        return runBatch(batch, environnement, login);
+        RetourBatch retourBatch = runBatch(batch, environnement, login);
+        deleteJob(environnementId, batchId);
+        return retourBatch;
     }
 
 
     @Transactional
     public RetourBatch runBatch(Batch batch, Environnement environnement, String login) throws EbadServiceException {
-
         String params = "";
         if (null != batch.getParams()) {
             params = batch.getParams();

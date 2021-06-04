@@ -284,6 +284,105 @@ public class BatchServiceTest {
     }
 
     @Test
+    public void runBatchWithoutParams() throws Exception {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        String commandExpected = "/home/app1/shell/Itest.ksh 20180201 toto ";
+
+        User user = new User();
+        user.setId(1L);
+
+
+        Batch batch = new Batch();
+        batch.setPath("test.ksh");
+        batch.setName("testName");
+        batch.setId(1L);
+        batch.setParams("${DATE_TRAITEMENT} toto");
+
+        Norme norme = new Norme();
+        norme.setName("norme 1");
+        norme.setPathShell("shell/");
+        norme.setCommandLine("/bin/bash $1");
+
+        Application application = new Application();
+        application.setId(1L);
+        application.setDateParametrePattern("yyyyMMdd");
+        application.setCode("AA1");
+
+        Environnement environnementIntegration = new Environnement();
+        environnementIntegration.setId(1L);
+        environnementIntegration.setPrefix("I");
+        environnementIntegration.setApplication(application);
+        environnementIntegration.setHomePath("/home/app1");
+        environnementIntegration.setNorme(norme);
+        environnementIntegration.setName("testEnv");
+
+        RetourBatch retourBatch = new RetourBatch();
+        retourBatch.setReturnCode(5);
+
+
+        LogBatch logBatchExpected = new LogBatch();
+        logBatchExpected.setId(1L);
+        when(environnementService.getDateTraiement(
+                eq(environnementIntegration.getId()))
+        ).thenReturn(simpleDateFormat.parse("01/02/2018"));
+
+        when(shellService.runCommand(
+                eq(environnementIntegration), eq(commandExpected))
+        ).thenReturn(retourBatch);
+
+        when(logBatchRepository.save(
+                argThat(logBatch -> {
+                            try {
+                                return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
+                                        && logBatch.getBatch().getId().equals(batch.getId())
+                                        && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
+                                        && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getReturnCode() == retourBatch.getReturnCode();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            return false;
+                        }
+                )
+        )).thenReturn(logBatchExpected);
+
+        doNothing().when(notificationService).createNotification(any(), any(), eq(true));
+        when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
+        when(batchRepository.getOne(batch.getId())).thenReturn(batch);
+        when(userService.getUser("user")).thenReturn(Optional.of(user));
+        when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), "user");
+
+        verify(environnementService, times(1)).getDateTraiement(
+                argThat(environnement -> environnementIntegration.getId().equals(environnement))
+        );
+
+        verify(shellService, times(1)).runCommand(
+                argThat(environnement -> environnement.getId().equals(environnementIntegration.getId())
+                ), eq(commandExpected)
+        );
+
+        verify(logBatchRepository,times(1)).save(
+                argThat(logBatch -> {
+                            try {
+                                return logBatch.getEnvironnement().getId().equals(environnementIntegration.getId())
+                                        && logBatch.getBatch().getId().equals(batch.getId())
+                                        && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
+                                        && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getReturnCode() == retourBatch.getReturnCode();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            return false;
+                        }
+                )
+        );
+
+        verify(notificationService, times(1)).createNotification("[AA1] Le batch testName sur l'environnement testEnv vient de se terminer avec le code retour 5", user, true);
+    }
+
+    @Test
     public void testSaveBatch() {
         Batch batch = new Batch();
         batch.setId(1L);
@@ -323,5 +422,21 @@ public class BatchServiceTest {
 
         verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(batchRepository).delete(eq(batch));
+    }
+
+    @Test
+    public void testCurrentJob(){
+        batchService.addJob(10L, 12L);
+        batchService.addJob(11L, 12L);
+        assertEquals((Long)12L, batchService.getCurrentJobForEnv(10L).get(0));
+        assertEquals((Long)12L, batchService.getCurrentJobForEnv(10L).get(0));
+        batchService.deleteJob(10L, 12L);
+        assertEquals(0, batchService.getCurrentJobForEnv(10L).size());
+
+        batchService.addJob(12L, 13L);
+        batchService.addJob(12L, 13L);
+        assertEquals(2, batchService.getCurrentJobForEnv(12L).size());
+        batchService.deleteJob(12L, 13L);
+        assertEquals(1, batchService.getCurrentJobForEnv(12L).size());
     }
 }

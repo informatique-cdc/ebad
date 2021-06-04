@@ -5,6 +5,7 @@ import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.BatchService;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
+import fr.icdc.ebad.web.rest.dto.CurrentJobDto;
 import fr.icdc.ebad.web.rest.dto.JobDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
@@ -21,15 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/batchs")
@@ -112,5 +108,12 @@ public class BatchResource {
         LOGGER.debug("REST request to delete a batch");
         batchService.deleteBatch(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("@permissionEnvironnement.canRead(#id, principal)")
+    @GetMapping(path = "/state/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<CurrentJobDto> streamFlux(@PathVariable Long id) {
+        return Flux.interval(Duration.ofSeconds(1))
+                .map(sequence -> CurrentJobDto.builder().batchs(batchService.getCurrentJobForEnv(id)).build());
     }
 }
