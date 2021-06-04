@@ -121,7 +121,7 @@ public class ExceptionTranslator implements ProblemHandling {
 
         Problem problem = Problem.builder()
                 .withStatus(Status.FORBIDDEN)
-                .withTitle("Error")
+                .withTitle(messageSource.getMessage(ErrorConstants.ERR_FORBIDDEN, null, LocaleContextHolder.getLocale()))
                 .withDetail(ex.getMessage())
                 .with(MESSAGE_KEY, messageSource.getMessage(ErrorConstants.ERR_FORBIDDEN, null, LocaleContextHolder.getLocale()))
                 .build();
@@ -156,6 +156,7 @@ public class ExceptionTranslator implements ProblemHandling {
 
         Problem problem = Problem.builder()
                 .withStatus(Status.FORBIDDEN)
+                .withTitle(ErrorConstants.ERR_FORBIDDEN)
                 .with(MESSAGE_KEY, ErrorConstants.ERR_FORBIDDEN)
                 .build();
         return create(ex, problem, request);
