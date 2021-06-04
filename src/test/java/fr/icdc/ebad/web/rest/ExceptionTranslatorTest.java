@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Locale;
+
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,6 +47,7 @@ public class ExceptionTranslatorTest {
 
     @Before
     public void setup() {
+        Locale.setDefault( Locale.FRANCE );
         MockitoAnnotations.initMocks(this);
         this.restMvc = MockMvcBuilders.standaloneSetup(batchResource).setControllerAdvice(exceptionTranslator).build();
     }
