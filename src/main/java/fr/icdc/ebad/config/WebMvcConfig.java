@@ -16,6 +16,7 @@ public class WebMvcConfig implements WebMvcConfigurer  {
         return taskExecutor;
     }
 
+    @Override
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
         configurer.setTaskExecutor(asyncExecutor());
     }

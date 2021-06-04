@@ -1,6 +1,5 @@
 package fr.icdc.ebad.config.oauth;
 
-import com.google.common.collect.Lists;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
@@ -25,9 +24,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 @Profile("!jwt")
