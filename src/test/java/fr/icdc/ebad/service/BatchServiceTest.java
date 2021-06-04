@@ -324,4 +324,20 @@ public class BatchServiceTest {
         verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(batchRepository).delete(eq(batch));
     }
+
+    @Test
+    public void testCurrentJob(){
+        batchService.addJob(10L, 12L);
+        batchService.addJob(11L, 12L);
+        assertEquals((Long)12L, batchService.getCurrentJobForEnv(10L).get(0));
+        assertEquals((Long)12L, batchService.getCurrentJobForEnv(10L).get(0));
+        batchService.deleteJob(10L, 12L);
+        assertEquals(0, batchService.getCurrentJobForEnv(10L).size());
+
+        batchService.addJob(12L, 13L);
+        batchService.addJob(12L, 13L);
+        assertEquals(2, batchService.getCurrentJobForEnv(12L).size());
+        batchService.deleteJob(12L, 13L);
+        assertEquals(1, batchService.getCurrentJobForEnv(12L).size());
+    }
 }
