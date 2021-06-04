@@ -55,23 +55,21 @@ public class BatchService {
     }
 
     public void addJob(Long env, Long batch){
-        LOGGER.debug("addJob " + batch + " on env "+env);
+        LOGGER.debug("addJob {} on env {}", batch, env);
         List<Long> currentJobs = currentJob.getOrDefault(env, new ArrayList<>());
         currentJobs.add(batch);
         currentJob.put(env, currentJobs);
     }
 
     public void deleteJob(Long env, Long batch) {
-        LOGGER.debug("deleteJob " + batch + " on env "+env);
+        LOGGER.debug("deleteJob {} on env {}", batch, env);
         List<Long> currentJobs = currentJob.getOrDefault(env, new ArrayList<>());
         currentJobs.remove(batch);
         currentJob.put(env, currentJobs);
     }
 
     public List<Long> getCurrentJobForEnv(Long env) {
-        LOGGER.debug("getCurrentJobForEnv on env "+env);
-        LOGGER.debug("getCurrentJobForEnv "+currentJob.getOrDefault(env, new ArrayList<>()));
-
+        LOGGER.debug("getCurrentJobForEnv on env {}",env);
         return currentJob.getOrDefault(env, new ArrayList<>());
     }
 
