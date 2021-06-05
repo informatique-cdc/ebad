@@ -1,17 +1,16 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpProgressMonitor;
+import com.jcraft.jsch.*;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import org.apache.commons.io.IOUtils;
+import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.channel.ClientChannelEvent;
+import org.apache.sshd.client.session.ClientSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,11 +19,19 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.*;
+import java.security.KeyPair;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +55,56 @@ public class ShellServiceTest {
     private ChannelSftp channelSftp;
     @Spy
     private EbadProperties ebadProperties;
+
+    @Test
+    public void test() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+        //convert privatekey : openssl pkcs8 -topk8 -inform PEM -outform DER -in private_key.pem -out private_key.der -nocrypt
+        byte[] keyBytes = Files.readAllBytes(Paths.get("private_key.der"));
+
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        PrivateKey privateKey = kf.generatePrivate(spec);
+
+        //convert publicKey : openssl rsa -in private_key.pem -pubout -outform DER -out public_key.der
+        byte[] keyBytes2 = Files.readAllBytes(Paths.get("public_key.der"));
+
+        X509EncodedKeySpec spec2 = new X509EncodedKeySpec(keyBytes2);
+        PublicKey publicKey = kf.generatePublic(spec2);
+
+        KeyPair keyPair = new KeyPair(publicKey, privateKey);
+
+        SshClient client = SshClient.setUpDefaultClient();
+        client.start();
+        long defaultTimeoutSeconds = 10;
+        try (ClientSession session = client.connect("test", "test.fr", 22)
+                .verify(defaultTimeoutSeconds, TimeUnit.SECONDS).getSession()) {
+//            session.addPasswordIdentity(password);
+            session.addPublicKeyIdentity(keyPair);
+            session.auth().verify(defaultTimeoutSeconds, TimeUnit.SECONDS);
+
+            try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+                 ClientChannel channel = session.createChannel(org.apache.sshd.common.channel.Channel.CHANNEL_SHELL)) {
+                channel.setOut(responseStream);
+                try {
+                    channel.open().verify(defaultTimeoutSeconds, TimeUnit.SECONDS);
+                    String command = "echo \"hello\"\nexit\n";
+                    try (OutputStream pipedIn = channel.getInvertedIn()) {
+                        pipedIn.write(command.getBytes());
+                        pipedIn.flush();
+                    }
+
+                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED),
+                            TimeUnit.SECONDS.toMillis(30));
+                    String responseString = new String(responseStream.toByteArray());
+                    System.out.println(responseString);
+                } finally {
+                    channel.close(false);
+                }
+            }
+        } finally {
+            client.stop();
+        }
+    }
 
     @Before
     public void setup() {
