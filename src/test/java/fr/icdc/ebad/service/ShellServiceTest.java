@@ -11,6 +11,15 @@ import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.session.ClientSession;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.bouncycastle.util.io.pem.PemReader;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,8 +32,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
 import java.security.KeyPair;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -36,10 +45,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShellServiceTest {
@@ -103,6 +109,63 @@ public class ShellServiceTest {
             }
         } finally {
             client.stop();
+        }
+    }
+
+    @Test
+    public void test2() throws IOException {
+        Security.addProvider(new BouncyCastleProvider());
+        String password = "xxx";
+
+        FileReader keyReader = new FileReader("/xxx/id_rsa");
+        PemReader pemReader = new PemReader(keyReader);
+        PEMParser pemParser = new PEMParser(pemReader);
+        Object pemKeyPair = pemParser.readObject();
+
+        KeyPair keyPair;
+        if (pemKeyPair instanceof PEMEncryptedKeyPair) {
+            if (password == null) {
+                System.err.println("Unable to import private key. Key is encrypted, but no password was provided.");
+            }
+            PEMDecryptorProvider decryptor = new JcePEMDecryptorProviderBuilder().build(password.toCharArray());
+            PEMKeyPair decryptedKeyPair = ((PEMEncryptedKeyPair) pemKeyPair).decryptKeyPair(decryptor);
+            keyPair = new JcaPEMKeyConverter().getKeyPair(decryptedKeyPair);
+        } else {
+            keyPair = new JcaPEMKeyConverter().getKeyPair((PEMKeyPair)pemKeyPair);
+        }
+
+        System.out.println(DateTime.now());
+        SshClient client = SshClient.setUpDefaultClient();
+        client.start();
+        long defaultTimeoutSeconds = 10;
+        try (ClientSession session = client.connect("xxx", "xxx", 22).verify()
+                .getSession()) {
+//            session.addPasswordIdentity(password);
+            session.addPublicKeyIdentity(keyPair);
+            session.auth().verify(defaultTimeoutSeconds, TimeUnit.SECONDS);
+
+            try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+                 ClientChannel channel = session.createChannel(org.apache.sshd.common.channel.Channel.CHANNEL_SHELL)) {
+                channel.setOut(responseStream);
+                try {
+                    channel.open().verify(defaultTimeoutSeconds, TimeUnit.SECONDS);
+                    String command = "sleep 120\nexit\n";
+                    try (OutputStream pipedIn = channel.getInvertedIn()) {
+                        pipedIn.write(command.getBytes());
+                        pipedIn.flush();
+                    }
+
+                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED),
+                            TimeUnit.HOURS.toMillis(30));
+                    String responseString = responseStream.toString();
+                    System.out.println(responseString);
+                } finally {
+                    channel.close(false);
+                }
+            }
+        } finally {
+            client.stop();
+            System.out.println(DateTime.now());
         }
     }
 
