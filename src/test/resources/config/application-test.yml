@@ -51,6 +51,8 @@ ebad:
     ssh:
         login: ebad
         passphrase: password
+        private-key-passphrase: password
+        private-key-path: ./src/test/resources/fakekeys/fake_key
 
 org:
     jobrunr:

@@ -46,7 +46,10 @@ public class SshConfiguration {
                 return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) pemKeyPair);
             }
         }catch (IOException e){
-            throw new EbadServiceException("Error when trying to read ssh key file", e);
+            throw new EbadServiceException("Error when trying to read ssh key file\n" +
+                    "Make sur use RSA keys, try to convert your key with \n" +
+                    "ssh-keygen -p -P \"old passphrase\" -N \"new passphrase\" -m pem -f path/to/key \n" +
+                    "THIS OVERWRITE YOUR KEY SO MAKE A BACKUP BEFORE", e);
         }
     }
 }
