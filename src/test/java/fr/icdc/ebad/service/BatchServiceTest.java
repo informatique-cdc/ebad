@@ -93,7 +93,7 @@ public class BatchServiceTest {
                 eq(environnementIntegration.getId()))
         ).thenReturn(simpleDateFormat.parse("01/02/2018"));
 
-        when(shellService.runCommand(
+        when(shellService.runCommandNew(
                 eq(environnementIntegration), eq(commandExpected))
         ).thenReturn(retourBatch);
 
@@ -124,7 +124,7 @@ public class BatchServiceTest {
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
         );
 
-        verify(shellService, times(1)).runCommand(
+        verify(shellService, times(1)).runCommandNew(
                 argThat(environnement -> environnement.getId().equals(environnementIntegration.getId())
                 ), eq(commandExpected)
         );
@@ -192,7 +192,7 @@ public class BatchServiceTest {
                 eq(environnementIntegration.getId()))
         ).thenReturn(simpleDateFormat.parse("01/02/2018"));
 
-        when(shellService.runCommand(
+        when(shellService.runCommandNew(
                 eq(environnementIntegration), eq(commandExpected))
         ).thenReturn(retourBatch);
 
@@ -227,7 +227,7 @@ public class BatchServiceTest {
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
         );
 
-        verify(shellService, times(1)).runCommand(
+        verify(shellService, times(1)).runCommandNew(
                 argThat(environnement -> environnement.getId().equals(environnementIntegration.getId())
                 ), eq(commandExpected)
         );
@@ -327,7 +327,7 @@ public class BatchServiceTest {
                 eq(environnementIntegration.getId()))
         ).thenReturn(simpleDateFormat.parse("01/02/2018"));
 
-        when(shellService.runCommand(
+        when(shellService.runCommandNew(
                 eq(environnementIntegration), eq(commandExpected))
         ).thenReturn(retourBatch);
 
@@ -358,7 +358,7 @@ public class BatchServiceTest {
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
         );
 
-        verify(shellService, times(1)).runCommand(
+        verify(shellService, times(1)).runCommandNew(
                 argThat(environnement -> environnement.getId().equals(environnementIntegration.getId())
                 ), eq(commandExpected)
         );

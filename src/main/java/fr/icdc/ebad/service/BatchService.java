@@ -24,10 +24,6 @@ import java.util.*;
 
 @Service
 public class BatchService {
-    /**
-     * Execution des batchs
-     * plus d'infos Jcraft sur http://www.jcraft.com/jsch/examples/
-     */
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchService.class);
     public static final int INTERVAL_CLEAN_BATCH = 3600000;
@@ -83,8 +79,7 @@ public class BatchService {
                 batch.setParams(params);
             }
             Environnement environnement = environnementService.getEnvironnement(environnementId);
-            RetourBatch retourBatch = runBatch(batch, environnement, login);
-            return retourBatch;
+            return runBatch(batch, environnement, login);
         }finally {
             deleteJob(environnementId, batchId);
         }
@@ -97,8 +92,7 @@ public class BatchService {
         try {
             Batch batch = batchRepository.getOne(batchId);
             Environnement environnement = environnementService.getEnvironnement(environnementId);
-            RetourBatch retourBatch = runBatch(batch, environnement, login);
-            return retourBatch;
+            return runBatch(batch, environnement, login);
         }finally {
             deleteJob(environnementId, batchId);
         }
@@ -118,7 +112,15 @@ public class BatchService {
 
         LOGGER.debug("Execute batch with command : '{}'", command);
 
-        RetourBatch batchRetour = shellService.runCommand(environnement, command);
+        RetourBatch batchRetour;
+
+        try {
+            batchRetour = shellService.runCommandNew(environnement, command);
+        }catch (EbadServiceException e){
+            User user = userService.getUser(login).orElseThrow(EbadServiceException::new);
+            notificationService.createNotification("[" + environnement.getApplication().getCode() + "] Le batch " + batch.getName() + " sur l'environnement " + environnement.getName() + " n'a pas pu être lancé : "+e.getMessage(), user, true);
+            throw e;
+        }
         LogBatch logBatch = new LogBatch();
         logBatch.setBatch(batch);
         logBatch.setEnvironnement(environnement);
@@ -146,13 +148,14 @@ public class BatchService {
 
     private String getParameters(Environnement environnement, String params, Date dateTraitement) {
         String[] paramsArray = params.split(" ");
-        StringBuilder realParams = new StringBuilder();
+        LOGGER.info("paramsArray = {}", paramsArray);
+        StringBuilder realParams = new StringBuilder("");
         for (String param : paramsArray) {
             if ("${DATE_TRAITEMENT}".equals(param)) {
 
                 String dateParam;
                 SimpleDateFormat dateFormat;
-                if (!StringUtils.isEmpty(environnement.getApplication().getDateParametrePattern())) {
+                if (StringUtils.hasText(environnement.getApplication().getDateParametrePattern())) {
                     dateFormat = new SimpleDateFormat(environnement.getApplication().getDateParametrePattern());
                 } else {
                     dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);

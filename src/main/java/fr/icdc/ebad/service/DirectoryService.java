@@ -1,12 +1,12 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.ChannelSftp;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
+import org.apache.sshd.sftp.client.SftpClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,17 +38,19 @@ public class DirectoryService {
         List<FilesDto> filesDtoList = new ArrayList<>();
         Directory directory = directoryRepository.getOne(idDirectory);
 
-        List<ChannelSftp.LsEntry> files = shellService.getListFiles(directory, subDirectory);
+        List<SftpClient.DirEntry> files = shellService.getListFiles(directory, subDirectory);
         files
                 .stream()
                 .filter(file -> !".".equals(file.getFilename()) && !"..".equals(file.getFilename()))
                 .filter(file -> {
-                    if (file.getAttrs().isDir()) {
+                    if (file.getAttributes().isDirectory()) {
                         return directory.isCanExplore();
                     }
                     return true;
                 })
-                .forEach(file -> filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttrs().getSize(), file.getAttrs().getATime(), file.getAttrs().getMTime(), file.getAttrs().isDir(), subDirectory)));
+                .forEach(file -> {
+                    filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttributes().getSize(), Date.from(file.getAttributes().getModifyTime().toInstant()), Date.from(file.getAttributes().getModifyTime().toInstant()), file.getAttributes().isDirectory(), subDirectory));
+                });
 
         return filesDtoList;
     }
@@ -68,7 +72,7 @@ public class DirectoryService {
 
     @Transactional
     public void uploadFile(MultipartFile multipartFile, Long directoryId, String subDirectory) throws EbadServiceException {
-        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, 0, 0, false, subDirectory);
+        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, Date.from(Instant.now()), Date.from(Instant.now()), false, subDirectory);
 
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");

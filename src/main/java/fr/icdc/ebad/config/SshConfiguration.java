@@ -10,6 +10,7 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +23,7 @@ import java.security.Security;
 public class SshConfiguration {
 
     @Bean
+    @ConditionalOnProperty(prefix = "ebad.ssh", name = "private-key-path")
     KeyPair keyPairEbad(EbadProperties ebadProperties) throws EbadServiceException {
         Security.addProvider(new BouncyCastleProvider());
         String password = ebadProperties.getSsh().getPrivateKeyPassphrase();
