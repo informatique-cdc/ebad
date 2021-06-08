@@ -63,5 +63,5 @@ logging.level:
 org.jobrunr:
   background-job-server:
     enabled: true
-    poll-interval-in-seconds: 2
+    poll-interval-in-seconds: 5
   dashboard.enabled: true
