@@ -28,11 +28,11 @@ public class SshConfiguration {
         Security.addProvider(new BouncyCastleProvider());
         String password = ebadProperties.getSsh().getPrivateKeyPassphrase();
 
-        FileReader keyReader;
-        try {
-            keyReader = new FileReader(ebadProperties.getSsh().getPrivateKeyPath());
-            PemReader pemReader = new PemReader(keyReader);
-            PEMParser pemParser = new PEMParser(pemReader);
+        try(
+                FileReader keyReader = new FileReader(ebadProperties.getSsh().getPrivateKeyPath());
+                PemReader pemReader = new PemReader(keyReader);
+                PEMParser pemParser = new PEMParser(pemReader)
+        ) {
             Object pemKeyPair = pemParser.readObject();
 
             if (pemKeyPair instanceof PEMEncryptedKeyPair) {

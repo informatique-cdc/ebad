@@ -214,8 +214,10 @@ public class ShellService {
             session.auth().verify();
             SftpClientFactory factory = SftpClientFactory.instance();
 
-            try (SftpClient client = factory.createSftpClient(session)) {
-                SftpClient.CloseableHandle handle = client.open(dstPath, EnumSet.of(SftpClient.OpenMode.Write, SftpClient.OpenMode.Create));
+            try (
+                    SftpClient client = factory.createSftpClient(session);
+                    SftpClient.CloseableHandle handle = client.open(dstPath, EnumSet.of(SftpClient.OpenMode.Write, SftpClient.OpenMode.Create))
+            ){
                 int buff_size = 1024 * 1024;
                 byte[] src = new byte[buff_size];
                 int len;
