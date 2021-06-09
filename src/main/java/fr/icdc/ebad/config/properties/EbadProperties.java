@@ -73,6 +73,7 @@ public class EbadProperties {
         @NotNull
         private String privateKeyPath;
         private String privateKeyPassphrase;
+        private String passphrase;
 
     }
 

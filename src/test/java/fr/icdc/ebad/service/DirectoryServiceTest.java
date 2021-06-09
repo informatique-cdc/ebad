@@ -1,9 +1,5 @@
 package fr.icdc.ebad.service;
 
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpException;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
@@ -12,6 +8,7 @@ import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
 import org.apache.commons.io.IOUtils;
+import org.apache.sshd.sftp.client.SftpClient;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,19 +22,13 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DirectoryServiceTest {
@@ -49,9 +40,9 @@ public class DirectoryServiceTest {
     private DirectoryService directoryService;
 
     @Test
-    public void listAllFiles() throws SftpException, JSchException, EbadServiceException {
+    public void listAllFiles() throws  EbadServiceException {
         Directory directory = Directory.builder().id(1L).build();
-        List<ChannelSftp.LsEntry> files = new ArrayList<>();
+        List<SftpClient.DirEntry> files = new ArrayList<>();
         files.add(lsEntryWithGivenFilenameAndMTime("test1.txt", unixTimestampForDaysAgo(30)));
         files.add(lsEntryWithGivenFilenameAndMTime("test2.txt", unixTimestampForDaysAgo(30)));
         files.add(lsEntryWithGivenFilenameAndMTime("test3.txt", unixTimestampForDaysAgo(30)));
@@ -122,12 +113,12 @@ public class DirectoryServiceTest {
         directoryService.uploadFile(secondFile, 1L, null);
     }
 
-    private ChannelSftp.LsEntry lsEntryWithGivenFilenameAndMTime(String filename, long mtime) {
-        ChannelSftp.LsEntry lsEntry = mock(ChannelSftp.LsEntry.class);
-        SftpATTRS attrs = mock(SftpATTRS.class);
-        when(lsEntry.getAttrs()).thenReturn(attrs);
+    private SftpClient.DirEntry lsEntryWithGivenFilenameAndMTime(String filename, long mtime) {
+        SftpClient.DirEntry lsEntry = mock(SftpClient.DirEntry.class);
+        SftpClient.Attributes attrs = mock(SftpClient.Attributes.class);
+        when(lsEntry.getAttributes()).thenReturn(attrs);
         when(lsEntry.getFilename()).thenReturn(filename);
-        when(attrs.getMTime()).thenReturn((int) mtime);
+        when(attrs.getModifyTime()).thenReturn(FileTime.fromMillis(1000));
         return lsEntry;
     }
 

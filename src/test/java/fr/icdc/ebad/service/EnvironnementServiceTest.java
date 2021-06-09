@@ -1,22 +1,12 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.Norme;
-import fr.icdc.ebad.domain.QEnvironnement;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
-import fr.icdc.ebad.repository.ApplicationRepository;
-import fr.icdc.ebad.repository.BatchRepository;
-import fr.icdc.ebad.repository.ChaineRepository;
-import fr.icdc.ebad.repository.DirectoryRepository;
-import fr.icdc.ebad.repository.EnvironnementRepository;
-import fr.icdc.ebad.repository.LogBatchRepository;
-import fr.icdc.ebad.repository.NormeRepository;
+import fr.icdc.ebad.repository.*;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
 import org.joda.time.format.DateTimeFormat;
@@ -38,25 +28,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by dtrouillet on 10/02/2017.
@@ -108,7 +84,7 @@ public class EnvironnementServiceTest {
         Application application = new Application();
         environnement.setApplication(application);
         RetourBatch retourBatch = new RetourBatch("20160101", 0, 10L);
-        when(shellService.runCommand(eq(environnement), anyString())).thenReturn(retourBatch);
+        when(shellService.runCommandNew(eq(environnement), anyString())).thenReturn(retourBatch);
         when(environnementRepository.getOne(environnement.getId())).thenReturn(environnement);
         Date dateTraitement = environnementService.getDateTraiement(environnement.getId());
         assertNotNull(dateTraitement);
@@ -186,11 +162,11 @@ public class EnvironnementServiceTest {
         Norme norme = Norme.builder().ctrlMDate("date.tr").build();
         Application application = Application.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
-        when(shellService.runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenReturn(retourBatch);
+        when(shellService.runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenReturn(retourBatch);
         when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
         environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
 
-        verify(shellService).runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"));
+        verify(shellService).runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"));
     }
 
     @Test(expected = EbadServiceException.class)
@@ -201,7 +177,7 @@ public class EnvironnementServiceTest {
         Norme norme = Norme.builder().ctrlMDate("date.tr").build();
         Application application = Application.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
-        when(shellService.runCommand(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenThrow(new EbadServiceException());
+        when(shellService.runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenThrow(new EbadServiceException());
         when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
 
         environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
@@ -217,44 +193,12 @@ public class EnvironnementServiceTest {
         Norme norme = Norme.builder().ctrlMDate("date.tr").build();
         Application application = Application.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
-        when(shellService.runCommand(eq(environnement), eq("echo $( df -m /home | tail -1 | awk ' { print $4 } ' )"))).thenReturn(retourBatch);
+        when(shellService.runCommandNew(eq(environnement), eq("echo $( df -m /home | tail -1 | awk ' { print $4 } ' )"))).thenReturn(retourBatch);
         when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
         String result = environnementService.getEspaceDisque(1L);
 
-        verify(shellService).runCommand(eq(environnement), eq("echo $( df -m /home | tail -1 | awk ' { print $4 } ' )"));
+        verify(shellService).runCommandNew(eq(environnement), eq("echo $( df -m /home | tail -1 | awk ' { print $4 } ' )"));
         assertEquals("10", result);
-    }
-
-    @Test
-    public void testPurgerLog() throws EbadServiceException {
-
-        RetourBatch retourBatch = new RetourBatch();
-        retourBatch.setReturnCode(0);
-
-        Norme norme = Norme.builder().ctrlMDate("date.tr").build();
-        Application application = Application.builder().id(1L).build();
-        Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
-        when(shellService.runCommand(eq(environnement), eq("find " + environnement.getHomePath() + "/logctm -type f -exec rm -v  {} ';'"))).thenReturn(retourBatch);
-        when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
-        environnementService.purgerLogs(1L);
-
-        verify(shellService).runCommand(eq(environnement), eq("find " + environnement.getHomePath() + "/logctm -type f -exec rm -v  {} ';'"));
-    }
-
-    @Test
-    public void testPurgerArchive() throws EbadServiceException {
-
-        RetourBatch retourBatch = new RetourBatch();
-        retourBatch.setReturnCode(0);
-
-        Norme norme = Norme.builder().ctrlMDate("date.tr").build();
-        Application application = Application.builder().id(1L).build();
-        Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
-        when(shellService.runCommand(eq(environnement), eq("find " + environnement.getHomePath() + "/archive -type f -exec rm -v  {} ';'"))).thenReturn(retourBatch);
-        when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
-        environnementService.purgerArchive(1L);
-
-        verify(shellService).runCommand(eq(environnement), eq("find " + environnement.getHomePath() + "/archive -type f -exec rm -v  {} ';'"));
     }
 
     @Test
