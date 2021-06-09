@@ -4,6 +4,8 @@ import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
+import fr.icdc.ebad.repository.SchedulingRepository;
+import org.jobrunr.scheduling.JobScheduler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -45,6 +47,12 @@ public class BatchServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private SchedulingRepository schedulingRepository;
+
+    @Mock
+    private JobScheduler jobScheduler;
 
     @InjectMocks
     private BatchService batchService;
@@ -273,10 +281,19 @@ public class BatchServiceTest {
 
         when(batchRepository.findBatchWithoutEnvironnement()).thenReturn(batchList);
 
+        List<Scheduling> schedulings = new ArrayList<>();
+        Scheduling scheduling = Scheduling.builder().id(10L).build();
+        schedulings.add(scheduling);
+        when(schedulingRepository.findAllByBatchId(1L)).thenReturn(schedulings);
+        when(schedulingRepository.findAllByBatchId(2L)).thenReturn(new ArrayList<>());
+
         batchService.removeBatchsWithoutEnvironnement();
 
         verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(logBatchRepository).deleteAllByBatchId(eq(2L));
+
+        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(schedulingRepository, times(1)).delete(eq(scheduling));
 
         verify(batchRepository).delete(batch1);
         verify(batchRepository).delete(batch2);
@@ -408,9 +425,17 @@ public class BatchServiceTest {
 
     @Test
     public void testDeleteBatchById() {
+        List<Scheduling> schedulings = new ArrayList<>();
+        Scheduling scheduling = Scheduling.builder().id(10L).build();
+        schedulings.add(scheduling);
+        when(schedulingRepository.findAllByBatchId(1L)).thenReturn(schedulings);
+
         batchService.deleteBatch(1L);
-        verify(logBatchRepository).deleteAllByBatchId(eq(1L));
-        verify(batchRepository).deleteById(eq(1L));
+        verify(logBatchRepository).deleteAllByBatchId(1L);
+        verify(batchRepository).deleteById(1L);
+        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(schedulingRepository, times(1)).delete(eq(scheduling));
+
     }
 
     @Test
@@ -418,10 +443,17 @@ public class BatchServiceTest {
         Batch batch = new Batch();
         batch.setId(1L);
 
+        List<Scheduling> schedulings = new ArrayList<>();
+        Scheduling scheduling = Scheduling.builder().id(10L).build();
+        schedulings.add(scheduling);
+        when(schedulingRepository.findAllByBatchId(1L)).thenReturn(schedulings);
+
         batchService.deleteBatch(batch);
 
-        verify(logBatchRepository).deleteAllByBatchId(eq(1L));
-        verify(batchRepository).delete(eq(batch));
+        verify(logBatchRepository).deleteAllByBatchId(1L);
+        verify(batchRepository).deleteById(1L);
+        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(schedulingRepository, times(1)).delete(eq(scheduling));
     }
 
     @Test

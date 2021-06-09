@@ -1,10 +1,7 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.Norme;
-import fr.icdc.ebad.domain.QEnvironnement;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
@@ -12,6 +9,7 @@ import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.*;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
+import org.jobrunr.scheduling.JobScheduler;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPluginManager;
@@ -52,8 +50,10 @@ public class EnvironnementService {
     private final List<EnvironnementConnectorPlugin> environnementConnectorPluginList;
     private final ApplicationRepository applicationRepository;
     private final SpringPluginManager springPluginManager;
+    private final SchedulingRepository schedulingRepository;
+    private final JobScheduler jobScheduler;
 
-    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager) {
+    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler) {
         this.shellService = shellService;
         this.environnementRepository = environnementRepository;
         this.batchRepository = batchRepository;
@@ -65,6 +65,8 @@ public class EnvironnementService {
         this.environnementConnectorPluginList = environnementConnectorPluginList;
         this.applicationRepository = applicationRepository;
         this.springPluginManager = springPluginManager;
+        this.schedulingRepository = schedulingRepository;
+        this.jobScheduler = jobScheduler;
     }
 
 
@@ -125,9 +127,19 @@ public class EnvironnementService {
     }
 
     @Transactional
+    public void deleteScheduledJobFromEnvironment(Long environmentId){
+        List<Scheduling> schedulings = schedulingRepository.findAllByEnvironnementId(environmentId);
+        schedulings.forEach(scheduling -> {
+            jobScheduler.delete(String.valueOf(scheduling.getId()));
+            schedulingRepository.delete(scheduling);
+        });
+    }
+
+    @Transactional
     public void deleteEnvironnement(Environnement environnement, boolean withBatchs) {
         logBatchRepository.deleteByEnvironnement(environnement);
         chaineRepository.deleteByEnvironnement(environnement);
+        deleteScheduledJobFromEnvironment(environnement.getId());
         if (withBatchs) {
             batchRepository.deleteAll(environnement.getBatchs());
         }
