@@ -9,6 +9,7 @@ import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.*;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
+import org.jobrunr.scheduling.JobScheduler;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,6 +60,10 @@ public class EnvironnementServiceTest {
     private NormeRepository normeRepository;
     @Mock
     private EnvironnementConnectorPlugin environnementConnectorPlugin;
+    @Mock
+    private SchedulingRepository schedulingRepository;
+    @Mock
+    private JobScheduler jobScheduler;
     @Spy
     private MapperFacade mapperFacade;
     @Spy
@@ -114,6 +119,11 @@ public class EnvironnementServiceTest {
         doNothing().when(directoryRepository).deleteByEnvironnement(eq(environnement));
         doNothing().when(environnementRepository).delete(eq(environnement));
 
+        List<Scheduling> schedulings = new ArrayList<>();
+        Scheduling scheduling = Scheduling.builder().id(10L).build();
+        schedulings.add(scheduling);
+        when(schedulingRepository.findAllByEnvironnementId(1L)).thenReturn(schedulings);
+
         environnementService.deleteEnvironnement(environnement, true);
 
         verify(logBatchRepository, times(1)).deleteByEnvironnement(eq(environnement));
@@ -121,6 +131,8 @@ public class EnvironnementServiceTest {
         verify(batchRepository, times(1)).deleteAll(eq(environnement.getBatchs()));
         verify(directoryRepository, times(1)).deleteByEnvironnement(eq(environnement));
         verify(environnementRepository, times(1)).delete(eq(environnement));
+        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(schedulingRepository, times(1)).delete(eq(scheduling));
     }
 
     @Test
@@ -144,6 +156,11 @@ public class EnvironnementServiceTest {
         doNothing().when(directoryRepository).deleteByEnvironnement(eq(environnement));
         doNothing().when(environnementRepository).delete(eq(environnement));
 
+        List<Scheduling> schedulings = new ArrayList<>();
+        Scheduling scheduling = Scheduling.builder().id(10L).build();
+        schedulings.add(scheduling);
+        when(schedulingRepository.findAllByEnvironnementId(1L)).thenReturn(schedulings);
+
         environnementService.deleteEnvironnement(environnement, false);
 
         verify(logBatchRepository, times(1)).deleteByEnvironnement(eq(environnement));
@@ -151,6 +168,9 @@ public class EnvironnementServiceTest {
         verify(batchRepository, times(0)).deleteAll(eq(environnement.getBatchs()));
         verify(directoryRepository, times(1)).deleteByEnvironnement(eq(environnement));
         verify(environnementRepository, times(1)).delete(eq(environnement));
+        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(schedulingRepository, times(1)).delete(eq(scheduling));
+
     }
 
     @Test

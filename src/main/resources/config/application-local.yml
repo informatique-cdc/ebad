@@ -5,9 +5,11 @@ spring:
     driverClassName: org.h2.Driver
     username: sa
     password: password
-    platform: h2
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      platform: h2
 
 ebad:
   security:
