@@ -48,9 +48,9 @@ public class DirectoryService {
                     }
                     return true;
                 })
-                .forEach(file -> {
-                    filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttributes().getSize(), Date.from(file.getAttributes().getModifyTime().toInstant()), Date.from(file.getAttributes().getModifyTime().toInstant()), file.getAttributes().isDirectory(), subDirectory));
-                });
+                .forEach(file ->
+                    filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttributes().getSize(), Date.from(file.getAttributes().getModifyTime().toInstant()), Date.from(file.getAttributes().getModifyTime().toInstant()), file.getAttributes().isDirectory(), subDirectory))
+                );
 
         return filesDtoList;
     }

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by dtrouillet on 03/03/2016.
@@ -44,22 +43,13 @@ public class ShellService {
     public RetourBatch runCommandNew(Environnement environnement, String command) throws EbadServiceException {
         LOGGER.debug("run command {}", command);
         Long start = System.currentTimeMillis();
-        int exitStatus = -1;
-        long defaultTimeoutSeconds = 10;
+        int exitStatus;
         String commandOut;
         String commandWithInterpreteur = environnement.getNorme().getCommandLine().replace("$1", command);
 
-        SshClient client = SshClient.setUpDefaultClient();
-        client.start();
-        try (ClientSession session = client.connect(ebadProperties.getSsh().getLogin(), environnement.getHost(), ebadProperties.getSsh().getPort()).verify()
-                .getSession()) {
-            if (null != ebadProperties.getSsh().getPassphrase())
-                session.addPasswordIdentity(ebadProperties.getSsh().getPassphrase());
-
-            if(null != keyPairEbad)
-                session.addPublicKeyIdentity(keyPairEbad);
-            session.auth().verify(defaultTimeoutSeconds, TimeUnit.SECONDS);
-
+        SshClient sshClient = SshClient.setUpDefaultClient();
+        sshClient.start();
+        try (ClientSession session = createSession(sshClient, environnement.getHost())) {
             try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
                  ClientChannel channel = session.createChannel(org.apache.sshd.common.channel.Channel.CHANNEL_EXEC, commandWithInterpreteur)) {
                 channel.setOut(responseStream);
@@ -75,7 +65,7 @@ public class ShellService {
         } catch (IOException e) {
             throw new EbadServiceException("Error when trying to connect to the server", e);
         } finally {
-            client.stop();
+            sshClient.stop();
         }
 
         Long end = System.currentTimeMillis();
@@ -95,21 +85,8 @@ public class ShellService {
         String path = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory);
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
-        try (
-                ClientSession session = sshClient
-                        .connect(
-                                ebadProperties.getSsh().getLogin(),
-                                directory.getEnvironnement().getHost(),
-                                ebadProperties.getSsh().getPort())
-                        .verify()
-                        .getSession()
-        ) {
-            if(null != keyPairEbad)
-                session.addPublicKeyIdentity(keyPairEbad);
 
-            if (null != ebadProperties.getSsh().getPassphrase())
-                session.addPasswordIdentity(ebadProperties.getSsh().getPassphrase());
-            session.auth().verify();
+        try (ClientSession session = createSession(sshClient, directory.getEnvironnement().getHost())) {
             SftpClientFactory factory = SftpClientFactory.instance();
 
             try (SftpClient client = factory.createSftpClient(session)) {
@@ -130,20 +107,7 @@ public class ShellService {
 
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
-        try (
-                ClientSession session = sshClient
-                        .connect(
-                                ebadProperties.getSsh().getLogin(),
-                                directory.getEnvironnement().getHost(),
-                                ebadProperties.getSsh().getPort())
-                        .verify()
-                        .getSession()
-        ) {
-            if(null != keyPairEbad)
-                session.addPublicKeyIdentity(keyPairEbad);
-            if (null != ebadProperties.getSsh().getPassphrase())
-                session.addPasswordIdentity(ebadProperties.getSsh().getPassphrase());
-            session.auth().verify();
+        try (ClientSession session = createSession(sshClient, directory.getEnvironnement().getHost())) {
             SftpClientFactory factory = SftpClientFactory.instance();
 
             try (SftpClient client = factory.createSftpClient(session)) {
@@ -161,20 +125,7 @@ public class ShellService {
 
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
-        try (
-                ClientSession session = sshClient
-                        .connect(
-                                ebadProperties.getSsh().getLogin(),
-                                directory.getEnvironnement().getHost(),
-                                ebadProperties.getSsh().getPort())
-                        .verify()
-                        .getSession()
-        ) {
-            if(null != keyPairEbad)
-                session.addPublicKeyIdentity(keyPairEbad);
-            if (null != ebadProperties.getSsh().getPassphrase())
-                session.addPasswordIdentity(ebadProperties.getSsh().getPassphrase());
-            session.auth().verify();
+        try (ClientSession session = createSession(sshClient, directory.getEnvironnement().getHost())) {
             SftpClientFactory factory = SftpClientFactory.instance();
 
             try (SftpClient client = factory.createSftpClient(session);
@@ -193,33 +144,41 @@ public class ShellService {
         }
     }
 
+    private ClientSession createSession(SshClient sshClient, String host) throws IOException {
+        ClientSession session = sshClient
+                .connect(
+                        ebadProperties.getSsh().getLogin(),
+                        host,
+                        ebadProperties.getSsh().getPort())
+                .verify()
+                .getSession();
+
+        if(null != keyPairEbad)
+            session.addPublicKeyIdentity(keyPairEbad);
+        if (null != ebadProperties.getSsh().getPassphrase())
+            session.addPasswordIdentity(ebadProperties.getSsh().getPassphrase());
+        session.auth().verify();
+
+        return session;
+
+
+
+    }
+
     public void uploadFile(Directory directory, InputStream inputStream, String filename, String subDirectory) throws EbadServiceException {
         String dstPath = directory.getEnvironnement().getHomePath() + PATH_SEPARATOR + directory.getPath() + constructSubDir(subDirectory) + PATH_SEPARATOR + filename;
 
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
-        try (
-                ClientSession session = sshClient
-                        .connect(
-                                ebadProperties.getSsh().getLogin(),
-                                directory.getEnvironnement().getHost(),
-                                ebadProperties.getSsh().getPort())
-                        .verify()
-                        .getSession()
-        ) {
-            if(null != keyPairEbad)
-                session.addPublicKeyIdentity(keyPairEbad);
-            if (null != ebadProperties.getSsh().getPassphrase())
-                session.addPasswordIdentity(ebadProperties.getSsh().getPassphrase());
-            session.auth().verify();
+        try (ClientSession session = createSession(sshClient, directory.getEnvironnement().getHost())) {
             SftpClientFactory factory = SftpClientFactory.instance();
 
             try (
                     SftpClient client = factory.createSftpClient(session);
                     SftpClient.CloseableHandle handle = client.open(dstPath, EnumSet.of(SftpClient.OpenMode.Write, SftpClient.OpenMode.Create))
-            ){
-                int buff_size = 1024 * 1024;
-                byte[] src = new byte[buff_size];
+            ) {
+                int bufferSize = 1024 * 1024;
+                byte[] src = new byte[bufferSize];
                 int len;
                 long fileOffset = 0L;
                 while ((len = inputStream.read(src)) != -1) {
