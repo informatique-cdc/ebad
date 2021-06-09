@@ -50,7 +50,9 @@ ebad:
                 token-validity-in-seconds-for-remember-me: 2592000
     ssh:
         login: ebad
-        private_key_path: src/test/resources/key
+        passphrase: password
+        private-key-passphrase: password
+        private-key-path: ./src/test/resources/fakekeys/fake_key
 
 org:
     jobrunr:

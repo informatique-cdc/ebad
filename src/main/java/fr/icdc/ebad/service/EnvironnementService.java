@@ -9,13 +9,7 @@ import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
-import fr.icdc.ebad.repository.ApplicationRepository;
-import fr.icdc.ebad.repository.BatchRepository;
-import fr.icdc.ebad.repository.ChaineRepository;
-import fr.icdc.ebad.repository.DirectoryRepository;
-import fr.icdc.ebad.repository.EnvironnementRepository;
-import fr.icdc.ebad.repository.LogBatchRepository;
-import fr.icdc.ebad.repository.NormeRepository;
+import fr.icdc.ebad.repository.*;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
 import org.pf4j.PluginRuntimeException;
@@ -34,12 +28,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by dtrouillet on 03/03/2016.
@@ -84,7 +73,7 @@ public class EnvironnementService {
     public Date getDateTraiement(Long id) {
         Environnement environnement = getEnvironnement(id);
         try {
-            RetourBatch retourBatch = shellService.runCommand(environnement, "cat " + environnement.getHomePath() + "/" + environnement.getNorme().getCtrlMDate());
+            RetourBatch retourBatch = shellService.runCommandNew(environnement, "cat " + environnement.getHomePath() + "/" + environnement.getNorme().getCtrlMDate());
             if (retourBatch.getReturnCode() == CODE_SUCCESS) {
                 Date dateTraitement;
                 String dateStr = retourBatch.getLogOut();
@@ -114,7 +103,7 @@ public class EnvironnementService {
         Environnement environnement = getEnvironnement(environnementId);
         SimpleDateFormat dateFormatCtrlM = new SimpleDateFormat(Optional.ofNullable(environnement.getApplication().getDateFichierPattern()).orElse(FR_DATE_FORMAT));
         String date = dateFormatCtrlM.format(dateTraitement);
-        shellService.runCommand(environnement, "echo " + date + " > " + environnement.getHomePath() + "/" + environnement.getNorme().getCtrlMDate());
+        shellService.runCommandNew(environnement, "echo " + date + " > " + environnement.getHomePath() + "/" + environnement.getNorme().getCtrlMDate());
     }
 
     //FIXME Mise en place norme
@@ -123,7 +112,7 @@ public class EnvironnementService {
     public String getEspaceDisque(Long id) {
         Environnement environnement = getEnvironnement(id);
         try {
-            RetourBatch retourBatch = shellService.runCommand(environnement, "echo $( df -m " + environnement.getHomePath() + " | tail -1 | awk ' { print $4 } ' )");
+            RetourBatch retourBatch = shellService.runCommandNew(environnement, "echo $( df -m " + environnement.getHomePath() + " | tail -1 | awk ' { print $4 } ' )");
             if (retourBatch.getReturnCode() == CODE_SUCCESS) {
                 LOGGER.debug("Espace disque = {}", retourBatch.getLogOut());
                 return retourBatch.getLogOut().replace("%", "");
@@ -133,32 +122,6 @@ public class EnvironnementService {
             LOGGER.warn("Erreur lors de la récupération de l'espace disque", e);
             return SANS_REPONSE;
         }
-    }
-
-    //FIXME Mise en place norme
-    @Transactional(readOnly = true)
-    public void purgerLogs(Long id) throws EbadServiceException {
-        Environnement environnement = getEnvironnement(id);
-
-        RetourBatch retourBatch = shellService.runCommand(environnement, "find " + environnement.getHomePath() + "/logctm -type f -exec rm -v  {} ';'");
-        if (retourBatch.getReturnCode() == CODE_SUCCESS) {
-            LOGGER.debug("Purge logctm OK {}", retourBatch.getLogOut());
-            return;
-        }
-        LOGGER.warn("Purge logctm KO {}", retourBatch.getLogOut());
-
-    }
-
-    //FIXME Mise en place norme
-    @Transactional
-    public void purgerArchive(Long id) throws EbadServiceException {
-        Environnement environnement = getEnvironnement(id);
-        RetourBatch retourBatch = shellService.runCommand(environnement, "find " + environnement.getHomePath() + "/archive -type f -exec rm -v  {} ';'");
-        if (retourBatch.getReturnCode() == CODE_SUCCESS) {
-            LOGGER.debug("Purge archive OK {}", retourBatch.getLogOut());
-            return;
-        }
-        LOGGER.warn("Purge archive KO {}", retourBatch.getLogOut());
     }
 
     @Transactional
