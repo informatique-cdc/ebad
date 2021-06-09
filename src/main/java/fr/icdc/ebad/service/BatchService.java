@@ -6,9 +6,11 @@ import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
+import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.jobrunr.jobs.annotations.Job;
+import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -36,10 +38,12 @@ public class BatchService {
     private final LogBatchRepository logBatchRepository;
     private final NotificationService notificationService;
     private final NormeService normeService;
+    private final SchedulingRepository schedulingRepository;
+    private final JobScheduler jobScheduler;
 
     private static final Map<Long, List<Long>> currentJob = new HashMap<>();
 
-    public BatchService(LogBatchRepository logBatchRepository, ShellService shellService, BatchRepository batchRepository, EnvironnementService environnementService, UserService userService, NotificationService notificationService, NormeService normeService) {
+    public BatchService(LogBatchRepository logBatchRepository, ShellService shellService, BatchRepository batchRepository, EnvironnementService environnementService, UserService userService, NotificationService notificationService, NormeService normeService, SchedulingRepository schedulingRepository, JobScheduler jobScheduler) {
         this.logBatchRepository = logBatchRepository;
         this.shellService = shellService;
         this.batchRepository = batchRepository;
@@ -47,6 +51,8 @@ public class BatchService {
         this.userService = userService;
         this.notificationService = notificationService;
         this.normeService = normeService;
+        this.schedulingRepository = schedulingRepository;
+        this.jobScheduler = jobScheduler;
     }
 
     public void addJob(Long env, Long batch){
@@ -182,6 +188,7 @@ public class BatchService {
         List<Batch> lstBatchs = batchRepository.findBatchWithoutEnvironnement();
         for (Batch batch : lstBatchs) {
             logBatchRepository.deleteAllByBatchId(batch.getId());
+            deleteScheduledJobFromBatch(batch.getId());
             LOGGER.debug("Deleting not linked batch {}", batch.getName());
             batchRepository.delete(batch);
         }
@@ -223,12 +230,21 @@ public class BatchService {
     @Transactional
     public void deleteBatch(Long id) {
         logBatchRepository.deleteAllByBatchId(id);
+        deleteScheduledJobFromBatch(id);
         batchRepository.deleteById(id);
     }
 
     @Transactional
+    public void deleteScheduledJobFromBatch(Long batchId){
+        List<Scheduling> schedulings = schedulingRepository.findAllByBatchId(batchId);
+        schedulings.forEach(scheduling -> {
+            jobScheduler.delete(String.valueOf(scheduling.getId()));
+            schedulingRepository.delete(scheduling);
+        });
+    }
+
+    @Transactional
     public void deleteBatch(Batch batch) {
-        logBatchRepository.deleteAllByBatchId(batch.getId());
-        batchRepository.delete(batch);
+        deleteBatch(batch.getId());
     }
 }
