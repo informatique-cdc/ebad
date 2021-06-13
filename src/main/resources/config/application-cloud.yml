@@ -23,4 +23,5 @@ ebad:
         token-validity-in-seconds-for-remember-me: ${EBAD_JWT_VALIDITY_REMEMBER_ME:2592000}
   ssh:
     login: ${EBAD_SSH_LOGIN:#{'ebad'}}
-    private_key_path: ${EBAD_SSH_PRIVATE_KEY_PATH:#{'src/main/resources/keys/key'}}
+    passphrase: test
+#    private_key_path: ${EBAD_SSH_PRIVATE_KEY_PATH:#{'src/main/resources/keys/key'}}
