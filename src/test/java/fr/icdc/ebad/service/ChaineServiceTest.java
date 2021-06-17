@@ -1,11 +1,7 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.domain.Chaine;
-import fr.icdc.ebad.domain.ChaineAssociation;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.QChaine;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.ChaineRepository;
 import org.junit.Test;
@@ -23,9 +19,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by dtrouillet on 15/03/2018.
@@ -171,7 +165,7 @@ public class ChaineServiceTest {
     public void testGetChaine() {
         Chaine chaine = new Chaine();
         chaine.setId(1L);
-        when(chaineRepository.getOne(chaine.getId())).thenReturn(chaine);
+        when(chaineRepository.getById(chaine.getId())).thenReturn(chaine);
 
         Chaine result = chaineService.getChaine(chaine.getId());
 

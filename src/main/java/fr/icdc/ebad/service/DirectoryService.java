@@ -36,7 +36,7 @@ public class DirectoryService {
     @Transactional
     public List<FilesDto> listAllFiles(Long idDirectory, String subDirectory) throws EbadServiceException {
         List<FilesDto> filesDtoList = new ArrayList<>();
-        Directory directory = directoryRepository.getOne(idDirectory);
+        Directory directory = directoryRepository.getById(idDirectory);
 
         List<SftpClient.DirEntry> files = shellService.getListFiles(directory, subDirectory);
         files
@@ -57,7 +57,7 @@ public class DirectoryService {
 
     @Transactional
     public void removeFile(FilesDto filesDTO) throws EbadServiceException {
-        Directory directory = directoryRepository.getOne(filesDTO.getDirectory().getId());
+        Directory directory = directoryRepository.getById(filesDTO.getDirectory().getId());
         if (!directory.isCanWrite()) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
         }
@@ -66,7 +66,7 @@ public class DirectoryService {
 
     @Transactional
     public InputStream readFile(FilesDto filesDTO) throws EbadServiceException {
-        Directory directory = directoryRepository.getOne(filesDTO.getDirectory().getId());
+        Directory directory = directoryRepository.getById(filesDTO.getDirectory().getId());
         return shellService.getFile(directory, filesDTO.getName(), filesDTO.getSubDirectory());
     }
 
@@ -87,7 +87,7 @@ public class DirectoryService {
 
     @Transactional(readOnly = true)
     public Directory getDirectory(Long id) {
-        return directoryRepository.getOne(id);
+        return directoryRepository.getById(id);
     }
 
     @Transactional(readOnly = true)

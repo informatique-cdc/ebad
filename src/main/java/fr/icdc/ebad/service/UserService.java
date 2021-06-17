@@ -1,11 +1,7 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Authority;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.UsageApplicationId;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.SecurityUtils;
@@ -64,7 +60,7 @@ public class UserService {
         User newUser = new User();
         Set<Authority> authorities = new HashSet<>();
 
-        authorities.add(authorityRepository.getOne("ROLE_USER"));
+        authorities.add(authorityRepository.getById("ROLE_USER"));
 
         newUser.setAuthorities(authorities);
 
@@ -219,7 +215,7 @@ public class UserService {
 
     @Transactional
     public User updateUser(User user) {
-        User userTmp = userRepository.getOne(user.getId());
+        User userTmp = userRepository.getById(user.getId());
         if (user.getPassword() == null) {
             user.setPassword(userTmp.getPassword());
         } else {

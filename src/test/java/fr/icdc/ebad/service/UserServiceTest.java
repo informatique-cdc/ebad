@@ -2,11 +2,7 @@ package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Authority;
-import fr.icdc.ebad.domain.QUser;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -25,19 +21,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,7 +62,7 @@ public class UserServiceTest {
     public void createUserInformation() {
         Authority authorityUser = new Authority("ROLE_USER", new HashSet<>());
         when(passwordEncoder.encode(eq("password_decode"))).thenReturn("password_encode");
-        when(authorityRepository.getOne(eq("ROLE_USER"))).thenReturn(authorityUser);
+        when(authorityRepository.getById(eq("ROLE_USER"))).thenReturn(authorityUser);
 
         userService.createUserInformation("dtrouillet", "password_decode", "Damien", "Trouillet", "damien.trouillet@test.fr", "fr_FR");
 
@@ -371,7 +358,7 @@ public class UserServiceTest {
     @Test
     public void updateUser() {
         User user1 = User.builder().activated(true).id(1L).login("dtrouillet").password("test").build();
-        when(userRepository.getOne(eq(1L))).thenReturn(user1);
+        when(userRepository.getById(eq(1L))).thenReturn(user1);
         User userUpdated = User.builder().activated(true).id(1L).login("toto").build();
         when(userRepository.save(eq(userUpdated))).thenReturn(userUpdated);
 
@@ -387,7 +374,7 @@ public class UserServiceTest {
     @Test
     public void updateUserWithPassword() {
         User user1 = User.builder().activated(true).id(1L).login("dtrouillet").password("test").build();
-        when(userRepository.getOne(eq(1L))).thenReturn(user1);
+        when(userRepository.getById(eq(1L))).thenReturn(user1);
         when(passwordEncoder.encode(eq("password_decode"))).thenReturn("password_encode");
 
         User userUpdated = User.builder().activated(true).id(1L).login("toto").password("password_decode").build();

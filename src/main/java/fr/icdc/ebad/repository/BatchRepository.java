@@ -30,7 +30,7 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, QuerydslPre
 
     @EntityGraph(attributePaths = {"environnements"})
     @Override
-    Batch getOne(Long id);
+    Batch getById(Long id);
 
     @Query("select batch from Batch batch where batch.environnements is empty")
     List<Batch> findBatchWithoutEnvironnement();

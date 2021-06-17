@@ -123,7 +123,7 @@ public class BatchServiceTest {
 
         doNothing().when(notificationService).createNotification(any(), any(), eq(true));
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
-        when(batchRepository.getOne(batch.getId())).thenReturn(batch);
+        when(batchRepository.getById(batch.getId())).thenReturn(batch);
         when(userService.getUser("user")).thenReturn(Optional.of(user));
         when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
         batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), null, "user");
@@ -223,7 +223,7 @@ public class BatchServiceTest {
 
         doNothing().when(notificationService).createNotification(any(), any(), eq(true));
 
-        when(batchRepository.getOne(eq(batch.getId()))).thenReturn(batch);
+        when(batchRepository.getById(eq(batch.getId()))).thenReturn(batch);
         when(environnementService.getEnvironnement(eq(environnementIntegration.getId()))).thenReturn(environnementIntegration);
 
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
@@ -366,7 +366,7 @@ public class BatchServiceTest {
 
         doNothing().when(notificationService).createNotification(any(), any(), eq(true));
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
-        when(batchRepository.getOne(batch.getId())).thenReturn(batch);
+        when(batchRepository.getById(batch.getId())).thenReturn(batch);
         when(userService.getUser("user")).thenReturn(Optional.of(user));
         when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
         batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), "user");
@@ -417,7 +417,7 @@ public class BatchServiceTest {
         Batch batch = new Batch();
         batch.setId(1L);
 
-        when(batchRepository.getOne(eq(1L))).thenReturn(batch);
+        when(batchRepository.getById(eq(1L))).thenReturn(batch);
         Batch result = batchService.getBatch(1L);
 
         assertEquals(batch, result);
