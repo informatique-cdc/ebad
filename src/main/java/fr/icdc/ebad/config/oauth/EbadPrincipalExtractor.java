@@ -40,7 +40,7 @@ public class EbadPrincipalExtractor implements PrincipalExtractor {
         Set<Authority> authorities = new HashSet<>();
 
         for (String authority : authoritiesString.split(",")) {
-            authorities.add(authorityRepository.getOne("ROLE" + authority));
+            authorities.add(authorityRepository.getById("ROLE" + authority));
         }
 
         if (userOptional.isPresent()) {

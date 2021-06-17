@@ -46,7 +46,7 @@ public class DirectoryServiceTest {
         files.add(lsEntryWithGivenFilenameAndMTime("test1.txt", unixTimestampForDaysAgo(30)));
         files.add(lsEntryWithGivenFilenameAndMTime("test2.txt", unixTimestampForDaysAgo(30)));
         files.add(lsEntryWithGivenFilenameAndMTime("test3.txt", unixTimestampForDaysAgo(30)));
-        when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
+        when(directoryRepository.getById(eq(1L))).thenReturn(directory);
         when(shellService.getListFiles(eq(directory), eq("test"))).thenReturn(files);
         List<FilesDto> result = directoryService.listAllFiles(1L, "test");
         assertEquals(3, result.size());
@@ -55,7 +55,7 @@ public class DirectoryServiceTest {
     @Test(expected = EbadServiceException.class)
     public void listAllFilesException() throws EbadServiceException {
         Directory directory = Directory.builder().id(1L).build();
-        when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
+        when(directoryRepository.getById(eq(1L))).thenReturn(directory);
         when(shellService.getListFiles(eq(directory), eq("subDir3"))).thenThrow(new EbadServiceException("erreur test"));
         directoryService.listAllFiles(1L, "subDir3");
     }
@@ -66,12 +66,12 @@ public class DirectoryServiceTest {
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
         filesDTO.setSubDirectory("testSub");
-        when(directoryRepository.getOne(1L)).thenReturn(directory);
+        when(directoryRepository.getById(1L)).thenReturn(directory);
         doNothing().when(shellService).removeFile(eq(directory), eq(filesDTO.getName()), anyString());
         directoryService.removeFile(filesDTO);
 
         directory.setCanWrite(false);
-        when(directoryRepository.getOne(1L)).thenReturn(directory);
+        when(directoryRepository.getById(1L)).thenReturn(directory);
         directoryService.removeFile(filesDTO);
     }
 
@@ -81,7 +81,7 @@ public class DirectoryServiceTest {
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
         FilesDto filesDTO = new FilesDto();
         filesDTO.setDirectory(directory);
-        when(directoryRepository.getOne(1L)).thenReturn(directory);
+        when(directoryRepository.getById(1L)).thenReturn(directory);
         when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenReturn(inputStream);
         InputStream result = directoryService.readFile(filesDTO);
         assertEquals(inputStream, result);
@@ -94,7 +94,7 @@ public class DirectoryServiceTest {
     public void uploadFile() throws EbadServiceException {
 
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
-        when(directoryRepository.getOne(eq(1L))).thenReturn(directory);
+        when(directoryRepository.getById(eq(1L))).thenReturn(directory);
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
         doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
@@ -130,7 +130,7 @@ public class DirectoryServiceTest {
     public void testGetDirectory() {
         Directory directory = new Directory();
         directory.setId(1L);
-        when(directoryRepository.getOne(eq(directory.getId()))).thenReturn(directory);
+        when(directoryRepository.getById(eq(directory.getId()))).thenReturn(directory);
 
         Directory result = directoryService.getDirectory(directory.getId());
 

@@ -45,8 +45,8 @@ public class SchedulingService {
 
     @Transactional
     public Scheduling saveAndRun(Long batchId, Long environnementId, String parameters, String cron) throws EbadServiceException {
-        Batch batch = batchRepository.getOne(batchId);
-        Environnement environnement = environnementRepository.getOne(environnementId);
+        Batch batch = batchRepository.getById(batchId);
+        Environnement environnement = environnementRepository.getById(environnementId);
 
         Scheduling newScheduling = Scheduling.builder()
                 .batch(batch)
@@ -64,7 +64,7 @@ public class SchedulingService {
 
     @Transactional
     public void remove(Long schedulingId) {
-        Scheduling scheduling = schedulingRepository.getOne(schedulingId);
+        Scheduling scheduling = schedulingRepository.getById(schedulingId);
         jobScheduler.delete(String.valueOf(scheduling.getId()));
         schedulingRepository.delete(scheduling);
     }
@@ -85,6 +85,6 @@ public class SchedulingService {
 
     @Transactional
     public Scheduling get(Long schedulingId) {
-        return schedulingRepository.getOne(schedulingId);
+        return schedulingRepository.getById(schedulingId);
     }
 }

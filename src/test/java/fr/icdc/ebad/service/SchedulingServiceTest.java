@@ -29,9 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Constants.SPRING_PROFILE_TEST)
@@ -97,8 +95,8 @@ public class SchedulingServiceTest {
                 .cron(cron)
                 .build();
 
-        when(batchRepository.getOne(1L)).thenReturn(batch);
-        when(environnementRepository.getOne(2L)).thenReturn(environnement);
+        when(batchRepository.getById(1L)).thenReturn(batch);
+        when(environnementRepository.getById(2L)).thenReturn(environnement);
         when(schedulingRepository.save(any())).thenReturn(scheduling);
         Scheduling result = schedulingService.saveAndRun(1L, 2L, parameters, cron);
 
@@ -130,7 +128,7 @@ public class SchedulingServiceTest {
 
         schedulingService.run(scheduling);
 
-        when(schedulingRepository.getOne(3L)).thenReturn(scheduling);
+        when(schedulingRepository.getById(3L)).thenReturn(scheduling);
 
         schedulingService.remove(3L);
 
@@ -194,7 +192,7 @@ public class SchedulingServiceTest {
     @Test
     public void get() {
         Scheduling scheduling = Scheduling.builder().id(1L).build();
-        when(schedulingRepository.getOne(1L)).thenReturn(scheduling);
+        when(schedulingRepository.getById(1L)).thenReturn(scheduling);
         Scheduling result = schedulingService.get(1L);
         assertEquals(scheduling, result);
     }

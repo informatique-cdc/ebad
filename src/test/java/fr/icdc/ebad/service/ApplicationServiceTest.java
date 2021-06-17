@@ -72,11 +72,11 @@ public class ApplicationServiceTest {
         application.setId(9L);
         application.setEnvironnements(environnementSet);
 
-        when(applicationRepository.getOne(eq(9L))).thenReturn(application);
+        when(applicationRepository.getById(eq(9L))).thenReturn(application);
 
         applicationService.deleteApplication(9L);
 
-        verify(applicationRepository, times(1)).getOne(eq(9L));
+        verify(applicationRepository, times(1)).getById(eq(9L));
         verify(environnementService, times(1)).deleteEnvironnement(eq(environnement1), eq(true));
         verify(environnementService, times(1)).deleteEnvironnement(eq(environnement2), eq(true));
         verify(applicationRepository, times(1)).delete(eq(application));

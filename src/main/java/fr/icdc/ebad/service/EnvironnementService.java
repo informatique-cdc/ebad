@@ -150,7 +150,7 @@ public class EnvironnementService {
 
     @Transactional(readOnly = true)
     public Environnement getEnvironnement(Long environnementId) {
-        return environnementRepository.getOne(environnementId);
+        return environnementRepository.getById(environnementId);
     }
 
     @Transactional

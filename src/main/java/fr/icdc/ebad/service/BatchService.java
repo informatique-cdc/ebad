@@ -80,7 +80,7 @@ public class BatchService {
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
         addJob(environnementId, batchId);
         try {
-            Batch batch = batchRepository.getOne(batchId);
+            Batch batch = batchRepository.getById(batchId);
             if (params != null) {
                 batch.setParams(params);
             }
@@ -96,7 +96,7 @@ public class BatchService {
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
         addJob(environnementId, batchId);
         try {
-            Batch batch = batchRepository.getOne(batchId);
+            Batch batch = batchRepository.getById(batchId);
             Environnement environnement = environnementService.getEnvironnement(environnementId);
             return runBatch(batch, environnement, login);
         }finally {
@@ -224,7 +224,7 @@ public class BatchService {
 
     @Transactional(readOnly = true)
     public Batch getBatch(Long id) {
-        return batchRepository.getOne(id);
+        return batchRepository.getById(id);
     }
 
     @Transactional

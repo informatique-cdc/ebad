@@ -31,7 +31,7 @@ public class PermissionDirectory {
     @Transactional(readOnly = true)
     public boolean canRead(Long directoryId, String subDirectory, UserDetails userDetails) {
         LOGGER.debug("PermissionDirectory canRead with subdir");
-        Directory directoryFromDataBase = directoryRepository.getOne(directoryId);
+        Directory directoryFromDataBase = directoryRepository.getById(directoryId);
         if (!directoryFromDataBase.isCanExplore() && !StringUtils.isEmpty(subDirectory)) {
             return false;
         }
@@ -50,7 +50,7 @@ public class PermissionDirectory {
     public boolean canWriteFile(Long directoryId, String subDirectory, UserDetails userDetails) {
         LOGGER.debug("PermissionDirectory canWriteFile");
 
-        Directory directoryFromDataBase = directoryRepository.getOne(directoryId);
+        Directory directoryFromDataBase = directoryRepository.getById(directoryId);
         if (!directoryFromDataBase.isCanExplore() && !StringUtils.isEmpty(subDirectory)) {
             return false;
         }
@@ -68,7 +68,7 @@ public class PermissionDirectory {
     @Transactional(readOnly = true)
     public boolean canRead(DirectoryDto directory, UserDetails userDetails) {
         LOGGER.debug("PermissionDirectory canRead");
-        Directory directoryFromDataBase = directoryRepository.getOne(directory.getId());
+        Directory directoryFromDataBase = directoryRepository.getById(directory.getId());
         User user = userRepository.findUserFromEnv(directoryFromDataBase.getEnvironnement().getId(), userDetails.getUsername());
         return user != null;
     }
@@ -86,7 +86,7 @@ public class PermissionDirectory {
     public boolean canWriteFile(DirectoryDto directory, UserDetails userDetails) {
         LOGGER.debug("PermissionDirectory canWriteFile");
 
-        Directory directoryFromDataBase = directoryRepository.getOne(directory.getId());
+        Directory directoryFromDataBase = directoryRepository.getById(directory.getId());
         User user = userRepository.findUserFromEnv(directoryFromDataBase.getEnvironnement().getId(), userDetails.getUsername());
 
         return user != null && directoryFromDataBase.isCanWrite();
