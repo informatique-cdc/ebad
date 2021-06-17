@@ -90,7 +90,7 @@ public class EnvironnementServiceTest {
         environnement.setApplication(application);
         RetourBatch retourBatch = new RetourBatch("20160101", 0, 10L);
         when(shellService.runCommandNew(eq(environnement), anyString())).thenReturn(retourBatch);
-        when(environnementRepository.getOne(environnement.getId())).thenReturn(environnement);
+        when(environnementRepository.getById(environnement.getId())).thenReturn(environnement);
         Date dateTraitement = environnementService.getDateTraiement(environnement.getId());
         assertNotNull(dateTraitement);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -183,7 +183,7 @@ public class EnvironnementServiceTest {
         Application application = Application.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
         when(shellService.runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenReturn(retourBatch);
-        when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
+        when(environnementRepository.getById(eq(environnement.getId()))).thenReturn(environnement);
         environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
 
         verify(shellService).runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"));
@@ -198,7 +198,7 @@ public class EnvironnementServiceTest {
         Application application = Application.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
         when(shellService.runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenThrow(new EbadServiceException());
-        when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
+        when(environnementRepository.getById(eq(environnement.getId()))).thenReturn(environnement);
 
         environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
     }
@@ -214,7 +214,7 @@ public class EnvironnementServiceTest {
         Application application = Application.builder().id(1L).build();
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
         when(shellService.runCommandNew(eq(environnement), eq("echo $( df -m /home | tail -1 | awk ' { print $4 } ' )"))).thenReturn(retourBatch);
-        when(environnementRepository.getOne(eq(environnement.getId()))).thenReturn(environnement);
+        when(environnementRepository.getById(eq(environnement.getId()))).thenReturn(environnement);
         String result = environnementService.getEspaceDisque(1L);
 
         verify(shellService).runCommandNew(eq(environnement), eq("echo $( df -m /home | tail -1 | awk ' { print $4 } ' )"));
@@ -225,7 +225,7 @@ public class EnvironnementServiceTest {
     public void testUpdateEnvironnement() {
         Environnement environnement = Environnement.builder().id(1L).name("toto").build();
         Environnement environnementUpdated = Environnement.builder().id(1L).name("titi").build();
-        when(environnementRepository.getOne(eq(1L))).thenReturn(environnement);
+        when(environnementRepository.getById(eq(1L))).thenReturn(environnement);
         when(environnementRepository.saveAndFlush(eq(environnementUpdated))).thenReturn(environnementUpdated);
         Environnement result = environnementService.updateEnvironnement(environnementUpdated);
         verify(environnementRepository).saveAndFlush(environnementUpdated);

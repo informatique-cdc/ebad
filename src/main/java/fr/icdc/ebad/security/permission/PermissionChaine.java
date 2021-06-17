@@ -43,7 +43,7 @@ public class PermissionChaine{
     @Transactional(readOnly = true)
     public boolean canRead(ChaineDto chaineDto, UserDetails userDetails) {
         LOGGER.debug("PermissionChaine canRead");
-        Chaine chaineFromDatabase = chaineRepository.getOne(chaineDto.getId());
+        Chaine chaineFromDatabase = chaineRepository.getById(chaineDto.getId());
         User user = userRepository.findUserFromEnv(chaineFromDatabase.getEnvironnement().getId(), userDetails.getUsername());
         return user != null;
     }
@@ -54,7 +54,7 @@ public class PermissionChaine{
         if (chaineDto.getId() == null) {
             return userRepository.findManagerFromEnv(chaineDto.getEnvironnement().getId(), userDetails.getUsername()) != null;
         }
-        Chaine chaineFromDatabase = chaineRepository.getOne(chaineDto.getId());
+        Chaine chaineFromDatabase = chaineRepository.getById(chaineDto.getId());
         User user = userRepository.findManagerFromEnv(chaineFromDatabase.getEnvironnement().getId(), userDetails.getUsername());
         return user != null;
     }

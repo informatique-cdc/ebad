@@ -83,7 +83,7 @@ public class ChaineService {
 
     @Transactional(readOnly = true)
     public Chaine getChaine(Long id) {
-        return chaineRepository.getOne(id);
+        return chaineRepository.getById(id);
     }
 
     @Transactional(readOnly = true)

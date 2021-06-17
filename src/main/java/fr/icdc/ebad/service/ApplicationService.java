@@ -77,7 +77,7 @@ public class ApplicationService {
 
     @Transactional
     public void deleteApplication(Long appId) {
-        Application application = applicationRepository.getOne(appId);
+        Application application = applicationRepository.getById(appId);
         accreditationRequestRepository.deleteByApplication(application);
         typeFichierRepository.deleteByApplication(application);
         application.getEnvironnements().forEach(environnement -> environnementService.deleteEnvironnement(environnement, true));
