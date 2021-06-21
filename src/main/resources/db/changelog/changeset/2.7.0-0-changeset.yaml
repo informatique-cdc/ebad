@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: creation_identity
+      author: dtrouillet
+      changes:
+        - createSequence:
+            cacheSize: 1
+            cycle: false
+            incrementBy: 1
+            maxValue: 9223372036854775807
+            minValue: 1
+            sequenceName: t_identity_id_seq
+            startValue: 1
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: t_identity_pkey
+                  name: id
+                  type: BIGINT
+                  defaultValueSequenceNext: t_identity_id_seq
+              - column:
+                  name: login
+                  type: VARCHAR(255)
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  name: privatekey
+                  type: VARCHAR(2048)
+              - column:
+                  name: privatekey_path
+                  type: VARCHAR(2048)
+              - column:
+                  name: passphrase
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_by
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+              - column:
+                  name: last_modified_by
+                  type: VARCHAR(50)
+              - column:
+                  name: last_modified_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+            tableName: t_identity
