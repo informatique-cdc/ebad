@@ -6,7 +6,7 @@ databaseChangeLog:
         - createSequence:
             cacheSize: 1
             cycle: false
-            incrementBy: 1
+            incrementBy: 50
             maxValue: 9223372036854775807
             minValue: 1
             sequenceName: t_identity_id_seq
@@ -22,8 +22,15 @@ databaseChangeLog:
                   type: BIGINT
                   defaultValueSequenceNext: t_identity_id_seq
               - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
                   name: login
                   type: VARCHAR(255)
+                  constraints:
+                    nullable: false
               - column:
                   name: password
                   type: VARCHAR(255)
