@@ -649,7 +649,7 @@
     <repositories>
         <repository>
             <id>github-public</id>
-            <url>https://read-public-ebad:&#103;&#104;&#112;&#95;&#107;&#100;&#71;&#118;&#81;&#69;&#108;&#100;&#66;&#52;&#80;&#102;&#113;&#88;&#121;&#84;&#121;&#90;&#83;&#74;&#108;&#83;&#81;&#86;&#51;&#52;&#66;&#122;&#51;&#121;&#49;&#99;&#99;&#55;&#106;&#102;&#32;&#10;@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
+            <url>https://read-public-ebad:&#103;&#104;&#112;&#95;&#107;&#100;&#71;&#118;&#81;&#69;&#108;&#100;&#66;&#52;&#80;&#102;&#113;&#88;&#121;&#84;&#121;&#90;&#83;&#74;&#108;&#83;&#81;&#86;&#51;&#52;&#66;&#122;&#51;&#121;&#49;&#99;&#99;&#55;&#106;&#102;@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
             <releases><enabled>true</enabled></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
