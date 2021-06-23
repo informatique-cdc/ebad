@@ -1,5 +1,6 @@
 package fr.icdc.ebad.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -47,4 +48,10 @@ public class Identity extends AbstractAuditingEntity {
     @Size(min = 1, max = 255)
     @Column
     private String passphrase;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "available_application_id")
+    @JsonBackReference
+    private Application availableApplication;
 }

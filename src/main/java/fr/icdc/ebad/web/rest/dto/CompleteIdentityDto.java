@@ -5,7 +5,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class CompleteIdentityDto {
+public class CompleteIdentityDto extends AbstractAuditingDto {
     private Long id;
 
     @NotNull
@@ -15,4 +15,5 @@ public class CompleteIdentityDto {
     private String privatekey;
     private String privatekeyPath;
     private String passphrase;
+//    private Long applicationId;
 }

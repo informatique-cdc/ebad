@@ -1,14 +1,15 @@
 package fr.icdc.ebad.service;
 
-import fr.icdc.ebad.domain.Batch;
 import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.repository.IdentityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class IdentityService {
@@ -27,8 +28,8 @@ public class IdentityService {
     }
 
     @Transactional(readOnly = true)
-    public Identity getIdentity(Long id) {
-        return identityRepository.getById(id);
+    public Optional<Identity> getIdentity(Long id) {
+        return identityRepository.findById(id);
     }
 
     @Transactional
@@ -37,7 +38,12 @@ public class IdentityService {
     }
 
     @Transactional(readOnly = true)
-    public List<Identity> findAll() {
-        return identityRepository.findAll();
+    public Page<Identity> findAll(Pageable pageable) {
+        return identityRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Identity> findAllByApplication(Long applicationId, Pageable pageable) {
+        return identityRepository.findAllByAvailableApplicationId(applicationId, pageable);
     }
 }

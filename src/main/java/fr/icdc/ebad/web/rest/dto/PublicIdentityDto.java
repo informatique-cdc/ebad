@@ -7,7 +7,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class PublicIdentityDto {
     private Long id;
-
+    @NotNull
+    private String name;
     @NotNull
     private String login;
 }

@@ -44,6 +44,9 @@ databaseChangeLog:
                   name: passphrase
                   type: VARCHAR(255)
               - column:
+                  name: available_application_id
+                  type: BIGINT
+              - column:
                   constraints:
                     nullable: false
                   name: created_by
@@ -59,4 +62,15 @@ databaseChangeLog:
               - column:
                   name: last_modified_date
                   type: TIMESTAMP WITHOUT TIME ZONE
+              - addForeignKeyConstraint:
+                  baseColumnNames: available_application_id
+                  baseTableName: t_identity
+                  constraintName: t_identity_application_id
+                  deferrable: false
+                  initiallyDeferred: false
+                  onDelete: CASCADE
+                  onUpdate: NO ACTION
+                  referencedColumnNames: id
+                  referencedTableName: t_application
+                  validate: true
             tableName: t_identity
