@@ -42,14 +42,13 @@ public class Identity extends AbstractAuditingEntity {
     private String privatekey;
 
     @Size(min = 1, max = 2048)
-    @Column
+    @Column(name = "privatekey_path")
     private String privatekeyPath;
 
     @Size(min = 1, max = 255)
     @Column
     private String passphrase;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "available_application_id")
     @JsonBackReference

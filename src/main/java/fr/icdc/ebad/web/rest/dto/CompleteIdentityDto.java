@@ -15,5 +15,5 @@ public class CompleteIdentityDto extends AbstractAuditingDto {
     private String privatekey;
     private String privatekeyPath;
     private String passphrase;
-//    private Long applicationId;
+    private Long availableApplication;
 }

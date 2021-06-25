@@ -2,15 +2,7 @@ package fr.icdc.ebad.service.jpa;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import fr.icdc.ebad.config.Constants;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Authority;
-import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.Norme;
-import fr.icdc.ebad.domain.QBatch;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.UsageApplicationId;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.service.BatchService;
 import org.junit.Test;
@@ -66,7 +58,7 @@ public class BatchServiceJpaTest {
         entityManager.persist(norme);
 
         Environnement environnement1 = Environnement.builder().application(application1)
-                .login("login")
+//                .login("login")
                 .norme(norme)
                 .host("localhost")
                 .prefix("")
@@ -74,7 +66,7 @@ public class BatchServiceJpaTest {
         entityManager.persist(environnement1);
 
         Environnement environnement2 = Environnement.builder().application(application1)
-                .login("login")
+//                .login("login")
                 .norme(norme)
                 .host("localhost")
                 .prefix("")

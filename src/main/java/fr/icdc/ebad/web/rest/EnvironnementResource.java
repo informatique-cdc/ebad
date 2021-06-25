@@ -98,12 +98,13 @@ public class EnvironnementResource {
      */
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionApplication.canWrite(#env.application, principal) && @permissionServiceOpen.canCreateEnvironment()")
+    @PreAuthorize("@permissionApplication.canWrite(#env.application, principal) && @permissionServiceOpen.canCreateEnvironment() && @permissionIdentity.canRead(#env.identity.id, principal)")
     public ResponseEntity<EnvironnementDto> addEnvironnement(@RequestBody EnvironnementCreationDto env) {
         LOGGER.debug("REST request to add a new environnement {}", env);
         if (env.getPrefix() == null) {
             env.setPrefix("");
         }
+
         Environnement environnement = environnementService.saveEnvironnement(mapper.map(env, Environnement.class));
         return new ResponseEntity<>(mapper.map(environnement, EnvironnementDto.class), HttpStatus.OK);
     }
@@ -113,7 +114,7 @@ public class EnvironnementResource {
      */
     @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal)")
+    @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal) && @permissionIdentity.canRead(#env.identity.id, principal)")
     public ResponseEntity<EnvironnementDto> updateEnvironnement(@RequestBody EnvironnementDto env) {
         LOGGER.debug("REST request to update an environnement {}", env.getId());
         Environnement result = environnementService.updateEnvironnement(mapper.map(env, Environnement.class));

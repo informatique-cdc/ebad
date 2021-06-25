@@ -43,7 +43,7 @@ public class IdentityResource {
      */
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("@permissionIdentity.canReadByApplication(#identityDto.availableApplication, principal)")
     public ResponseEntity<CompleteIdentityDto> addIdentity(@RequestBody @Valid CompleteIdentityDto identityDto) {
         LOGGER.debug("REST request to add a new identity");
         Identity identity = identityService.saveIdentity(mapper.map(identityDto, Identity.class));
@@ -55,7 +55,7 @@ public class IdentityResource {
      */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("@permissionIdentity.canWrite(#id, principal)")
     public ResponseEntity<CompleteIdentityDto> getOneIdentity(@PathVariable Long id) {
         LOGGER.debug("REST request to get an identity");
         Optional<CompleteIdentityDto> optionalCompleteIdentityDto = identityService.getIdentity(id)
@@ -68,13 +68,13 @@ public class IdentityResource {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionIdentity.canRead(#applicationId, principal)")
+    @PreAuthorize("@permissionIdentity.canReadByApplication(#applicationId, principal)")
     public ResponseEntity<Page<PublicIdentityDto>> getAllIdentities(@Param("applicationId") Long applicationId, Pageable pageable) {
         LOGGER.debug("REST request to get all identities");
         Page<Identity> identities;
 
         if(applicationId == null){
-            identities = identityService.findAll(PaginationUtil.generatePageRequestOrDefault(pageable));
+            identities = identityService.findWithoutApp(PaginationUtil.generatePageRequestOrDefault(pageable));
         }else{
             identities = identityService.findAllByApplication(applicationId, PaginationUtil.generatePageRequestOrDefault(pageable));
         }
@@ -86,9 +86,10 @@ public class IdentityResource {
     /**
      * PATCH  /identities to update an identity
      */
+
     @PatchMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("@permissionIdentity.canWrite(#identityDto.id, principal) && @permissionIdentity.canWriteByApplication(#identityDto.availableApplication, principal)")
     public ResponseEntity<CompleteIdentityDto> updateIdentity(@RequestBody CompleteIdentityDto identityDto) {
         LOGGER.debug("REST request to update an identity");
         Identity identity = identityService.saveIdentity(mapper.map(identityDto, Identity.class));
@@ -98,12 +99,12 @@ public class IdentityResource {
     /**
      * DELETE  /identities/id to delete an identity
      */
-    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{identityId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteIdentity(@PathVariable Long id) {
+    @PreAuthorize("@permissionIdentity.canWrite(#identityId, principal)")
+    public ResponseEntity<Void> deleteIdentity(@PathVariable Long identityId) {
         LOGGER.debug("REST request to delete an identity");
-        identityService.deleteIdentity(id);
+        identityService.deleteIdentity(identityId);
         return ResponseEntity.ok().build();
     }
 }

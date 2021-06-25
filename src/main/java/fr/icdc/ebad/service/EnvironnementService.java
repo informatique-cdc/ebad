@@ -7,6 +7,7 @@ import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.*;
+import fr.icdc.ebad.security.permission.PermissionIdentity;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.scheduling.JobScheduler;
@@ -52,8 +53,9 @@ public class EnvironnementService {
     private final SpringPluginManager springPluginManager;
     private final SchedulingRepository schedulingRepository;
     private final JobScheduler jobScheduler;
+    private final PermissionIdentity permissionIdentity;
 
-    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler) {
+    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler, PermissionIdentity permissionIdentity) {
         this.shellService = shellService;
         this.environnementRepository = environnementRepository;
         this.batchRepository = batchRepository;
@@ -67,6 +69,7 @@ public class EnvironnementService {
         this.springPluginManager = springPluginManager;
         this.schedulingRepository = schedulingRepository;
         this.jobScheduler = jobScheduler;
+        this.permissionIdentity = permissionIdentity;
     }
 
 
@@ -191,13 +194,13 @@ public class EnvironnementService {
 
                     environnement.setName(environnementDiscoverDto.getName());
                     environnement.setHost(environnementDiscoverDto.getHost());
-                    environnement.setLogin(environnementDiscoverDto.getLogin());
                     environnement.setHomePath(environnementDiscoverDto.getHome());
                     environnement.setPrefix(environnementDiscoverDto.getPrefix());
                     environnement.setNorme(mapper.map(environnementDiscoverDto.getNorme(), Norme.class));
                     environnement.setExternalId(environnementDiscoverDto.getId());
                     environnement.setPluginId(pluginId);
                     environnement.setApplication(application);
+                    //FIXME DTROUILLET ADD DEFAULT IDENTITY
 
                     try {
                         environnementRepository.save(environnement);

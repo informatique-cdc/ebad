@@ -22,6 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -31,7 +32,6 @@ import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -43,6 +43,9 @@ public class ShellServiceTest {
     @Spy
     private EbadProperties ebadProperties;
 
+    @Mock
+    private IdentityService identityService;
+
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
@@ -53,7 +56,7 @@ public class ShellServiceTest {
 
     @Before
     public void setup() throws IOException {
-        shellService = new ShellService(ebadProperties, Optional.empty());
+        shellService = new ShellService(ebadProperties, identityService);
         EbadProperties.SshProperties sshProperties = ebadProperties.getSsh();
         sshProperties.setPrivateKeyPath("/key");
         sshProperties.setPrivateKeyPassphrase("test");
