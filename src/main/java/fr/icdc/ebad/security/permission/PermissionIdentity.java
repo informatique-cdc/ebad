@@ -1,11 +1,10 @@
 package fr.icdc.ebad.security.permission;
 
-import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.repository.IdentityRepository;
+import fr.icdc.ebad.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +26,7 @@ public class PermissionIdentity {
     public boolean canReadByApplication(Long applicationId, UserDetails userDetails) {
         LOGGER.debug("PermissionIdentity canReadByApplication");
         if (applicationId == null) {
-            return userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Constants.ROLE_ADMIN)) ||
-                    userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Constants.ROLE_USER));
+            return SecurityUtils.isAdmin() ||  SecurityUtils.isUser();
         }
         return permissionApplication.canWrite(applicationId, userDetails);
     }
@@ -43,8 +41,7 @@ public class PermissionIdentity {
             return false;
         }
         if(identityOptional.get().getAvailableApplication() == null){
-            return userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Constants.ROLE_ADMIN)) ||
-                    userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Constants.ROLE_ADMIN));
+            return SecurityUtils.isAdmin() ||  SecurityUtils.isUser();
         }
         return canReadByApplication(identityOptional.get().getAvailableApplication().getId(), userDetails);
     }
@@ -52,7 +49,7 @@ public class PermissionIdentity {
     public boolean canWriteByApplication(Long applicationId, UserDetails userDetails) {
         LOGGER.debug("PermissionIdentity canWriteByApplication");
         if (applicationId == null) {
-            return userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Constants.ROLE_ADMIN));
+            return SecurityUtils.isAdmin();
         }
         return permissionApplication.canWrite(applicationId, userDetails);
     }
@@ -67,7 +64,7 @@ public class PermissionIdentity {
             return false;
         }
         if(identityOptional.get().getAvailableApplication() == null){
-            return userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Constants.ROLE_ADMIN));
+            return SecurityUtils.isAdmin();
         }
         return canWriteByApplication(identityOptional.get().getAvailableApplication().getId(), userDetails);
     }
