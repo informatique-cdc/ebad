@@ -81,7 +81,7 @@ public class IdentityServiceTest {
 
     @Test
     public void createKeyPair() throws EbadServiceException {
-        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/main/resources/fake_key_password").passphrase("password").build();
+        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/test/resources/fakekeys/fake_key_password").passphrase("password").build();
 
         KeyPair result = identityService.createKeyPair(identity);
         assertNotNull(result);
@@ -89,7 +89,7 @@ public class IdentityServiceTest {
 
     @Test
     public void createKeyPair2() throws EbadServiceException {
-        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/main/resources/fake_key_no_password").build();
+        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/test/resources/fakekeys/fake_key_no_password").build();
 
         KeyPair result = identityService.createKeyPair(identity);
         assertNotNull(result);
@@ -97,7 +97,7 @@ public class IdentityServiceTest {
 
     @Test(expected = EbadServiceException.class)
     public void createKeyPair3() throws EbadServiceException {
-        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/main/resources/fake_key_bad_format").build();
+        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/test/resources/fakekeys/fake_key_bad_format").build();
         identityService.createKeyPair(identity);
     }
 
@@ -109,7 +109,7 @@ public class IdentityServiceTest {
 
     @Test(expected = EbadServiceException.class)
     public void createKeyPair5() throws EbadServiceException {
-        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/main/resources/fake_key_password").build();
+        Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").privatekeyPath("src/test/resources/fakekeys/fake_key_password").build();
         identityService.createKeyPair(identity);
     }
 
