@@ -25,9 +25,6 @@ import java.util.Optional;
 
 @Service
 public class IdentityService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(IdentityService.class);
-
     private final IdentityRepository identityRepository;
 
     public IdentityService(IdentityRepository identityRepository) {
@@ -62,9 +59,7 @@ public class IdentityService {
 
     public KeyPair createKeyPair(Identity identity) throws EbadServiceException {
         Security.addProvider(new BouncyCastleProvider());
-        String password =identity.getPassphrase();
-
-
+        String password = identity.getPassphrase();
 
         try(
                 PemReader pemReader = new PemReader(openReader(identity));

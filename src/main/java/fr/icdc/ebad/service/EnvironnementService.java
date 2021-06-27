@@ -53,9 +53,8 @@ public class EnvironnementService {
     private final SpringPluginManager springPluginManager;
     private final SchedulingRepository schedulingRepository;
     private final JobScheduler jobScheduler;
-    private final PermissionIdentity permissionIdentity;
 
-    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler, PermissionIdentity permissionIdentity) {
+    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler) {
         this.shellService = shellService;
         this.environnementRepository = environnementRepository;
         this.batchRepository = batchRepository;
@@ -69,7 +68,6 @@ public class EnvironnementService {
         this.springPluginManager = springPluginManager;
         this.schedulingRepository = schedulingRepository;
         this.jobScheduler = jobScheduler;
-        this.permissionIdentity = permissionIdentity;
     }
 
 

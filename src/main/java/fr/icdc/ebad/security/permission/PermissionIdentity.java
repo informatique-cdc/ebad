@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 public class PermissionIdentity {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionEnvironnement.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionIdentity.class);
 
     private final PermissionApplication permissionApplication;
     private final IdentityRepository identityRepository;

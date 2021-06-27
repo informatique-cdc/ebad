@@ -13,22 +13,24 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IdentityMapper implements OrikaMapperFactoryConfigurer {
+    private static final String CONVERTER_NAME = "applicationLongIdConverter";
+    private static final String AVAILABLE_APPLICATION_FIELD = "availableApplication";
     @Override
     public void configure(MapperFactory orikaMapperFactory) {
         ConverterFactory converterFactory = orikaMapperFactory.getConverterFactory();
-        converterFactory.registerConverter("applicationLongIdConverter", new ApplicationLongIdConverter());
+        converterFactory.registerConverter(CONVERTER_NAME, new ApplicationLongIdConverter());
 
         orikaMapperFactory.classMap(Identity.class, CompleteIdentityDto.class)
-                .fieldMap("availableApplication", "availableApplication").converter("applicationLongIdConverter").add()
+                .fieldMap(AVAILABLE_APPLICATION_FIELD, AVAILABLE_APPLICATION_FIELD).converter(CONVERTER_NAME).add()
                 .byDefault()
                 .register();
         orikaMapperFactory.classMap(CompleteIdentityDto.class, Identity.class)
-                .fieldMap("availableApplication", "availableApplication").converter("applicationLongIdConverter").add()
+                .fieldMap(AVAILABLE_APPLICATION_FIELD, AVAILABLE_APPLICATION_FIELD).converter(CONVERTER_NAME).add()
                 .byDefault()
                 .register();
     }
 
-    class ApplicationLongIdConverter extends BidirectionalConverter<Application,Long> {
+    static class ApplicationLongIdConverter extends BidirectionalConverter<Application,Long> {
 
         @Override
         public Long convertTo(Application application, Type<Long> type, MappingContext mappingContext) {
