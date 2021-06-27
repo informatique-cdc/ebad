@@ -43,7 +43,7 @@ public class IdentityResource {
      */
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    @PreAuthorize("@permissionIdentity.canReadByApplication(#identityDto.availableApplication, principal)")
+    @PreAuthorize("@permissionIdentity.canWriteByApplication(#identityDto.availableApplication, principal)")
     public ResponseEntity<CompleteIdentityDto> addIdentity(@RequestBody @Valid CompleteIdentityDto identityDto) {
         LOGGER.debug("REST request to add a new identity");
         Identity identity = identityService.saveIdentity(mapper.map(identityDto, Identity.class));
