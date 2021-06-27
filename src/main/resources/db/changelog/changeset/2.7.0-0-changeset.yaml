@@ -74,3 +74,21 @@ databaseChangeLog:
                   referencedTableName: t_application
                   validate: true
             tableName: t_identity
+        - insert:
+            tableName: t_identity
+            columns:
+              - column:
+                  name: created_by
+                  value: SYSTEM
+              - column:
+                  name: created_date
+                  value: NOW()
+              - column:
+                  name: name
+                  value: default
+              - column:
+                  name: login
+                  value: default_login
+              - column:
+                  name: password
+                  value: changeme

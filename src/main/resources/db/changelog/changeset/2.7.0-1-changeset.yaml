@@ -3,24 +3,6 @@ databaseChangeLog:
       id: creation_identity_constraint
       author: dtrouillet
       changes:
-        - insert:
-            tableName: t_identity
-            columns:
-              - column:
-                  name: created_by
-                  value: SYSTEM
-              - column:
-                  name: created_date
-                  value: NOW()
-              - column:
-                  name: name
-                  value: default
-              - column:
-                  name: login
-                  value: default_login
-              - column:
-                  name: password
-                  value: changeme
         - dropColumn:
             tableName: t_environnement
             columns:
