@@ -6,6 +6,7 @@ import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
+import fr.icdc.ebad.repository.IdentityRepository;
 import fr.icdc.ebad.repository.TypeFichierRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.junit.Before;
@@ -47,7 +48,8 @@ public class ApplicationServiceTest {
     private TypeFichierRepository typeFichierRepository;
     @Mock
     private AccreditationRequestRepository accreditationRequestRepository;
-
+    @Mock
+    private IdentityRepository identityRepository;
     @Spy
     private List<ApplicationConnectorPlugin> applicationConnectorPlugins = new ArrayList<>();
 
@@ -73,13 +75,15 @@ public class ApplicationServiceTest {
         application.setEnvironnements(environnementSet);
 
         when(applicationRepository.getById(eq(9L))).thenReturn(application);
-
+        Page<Identity> pageIdentities = new PageImpl<>(new ArrayList<>());
+        when(identityRepository.findAllByAvailableApplicationId(eq(9L),any(Pageable.class))).thenReturn(pageIdentities);
         applicationService.deleteApplication(9L);
 
         verify(applicationRepository, times(1)).getById(eq(9L));
         verify(environnementService, times(1)).deleteEnvironnement(eq(environnement1), eq(true));
         verify(environnementService, times(1)).deleteEnvironnement(eq(environnement2), eq(true));
         verify(applicationRepository, times(1)).delete(eq(application));
+        verify(identityRepository, times(1)).deleteAll(eq(pageIdentities));
     }
 
     @Test

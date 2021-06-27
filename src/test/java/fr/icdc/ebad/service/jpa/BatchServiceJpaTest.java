@@ -57,16 +57,20 @@ public class BatchServiceJpaTest {
         Norme norme = Norme.builder().name("UNIX").commandLine("$1").pathShell("/").ctrlMDate("ctr").build();
         entityManager.persist(norme);
 
+        Identity identity = Identity.builder().name("IdentityName").login("myLogin").build();
+        entityManager.persist(identity);
+
         Environnement environnement1 = Environnement.builder().application(application1)
-//                .login("login")
+                .identity(identity)
                 .norme(norme)
                 .host("localhost")
                 .prefix("")
                 .name("dev").build();
         entityManager.persist(environnement1);
 
+
         Environnement environnement2 = Environnement.builder().application(application1)
-//                .login("login")
+                .identity(identity)
                 .norme(norme)
                 .host("localhost")
                 .prefix("")
