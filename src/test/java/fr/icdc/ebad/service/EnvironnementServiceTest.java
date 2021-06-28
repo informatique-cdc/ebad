@@ -1,6 +1,7 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
+import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
@@ -62,6 +63,10 @@ public class EnvironnementServiceTest {
     private EnvironnementConnectorPlugin environnementConnectorPlugin;
     @Mock
     private SchedulingRepository schedulingRepository;
+    @Mock
+    private GlobalSettingService globalSettingService;
+    @Mock
+    private IdentityRepository identityRepository;
     @Mock
     private JobScheduler jobScheduler;
     @Spy
@@ -323,6 +328,10 @@ public class EnvironnementServiceTest {
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
 
+        GlobalSetting globalSetting = GlobalSetting.builder().key(Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID).value("1").build();
+        when(globalSettingService.getValue(Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID)).thenReturn(globalSetting);
+        Identity identity = Identity.builder().id(1L).build();
+        when(identityRepository.getById(eq(1L))).thenReturn(identity);
         when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
 
         //WHEN
@@ -359,7 +368,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto1.getHome())
                 .name(environnementDiscoverDto1.getName())
                 .prefix(environnementDiscoverDto1.getPrefix())
-//                .login(environnementDiscoverDto1.getLogin())
+                .identity(identity)
                 .application(application)
                 .pluginId("import-plugin")
                 .build();
@@ -370,7 +379,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto2.getHome())
                 .name(environnementDiscoverDto2.getName())
                 .prefix(environnementDiscoverDto2.getPrefix())
-//                .login(environnementDiscoverDto2.getLogin())
+                .identity(identity)
                 .application(application)
                 .pluginId("import-plugin")
                 .build();
@@ -465,6 +474,11 @@ public class EnvironnementServiceTest {
             }
         };
         PluginWrapper pluginWrapper = new PluginWrapper(springPluginManager, pluginDescriptor, null, null);
+
+        GlobalSetting globalSetting = GlobalSetting.builder().key(Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID).value("1").build();
+        when(globalSettingService.getValue(Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID)).thenReturn(globalSetting);
+        Identity identity = Identity.builder().id(1L).build();
+        when(identityRepository.getById(eq(1L))).thenReturn(identity);
 
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(application));
         when(normeRepository.findAll()).thenReturn(normeList);
@@ -582,6 +596,11 @@ public class EnvironnementServiceTest {
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto1.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
         when(environnementRepository.findAllByExternalIdAndPluginId(eq(environnementDiscoverDto2.getId()), eq("import-plugin"))).thenReturn(Optional.empty());
 
+        GlobalSetting globalSetting = GlobalSetting.builder().key(Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID).value("1").build();
+        when(globalSettingService.getValue(Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID)).thenReturn(globalSetting);
+        Identity identity = Identity.builder().id(1L).build();
+        when(identityRepository.getById(eq(1L))).thenReturn(identity);
+
         when(springPluginManager.whichPlugin(any())).thenReturn(pluginWrapper);
 
         //WHEN
@@ -599,7 +618,7 @@ public class EnvironnementServiceTest {
                 && env.getName().equals(environnementDiscoverDto1.getName())
                 && env.getPrefix().equals(environnementDiscoverDto1.getPrefix())
                 && env.getExternalId().equals(environnementDiscoverDto1.getId())
-//                && env.getLogin().equals(environnementDiscoverDto1.getLogin())
+                && env.getIdentity().getId().equals(identity.getId())
                 && env.getPluginId().equals("import-plugin")));
 
         verify(environnementRepository).save(argThat((env) -> env.getApplication().equals(application)
@@ -608,7 +627,7 @@ public class EnvironnementServiceTest {
                 && env.getName().equals(environnementDiscoverDto2.getName())
                 && env.getPrefix().equals(environnementDiscoverDto2.getPrefix())
                 && env.getExternalId().equals(environnementDiscoverDto2.getId())
-//                && env.getLogin().equals(environnementDiscoverDto2.getLogin())
+                && env.getIdentity().getId().equals(identity.getId())
                 && env.getPluginId().equals("import-plugin")));
 
         Environnement expectedEnv1 = Environnement.builder()
@@ -617,7 +636,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto1.getHome())
                 .name(environnementDiscoverDto1.getName())
                 .prefix(environnementDiscoverDto1.getPrefix())
-//                .login(environnementDiscoverDto1.getLogin())
+                .identity(identity)
                 .application(application)
                 .pluginId("import-plugin")
                 .build();
@@ -628,7 +647,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto2.getHome())
                 .name(environnementDiscoverDto2.getName())
                 .prefix(environnementDiscoverDto2.getPrefix())
-//                .login(environnementDiscoverDto2.getLogin())
+                .identity(identity)
                 .application(application)
                 .pluginId("import-plugin")
                 .build();

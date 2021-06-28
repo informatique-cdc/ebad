@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
+import static fr.icdc.ebad.config.Constants.*;
+
 /**
  * Determine if a service is opened or closed
  */
@@ -25,19 +27,19 @@ public class PermissionServiceOpen {
     }
 
     public boolean canImportEnvironment() {
-        return getServiceOpen("ENVIRONMENT_IMPORT_ENABLED");
+        return getServiceOpen(GLOBAL_SETTINGS_ENVIRONMENT_IMPORT_ENABLED);
     }
 
     public boolean canImportApplication() {
-        return getServiceOpen("APPLICATION_IMPORT_ENABLED");
+        return getServiceOpen(GLOBAL_SETTINGS_APPLICATION_IMPORT_ENABLED);
     }
 
     public boolean canCreateEnvironment() {
-        return getServiceOpen("ENVIRONMENT_CREATE_ENABLED");
+        return getServiceOpen(GLOBAL_SETTINGS_ENVIRONMENT_CREATE_ENABLED);
     }
 
     public boolean canCreateApplication() {
-        return getServiceOpen("APPLICATION_CREATE_ENABLED");
+        return getServiceOpen(GLOBAL_SETTINGS_APPLICATION_CREATE_ENABLED);
     }
 
     public boolean canCreateOrUpdateUser() {
