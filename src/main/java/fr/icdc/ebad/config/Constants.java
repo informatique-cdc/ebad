@@ -12,6 +12,13 @@ public final class Constants {
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_USER = "ROLE_USER";
 
+
+    public static final String GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID = "DEFAULT_IDENTITY_ID";
+    public static final String GLOBAL_SETTINGS_ENVIRONMENT_IMPORT_ENABLED = "ENVIRONMENT_IMPORT_ENABLED";
+    public static final String GLOBAL_SETTINGS_APPLICATION_IMPORT_ENABLED = "APPLICATION_IMPORT_ENABLED";
+    public static final String GLOBAL_SETTINGS_ENVIRONMENT_CREATE_ENABLED = "ENVIRONMENT_CREATE_ENABLED";
+    public static final String GLOBAL_SETTINGS_APPLICATION_CREATE_ENABLED = "APPLICATION_CREATE_ENABLED";
+
     private Constants() {
     }
 

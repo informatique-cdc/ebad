@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: global_setting_default_identity
+      author: dtrouillet
+      changes:
+        - insert:
+            tableName: t_global_setting
+            columns:
+              - column:
+                  name: key
+                  value: DEFAULT_IDENTITY_ID
+              - column:
+                  name: value
+                  value: "1"
+              - column:
+                  name: description
+                  value: Default id identity for environment import
+              - column:
+                  name: label
+                  value: Default Identity ID

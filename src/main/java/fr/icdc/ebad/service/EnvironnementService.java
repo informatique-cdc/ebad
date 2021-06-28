@@ -7,7 +7,6 @@ import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.*;
-import fr.icdc.ebad.security.permission.PermissionIdentity;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.scheduling.JobScheduler;
@@ -28,6 +27,8 @@ import javax.validation.constraints.NotNull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static fr.icdc.ebad.config.Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID;
 
 /**
  * Created by dtrouillet on 03/03/2016.
@@ -53,8 +54,10 @@ public class EnvironnementService {
     private final SpringPluginManager springPluginManager;
     private final SchedulingRepository schedulingRepository;
     private final JobScheduler jobScheduler;
+    private final GlobalSettingService globalSettingService;
+    private final IdentityRepository identityRepository;
 
-    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler) {
+    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler, GlobalSettingService globalSettingService, IdentityRepository identityRepository) {
         this.shellService = shellService;
         this.environnementRepository = environnementRepository;
         this.batchRepository = batchRepository;
@@ -68,6 +71,8 @@ public class EnvironnementService {
         this.springPluginManager = springPluginManager;
         this.schedulingRepository = schedulingRepository;
         this.jobScheduler = jobScheduler;
+        this.globalSettingService = globalSettingService;
+        this.identityRepository = identityRepository;
     }
 
 
@@ -179,6 +184,8 @@ public class EnvironnementService {
         Application application = applicationRepository.findById(applicationId).orElseThrow(() -> new EbadServiceException("No application with id " + applicationId));
         Set<Environnement> environnements = new HashSet<>();
         List<NormeDiscoverDto> normeDiscoverDtos = mapper.mapAsList(normeRepository.findAll(), NormeDiscoverDto.class);
+        GlobalSetting defaultIdentityId = globalSettingService.getValue(GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID);
+        Identity identity = identityRepository.getById(Long.valueOf(defaultIdentityId.getValue()));
 
         try {
             for (EnvironnementConnectorPlugin environnementConnectorPlugin : environnementConnectorPluginList) {
@@ -198,7 +205,7 @@ public class EnvironnementService {
                     environnement.setExternalId(environnementDiscoverDto.getId());
                     environnement.setPluginId(pluginId);
                     environnement.setApplication(application);
-                    //FIXME DTROUILLET ADD DEFAULT IDENTITY
+                    environnement.setIdentity(identity);
 
                     try {
                         environnementRepository.save(environnement);
