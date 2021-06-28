@@ -7,6 +7,7 @@ import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
 import fr.icdc.ebad.repository.*;
+import fr.icdc.ebad.security.permission.PermissionIdentity;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.scheduling.JobScheduler;
@@ -191,13 +192,13 @@ public class EnvironnementService {
 
                     environnement.setName(environnementDiscoverDto.getName());
                     environnement.setHost(environnementDiscoverDto.getHost());
-                    environnement.setLogin(environnementDiscoverDto.getLogin());
                     environnement.setHomePath(environnementDiscoverDto.getHome());
                     environnement.setPrefix(environnementDiscoverDto.getPrefix());
                     environnement.setNorme(mapper.map(environnementDiscoverDto.getNorme(), Norme.class));
                     environnement.setExternalId(environnementDiscoverDto.getId());
                     environnement.setPluginId(pluginId);
                     environnement.setApplication(application);
+                    //FIXME DTROUILLET ADD DEFAULT IDENTITY
 
                     try {
                         environnementRepository.save(environnement);

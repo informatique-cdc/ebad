@@ -3,12 +3,7 @@ package fr.icdc.ebad.web.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import fr.icdc.ebad.domain.AbstractAuditingEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * Environnement.
@@ -24,7 +19,7 @@ public class EnvironnementCreationDto extends AbstractAuditingEntity {
     @JsonBackReference
     private ApplicationDto application;
     private String host;
-    private String login;
+    private PublicIdentityDto identity;
     private String homePath;
     private String prefix;
     private NormeDto norme;

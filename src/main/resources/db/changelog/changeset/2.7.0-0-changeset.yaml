@@ -1,0 +1,125 @@
+databaseChangeLog:
+  - changeSet:
+      id: creation_identity
+      author: dtrouillet
+      changes:
+        - createSequence:
+            cacheSize: 1
+            cycle: false
+            incrementBy: 50
+            maxValue: 9223372036854775807
+            minValue: 1
+            sequenceName: t_identity_id_seq
+            startValue: 1
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: t_identity_pkey
+                  name: id
+                  type: BIGINT
+                  defaultValueSequenceNext: t_identity_id_seq
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: login
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  name: privatekey
+                  type: VARCHAR(2048)
+              - column:
+                  name: privatekey_path
+                  type: VARCHAR(2048)
+              - column:
+                  name: passphrase
+                  type: VARCHAR(255)
+              - column:
+                  name: available_application_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_by
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+              - column:
+                  name: last_modified_by
+                  type: VARCHAR(50)
+              - column:
+                  name: last_modified_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+              - addForeignKeyConstraint:
+                  baseColumnNames: available_application_id
+                  baseTableName: t_identity
+                  constraintName: t_identity_application_id
+                  deferrable: false
+                  initiallyDeferred: false
+                  onDelete: CASCADE
+                  onUpdate: NO ACTION
+                  referencedColumnNames: id
+                  referencedTableName: t_application
+                  validate: true
+            tableName: t_identity
+        - insert:
+            tableName: t_identity
+            columns:
+              - column:
+                  name: created_by
+                  value: SYSTEM
+              - column:
+                  name: created_date
+                  value: NOW()
+              - column:
+                  name: name
+                  value: default
+              - column:
+                  name: login
+                  value: default_login
+              - column:
+                  name: password
+                  value: changeme
+        - dropColumn:
+            tableName: t_environnement
+            columns:
+              - column:
+                  name: login
+        - addColumn:
+            tableName: t_environnement
+            columns:
+              - column:
+                  name: identity_id
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseColumnNames: identity_id
+            baseTableName: t_environnement
+            constraintName: t_environnement_identity_id
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: t_identity
+            validate: true
+        - update:
+            tableName: t_environnement
+            columns:
+              - column:
+                  name: identity_id
+                  valueComputed: (SELECT id  from t_identity where name = 'default')
+        - addNotNullConstraint:
+            tableName: t_environnement
+            columnName: identity_id
