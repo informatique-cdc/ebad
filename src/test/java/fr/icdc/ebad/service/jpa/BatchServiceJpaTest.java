@@ -2,15 +2,7 @@ package fr.icdc.ebad.service.jpa;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import fr.icdc.ebad.config.Constants;
-import fr.icdc.ebad.domain.Application;
-import fr.icdc.ebad.domain.Authority;
-import fr.icdc.ebad.domain.Batch;
-import fr.icdc.ebad.domain.Environnement;
-import fr.icdc.ebad.domain.Norme;
-import fr.icdc.ebad.domain.QBatch;
-import fr.icdc.ebad.domain.UsageApplication;
-import fr.icdc.ebad.domain.UsageApplicationId;
-import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.domain.*;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.service.BatchService;
 import org.junit.Test;
@@ -65,16 +57,20 @@ public class BatchServiceJpaTest {
         Norme norme = Norme.builder().name("UNIX").commandLine("$1").pathShell("/").ctrlMDate("ctr").build();
         entityManager.persist(norme);
 
+        Identity identity = Identity.builder().name("IdentityName").login("myLogin").build();
+        entityManager.persist(identity);
+
         Environnement environnement1 = Environnement.builder().application(application1)
-                .login("login")
+                .identity(identity)
                 .norme(norme)
                 .host("localhost")
                 .prefix("")
                 .name("dev").build();
         entityManager.persist(environnement1);
 
+
         Environnement environnement2 = Environnement.builder().application(application1)
-                .login("login")
+                .identity(identity)
                 .norme(norme)
                 .host("localhost")
                 .prefix("")

@@ -2,14 +2,12 @@ package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.QIdentity;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.ApplicationConnectorPlugin;
-import fr.icdc.ebad.repository.AccreditationRequestRepository;
-import fr.icdc.ebad.repository.ApplicationRepository;
-import fr.icdc.ebad.repository.TypeFichierRepository;
-import fr.icdc.ebad.repository.UsageApplicationRepository;
+import fr.icdc.ebad.repository.*;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
@@ -42,8 +40,9 @@ public class ApplicationService {
     private final List<ApplicationConnectorPlugin> applicationConnectorPlugins;
     private final SpringPluginManager springPluginManager;
     private final AccreditationRequestRepository accreditationRequestRepository;
+    private final IdentityRepository identityRepository;
 
-    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, UsageApplicationRepository usageApplicationRepository, EnvironnementService environnementService, List<ApplicationConnectorPlugin> applicationConnectorPlugins, SpringPluginManager springPluginManager, AccreditationRequestRepository accreditationRequestRepository) {
+    public ApplicationService(ApplicationRepository applicationRepository, TypeFichierRepository typeFichierRepository, UsageApplicationRepository usageApplicationRepository, EnvironnementService environnementService, List<ApplicationConnectorPlugin> applicationConnectorPlugins, SpringPluginManager springPluginManager, AccreditationRequestRepository accreditationRequestRepository, IdentityRepository identityRepository) {
         this.applicationRepository = applicationRepository;
         this.typeFichierRepository = typeFichierRepository;
         this.usageApplicationRepository = usageApplicationRepository;
@@ -51,6 +50,7 @@ public class ApplicationService {
         this.applicationConnectorPlugins = applicationConnectorPlugins;
         this.springPluginManager = springPluginManager;
         this.accreditationRequestRepository = accreditationRequestRepository;
+        this.identityRepository = identityRepository;
     }
 
 
@@ -81,6 +81,7 @@ public class ApplicationService {
         accreditationRequestRepository.deleteByApplication(application);
         typeFichierRepository.deleteByApplication(application);
         application.getEnvironnements().forEach(environnement -> environnementService.deleteEnvironnement(environnement, true));
+        identityRepository.deleteAll(identityRepository.findAll(QIdentity.identity.availableApplication.id.eq(appId), Pageable.unpaged()));
         applicationRepository.delete(application);
     }
 

@@ -3,6 +3,7 @@ package fr.icdc.ebad.service;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -22,6 +23,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -31,7 +33,6 @@ import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -43,6 +44,9 @@ public class ShellServiceTest {
     @Spy
     private EbadProperties ebadProperties;
 
+    @Mock
+    private IdentityService identityService;
+
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
@@ -53,7 +57,7 @@ public class ShellServiceTest {
 
     @Before
     public void setup() throws IOException {
-        shellService = new ShellService(ebadProperties, Optional.empty());
+        shellService = new ShellService(ebadProperties, identityService);
         EbadProperties.SshProperties sshProperties = ebadProperties.getSsh();
         sshProperties.setPrivateKeyPath("/key");
         sshProperties.setPrivateKeyPassphrase("test");
@@ -96,7 +100,8 @@ public class ShellServiceTest {
     @Test
     public void runCommand() throws EbadServiceException {
         Norme norme = Norme.builder().commandLine("$1").build();
-        Environnement environnement = Environnement.builder().id(1L).host("localhost").norme(norme).build();
+        Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
+        Environnement environnement = Environnement.builder().id(1L).identity(identity).host("localhost").norme(norme).build();
         RetourBatch retourBatch = shellService.runCommandNew(environnement, "echo hello");
         assertEquals("hello", retourBatch.getLogOut().trim());
         assertEquals(0, retourBatch.getReturnCode());
@@ -113,7 +118,8 @@ public class ShellServiceTest {
         fileWriter.close();
 
         Norme norme = Norme.builder().commandLine("$1").build();
-        Environnement environnement = Environnement.builder().homePath("").id(1L).host("localhost").norme(norme).build();
+        Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
+        Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
         Directory directory = new Directory();
         directory.setPath("");
         directory.setEnvironnement(environnement);

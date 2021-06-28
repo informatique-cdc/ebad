@@ -340,7 +340,7 @@ public class EnvironnementServiceTest {
                 && env.getName().equals(environnementDiscoverDto1.getName())
                 && env.getPrefix().equals(environnementDiscoverDto1.getPrefix())
                 && env.getExternalId().equals(environnementDiscoverDto1.getId())
-                && env.getLogin().equals(environnementDiscoverDto1.getLogin())
+//                && env.getLogin().equals(environnementDiscoverDto1.getLogin())
                 && env.getPluginId().equals("import-plugin")));
 
         verify(environnementRepository).save(argThat((env) -> env.getApplication().equals(application)
@@ -349,7 +349,7 @@ public class EnvironnementServiceTest {
                 && env.getName().equals(environnementDiscoverDto2.getName())
                 && env.getPrefix().equals(environnementDiscoverDto2.getPrefix())
                 && env.getExternalId().equals(environnementDiscoverDto2.getId())
-                && env.getLogin().equals(environnementDiscoverDto2.getLogin())
+//                && env.getLogin().equals(environnementDiscoverDto2.getLogin())
                 && env.getPluginId().equals("import-plugin")));
 
 
@@ -359,7 +359,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto1.getHome())
                 .name(environnementDiscoverDto1.getName())
                 .prefix(environnementDiscoverDto1.getPrefix())
-                .login(environnementDiscoverDto1.getLogin())
+//                .login(environnementDiscoverDto1.getLogin())
                 .application(application)
                 .pluginId("import-plugin")
                 .build();
@@ -370,7 +370,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto2.getHome())
                 .name(environnementDiscoverDto2.getName())
                 .prefix(environnementDiscoverDto2.getPrefix())
-                .login(environnementDiscoverDto2.getLogin())
+//                .login(environnementDiscoverDto2.getLogin())
                 .application(application)
                 .pluginId("import-plugin")
                 .build();
@@ -599,7 +599,7 @@ public class EnvironnementServiceTest {
                 && env.getName().equals(environnementDiscoverDto1.getName())
                 && env.getPrefix().equals(environnementDiscoverDto1.getPrefix())
                 && env.getExternalId().equals(environnementDiscoverDto1.getId())
-                && env.getLogin().equals(environnementDiscoverDto1.getLogin())
+//                && env.getLogin().equals(environnementDiscoverDto1.getLogin())
                 && env.getPluginId().equals("import-plugin")));
 
         verify(environnementRepository).save(argThat((env) -> env.getApplication().equals(application)
@@ -608,7 +608,7 @@ public class EnvironnementServiceTest {
                 && env.getName().equals(environnementDiscoverDto2.getName())
                 && env.getPrefix().equals(environnementDiscoverDto2.getPrefix())
                 && env.getExternalId().equals(environnementDiscoverDto2.getId())
-                && env.getLogin().equals(environnementDiscoverDto2.getLogin())
+//                && env.getLogin().equals(environnementDiscoverDto2.getLogin())
                 && env.getPluginId().equals("import-plugin")));
 
         Environnement expectedEnv1 = Environnement.builder()
@@ -617,7 +617,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto1.getHome())
                 .name(environnementDiscoverDto1.getName())
                 .prefix(environnementDiscoverDto1.getPrefix())
-                .login(environnementDiscoverDto1.getLogin())
+//                .login(environnementDiscoverDto1.getLogin())
                 .application(application)
                 .pluginId("import-plugin")
                 .build();
@@ -628,7 +628,7 @@ public class EnvironnementServiceTest {
                 .homePath(environnementDiscoverDto2.getHome())
                 .name(environnementDiscoverDto2.getName())
                 .prefix(environnementDiscoverDto2.getPrefix())
-                .login(environnementDiscoverDto2.getLogin())
+//                .login(environnementDiscoverDto2.getLogin())
                 .application(application)
                 .pluginId("import-plugin")
                 .build();

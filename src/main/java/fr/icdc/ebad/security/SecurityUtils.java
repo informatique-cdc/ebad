@@ -41,4 +41,11 @@ public final class SecurityUtils {
                 authority -> authority.getAuthority().equals(Constants.ROLE_ADMIN)
         );
     }
+
+    public static boolean isUser() {
+
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(
+                authority -> authority.getAuthority().equals(Constants.ROLE_USER)
+        );
+    }
 }
