@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.service.IdentityService;
 import fr.icdc.ebad.web.ResponseUtil;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -69,14 +71,14 @@ public class IdentityResource {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionIdentity.canReadByApplication(#applicationId, principal)")
-    public ResponseEntity<Page<PublicIdentityDto>> getAllIdentities(@Param("applicationId") Long applicationId, Pageable pageable) {
+    public ResponseEntity<Page<PublicIdentityDto>> getAllIdentities(@Param("applicationId") Long applicationId, @QuerydslPredicate(root = Identity.class) Predicate predicate, Pageable pageable) {
         LOGGER.debug("REST request to get all identities");
         Page<Identity> identities;
 
         if(applicationId == null){
-            identities = identityService.findWithoutApp(PaginationUtil.generatePageRequestOrDefault(pageable));
+            identities = identityService.findWithoutApp(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         }else{
-            identities = identityService.findAllByApplication(applicationId, PaginationUtil.generatePageRequestOrDefault(pageable));
+            identities = identityService.findAllByApplication(applicationId, predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         }
 
         return new ResponseEntity<>(identities.map(identity -> mapper.map(identity, PublicIdentityDto.class)), HttpStatus.OK);

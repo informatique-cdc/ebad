@@ -1,6 +1,8 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Identity;
+import fr.icdc.ebad.domain.QIdentity;
 import fr.icdc.ebad.repository.IdentityRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.junit.Test;
@@ -16,7 +18,8 @@ import java.security.KeyPair;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -63,8 +66,8 @@ public class IdentityServiceTest {
         Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").build();
 
         Page<Identity> identities = new PageImpl<>(Collections.singletonList(identity));
-        when(identityRepository.findAllByAvailableApplicationNull(eq(pageable))).thenReturn(identities);
-        Page<Identity> result = identityService.findWithoutApp(pageable);
+        when(identityRepository.findAll(any(Predicate.class), eq(pageable))).thenReturn(identities);
+        Page<Identity> result = identityService.findWithoutApp(QIdentity.identity.id.eq(1L), pageable);
         assertEquals(identity, result.getContent().get(0));
     }
 
@@ -74,8 +77,8 @@ public class IdentityServiceTest {
         Identity identity = Identity.builder().id(1L).name("testName").login("testLogin").build();
 
         Page<Identity> identities = new PageImpl<>(Collections.singletonList(identity));
-        when(identityRepository.findAllByAvailableApplicationId(eq(1L), eq(pageable))).thenReturn(identities);
-        Page<Identity> result = identityService.findAllByApplication(1L, pageable);
+        when(identityRepository.findAll(any(Predicate.class), eq(pageable))).thenReturn(identities);
+        Page<Identity> result = identityService.findAllByApplication(1L, QIdentity.identity.id.eq(1L), pageable);
         assertEquals(identity, result.getContent().get(0));
     }
 

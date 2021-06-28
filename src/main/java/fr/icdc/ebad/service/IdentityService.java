@@ -1,6 +1,8 @@
 package fr.icdc.ebad.service;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Identity;
+import fr.icdc.ebad.domain.QIdentity;
 import fr.icdc.ebad.repository.IdentityRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -11,8 +13,6 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.util.io.pem.PemReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,13 +47,15 @@ public class IdentityService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Identity> findWithoutApp(Pageable pageable) {
-        return identityRepository.findAllByAvailableApplicationNull(pageable);
+    public Page<Identity> findWithoutApp(Predicate predicate, Pageable pageable) {
+        Predicate predicateAll = QIdentity.identity.availableApplication.isNull().and(predicate);
+        return identityRepository.findAll(predicateAll, pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<Identity> findAllByApplication(Long applicationId, Pageable pageable) {
-        return identityRepository.findAllByAvailableApplicationId(applicationId, pageable);
+    public Page<Identity> findAllByApplication(Long applicationId, Predicate predicate, Pageable pageable) {
+        Predicate predicateAll = QIdentity.identity.availableApplication.id.eq(applicationId).and(predicate);
+        return identityRepository.findAll(predicateAll, pageable);
     }
 
 

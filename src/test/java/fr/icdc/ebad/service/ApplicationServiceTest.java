@@ -76,7 +76,7 @@ public class ApplicationServiceTest {
 
         when(applicationRepository.getById(eq(9L))).thenReturn(application);
         Page<Identity> pageIdentities = new PageImpl<>(new ArrayList<>());
-        when(identityRepository.findAllByAvailableApplicationId(eq(9L),any(Pageable.class))).thenReturn(pageIdentities);
+        when(identityRepository.findAll(any(Predicate.class),any(Pageable.class))).thenReturn(pageIdentities);
         applicationService.deleteApplication(9L);
 
         verify(applicationRepository, times(1)).getById(eq(9L));

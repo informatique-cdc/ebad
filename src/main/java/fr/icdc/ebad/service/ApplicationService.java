@@ -2,6 +2,7 @@ package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.QIdentity;
 import fr.icdc.ebad.domain.UsageApplication;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.ApplicationDiscoverDto;
@@ -80,7 +81,7 @@ public class ApplicationService {
         accreditationRequestRepository.deleteByApplication(application);
         typeFichierRepository.deleteByApplication(application);
         application.getEnvironnements().forEach(environnement -> environnementService.deleteEnvironnement(environnement, true));
-        identityRepository.deleteAll(identityRepository.findAllByAvailableApplicationId(appId, Pageable.unpaged()));
+        identityRepository.deleteAll(identityRepository.findAll(QIdentity.identity.availableApplication.id.eq(appId), Pageable.unpaged()));
         applicationRepository.delete(application);
     }
 

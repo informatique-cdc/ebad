@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest;
 
+import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Identity;
@@ -26,8 +27,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -122,7 +124,7 @@ public class IdentityResourceTest {
         identities.add(identity3);
 
         Page<Identity>  identityPage = new PageImpl<>(identities);
-        when(identityService.findWithoutApp(any(Pageable.class))).thenReturn(identityPage);
+        when(identityService.findWithoutApp(any(Predicate.class), any(Pageable.class))).thenReturn(identityPage);
 
         restMvc.perform(
                 builder
@@ -158,7 +160,7 @@ public class IdentityResourceTest {
         identities.add(identity3);
 
         Page<Identity>  identityPage = new PageImpl<>(identities);
-        when(identityService.findAllByApplication(eq(1L), any(Pageable.class))).thenReturn(identityPage);
+        when(identityService.findAllByApplication(eq(1L), any(Predicate.class), any(Pageable.class))).thenReturn(identityPage);
 
         restMvc.perform(
                 builder
