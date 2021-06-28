@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -54,12 +55,14 @@ public class IdentityResourceTest {
     @Autowired
     private IdentityResource identityResource;
 
+    @Autowired
+    private QuerydslPredicateArgumentResolver querydslPredicateArgumentResolver;
 
     @Before
     public void setup() {
         this.restMvc = MockMvcBuilders
                 .standaloneSetup(identityResource)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setCustomArgumentResolvers(querydslPredicateArgumentResolver, new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
