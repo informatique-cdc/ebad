@@ -1,9 +1,8 @@
-package fr.icdc.ebad.config.oauth;
+package fr.icdc.ebad.config.apikey;
 
-import fr.icdc.ebad.security.Test2Filter;
+import fr.icdc.ebad.security.ApiKeyFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,10 +14,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @Configuration
 @EnableWebSecurity
 @Order(2)
-@Profile("!jwt")
 public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
-    private Test2Filter test2Filter;
+    private ApiKeyFilter apiKeyFilter;
 
 
     @Override
@@ -30,7 +28,7 @@ public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
                     String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
                     return (auth != null && auth.startsWith("Basic"));
                 })
-                .addFilterBefore(test2Filter, BasicAuthenticationFilter.class)
+                .addFilterBefore(apiKeyFilter, BasicAuthenticationFilter.class)
                 .httpBasic().disable()
                 .authorizeRequests()
                 .anyRequest().authenticated()
