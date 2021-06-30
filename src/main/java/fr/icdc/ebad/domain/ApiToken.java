@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @Table(name = "t_api_token")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class ApiToken {
+public class ApiToken extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "api_token_generator")
     @SequenceGenerator(name = "api_token_generator", sequenceName = "t_api_token_id_seq")

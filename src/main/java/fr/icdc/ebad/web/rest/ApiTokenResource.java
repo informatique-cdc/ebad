@@ -6,6 +6,7 @@ import fr.icdc.ebad.service.ApiTokenService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ApiTokenDto;
 import fr.icdc.ebad.web.rest.dto.ApiTokenWithKeyDto;
+import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api-token")
+@RequestMapping("/api-tokens")
 @Tag(name = "API Token", description = "the API token API")
 public class ApiTokenResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiTokenResource.class);
@@ -39,14 +40,14 @@ public class ApiTokenResource {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<Page<ApiTokenDto>> findToken(Pageable pageable) {
         LOGGER.debug("REST request to find api token");
-        Page<ApiToken> apiTokens = apiTokenService.findTokenByUser(SecurityUtils.getCurrentLogin(), pageable);
+        Page<ApiToken> apiTokens = apiTokenService.findTokenByUser(SecurityUtils.getCurrentLogin(), PaginationUtil.generatePageRequestOrDefault(pageable));
         return ResponseEntity.ok().body(apiTokens.map(apiToken -> mapper.map(apiToken, ApiTokenDto.class)));
     }
 
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public ResponseEntity<ApiTokenWithKeyDto> createToken(@Valid ApiTokenDto apiTokenDto) throws EbadServiceException {
+    public ResponseEntity<ApiTokenWithKeyDto> createToken(@Valid @RequestBody ApiTokenDto apiTokenDto) throws EbadServiceException {
         LOGGER.debug("REST request to create api token");
         ApiToken apiToken = apiTokenService.createToken(SecurityUtils.getCurrentLogin(), apiTokenDto.getName());
         return ResponseEntity.ok().body(mapper.map(apiToken, ApiTokenWithKeyDto.class));

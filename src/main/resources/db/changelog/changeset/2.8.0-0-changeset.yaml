@@ -38,6 +38,22 @@ databaseChangeLog:
                     nullable: false
                   name: name
                   type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_by
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+              - column:
+                  name: last_modified_by
+                  type: VARCHAR(50)
+              - column:
+                  name: last_modified_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
         - addForeignKeyConstraint:
             baseColumnNames: user_id
             baseTableName: t_api_token
