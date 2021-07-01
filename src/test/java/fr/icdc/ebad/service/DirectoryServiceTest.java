@@ -6,6 +6,7 @@ import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
 import org.apache.commons.io.IOUtils;
 import org.apache.sshd.sftp.client.SftpClient;
@@ -21,7 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,8 +64,9 @@ public class DirectoryServiceTest {
     @Test(expected = IllegalAccessError.class)
     public void removeFile() throws EbadServiceException {
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
+        DirectoryDto directoryDto = DirectoryDto.builder().id(1L).name("test").canWrite(true).build();
         FilesDto filesDTO = new FilesDto();
-        filesDTO.setDirectory(directory);
+        filesDTO.setDirectory(directoryDto);
         filesDTO.setSubDirectory("testSub");
         when(directoryRepository.getById(1L)).thenReturn(directory);
         doNothing().when(shellService).removeFile(eq(directory), eq(filesDTO.getName()), anyString());
@@ -77,10 +79,11 @@ public class DirectoryServiceTest {
 
     @Test(expected = EbadServiceException.class)
     public void readFile() throws EbadServiceException {
-        InputStream inputStream = IOUtils.toInputStream("hello", Charset.forName("UTF-8"));
+        InputStream inputStream = IOUtils.toInputStream("hello", StandardCharsets.UTF_8);
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
+        DirectoryDto directoryDto = DirectoryDto.builder().id(1L).name("test").canWrite(true).build();
         FilesDto filesDTO = new FilesDto();
-        filesDTO.setDirectory(directory);
+        filesDTO.setDirectory(directoryDto);
         when(directoryRepository.getById(1L)).thenReturn(directory);
         when(shellService.getFile(eq(directory), eq(filesDTO.getName()), any())).thenReturn(inputStream);
         InputStream result = directoryService.readFile(filesDTO);
