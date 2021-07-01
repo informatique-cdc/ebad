@@ -60,8 +60,8 @@ public class ApiTokenService {
     }
 
     @Transactional(readOnly = true)
-    public User userFromToken(String login, String apiToken){
-        Optional<ApiToken> optionalApiToken = apiTokenRepository.findApiTokenByUserLoginAndToken(login, apiToken);
+    public User userFromToken(String apiToken){
+        Optional<ApiToken> optionalApiToken = apiTokenRepository.findApiTokenByToken(apiToken);
         if (optionalApiToken.isEmpty()){
             return null;
         }

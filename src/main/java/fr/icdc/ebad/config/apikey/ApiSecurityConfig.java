@@ -1,39 +1,44 @@
 package fr.icdc.ebad.config.apikey;
 
-import fr.icdc.ebad.security.ApiKeyFilter;
+import fr.icdc.ebad.security.apikey.ApiKeyAuthenticationManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @Order(2)
 public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
-    private ApiKeyFilter apiKeyFilter;
+    private ApiKeyAuthenticationManager apiKeyAuthenticationManager;
+    @Bean
+    public RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter() {
+        RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter =  new RequestHeaderAuthenticationFilter();
 
+        requestHeaderAuthenticationFilter.setPrincipalRequestHeader("ebad-api-token");
+        requestHeaderAuthenticationFilter.setExceptionIfHeaderMissing(false);
+        requestHeaderAuthenticationFilter.setAuthenticationManager(apiKeyAuthenticationManager);
+
+        return requestHeaderAuthenticationFilter;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // @formatter:off
         http
-                .csrf().disable()
                 .requestMatcher(request -> {
-                    String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
-                    return (auth != null && auth.startsWith("Basic"));
+                    String auth = request.getHeader("ebad-api-token");
+                    return (auth != null);
                 })
-                .addFilterBefore(apiKeyFilter, BasicAuthenticationFilter.class)
-                .httpBasic().disable()
+                .csrf().disable()
+                .addFilter(requestHeaderAuthenticationFilter())
                 .authorizeRequests()
-                .anyRequest().authenticated()
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .anyRequest().authenticated();
         // @formatter:on
     }
 }

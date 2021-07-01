@@ -30,9 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles({Constants.SPRING_PROFILE_TEST, "jwt"})
@@ -41,8 +39,8 @@ public class UserJWTControllerTest {
     @MockBean
     private TokenProvider tokenProvider;
 
-    @MockBean
-    private AuthenticationManager authenticationManager;
+    @MockBean(name = "customAuthenticationManager")
+    private AuthenticationManager customAuthenticationManager;
 
     @MockBean
     private UserService userService;

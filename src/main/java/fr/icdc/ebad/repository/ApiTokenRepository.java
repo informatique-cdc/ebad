@@ -23,5 +23,5 @@ public interface ApiTokenRepository extends JpaRepository<ApiToken, Long>, Query
     }
 
     Page<ApiToken> findAllByUserLogin(String login, Pageable pageable);
-    Optional<ApiToken> findApiTokenByUserLoginAndToken(String login, String key);
+    Optional<ApiToken> findApiTokenByToken(String key);
 }
