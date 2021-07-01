@@ -7,6 +7,7 @@ import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +19,15 @@ import java.util.Optional;
 public class ApiTokenService {
     private final ApiTokenRepository apiTokenRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
 
-    public ApiTokenService(ApiTokenRepository apiTokenRepository, UserRepository userRepository) {
+    public ApiTokenService(ApiTokenRepository apiTokenRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.apiTokenRepository = apiTokenRepository;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -38,14 +41,17 @@ public class ApiTokenService {
         if (optionalUser.isEmpty()){
             throw new EbadServiceException("No user found");
         }
+
+        String token = generateNewToken();
         ApiToken apiToken = ApiToken
                 .builder()
                 .user(optionalUser.get())
                 .name(name)
-                .token(generateNewToken())
+                .token(passwordEncoder.encode(token))
                 .build();
 
-        return apiTokenRepository.save(apiToken);
+        ApiToken apiTokenSaved = apiTokenRepository.save(apiToken);
+        return ApiToken.builder().id(apiTokenSaved.getId()).name(apiTokenSaved.getName()).token(apiTokenSaved.getId()+":"+token).user(apiTokenSaved.getUser()).build();
     }
 
     public static String generateNewToken() {
@@ -61,11 +67,37 @@ public class ApiTokenService {
 
     @Transactional(readOnly = true)
     public User userFromToken(String apiToken){
-        Optional<ApiToken> optionalApiToken = apiTokenRepository.findApiTokenByToken(apiToken);
-        if (optionalApiToken.isEmpty()){
+        Long id = getIdFromTokenId(apiToken);
+        String token = getTokenFromTokenId(apiToken);
+        if(token == null || id == null){
+            return null;
+        }
+        Optional<ApiToken> optionalApiToken = apiTokenRepository.findById(id);
+        if (optionalApiToken.isEmpty() || !passwordEncoder.matches(token, optionalApiToken.get().getToken())){
             return null;
         }
 
         return optionalApiToken.get().getUser();
+    }
+
+    private String getTokenFromTokenId(String token){
+        int index = token.indexOf(":");
+        if(index == -1){
+            return null;
+        }
+        return token.substring(index+1);
+    }
+
+    private Long getIdFromTokenId(String token){
+        int index = token.indexOf(":");
+        if(index == -1){
+            return null;
+        }
+
+        try {
+            return Long.valueOf(token.substring(0, index));
+        }catch (NumberFormatException e){
+            return null;
+        }
     }
 }
