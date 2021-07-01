@@ -8,6 +8,7 @@ import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
+import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.io.IOUtils;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.joda.time.DateTime;
@@ -37,6 +38,8 @@ public class DirectoryServiceTest {
     private DirectoryRepository directoryRepository;
     @Mock
     private ShellService shellService;
+    @Mock
+    private MapperFacade mapperFacade;
     @InjectMocks
     private DirectoryService directoryService;
 
@@ -97,7 +100,9 @@ public class DirectoryServiceTest {
     public void uploadFile() throws EbadServiceException {
 
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
+        DirectoryDto directoryDto = DirectoryDto.builder().id(1L).name("test").canWrite(true).build();
         when(directoryRepository.getById(eq(1L))).thenReturn(directory);
+        when(mapperFacade.map(eq(directory),eq(DirectoryDto.class))).thenReturn(directoryDto);
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
         doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());
@@ -111,6 +116,7 @@ public class DirectoryServiceTest {
 
     @Test(expected = IllegalAccessError.class)
     public void uploadFileKo() throws EbadServiceException {
+
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
         directoryService.uploadFile(secondFile, 1L, null);
