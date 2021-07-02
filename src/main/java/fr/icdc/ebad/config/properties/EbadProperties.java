@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 
 @Getter
 @Setter
@@ -64,7 +65,10 @@ public class EbadProperties {
     @Getter
     @Setter
     public static class SshProperties {
+        @NotNull
         private int port = 22;
+        @NotNull
+        private long timeoutInMs = Duration.ofDays(2).toMillis();
     }
 
     @Getter
