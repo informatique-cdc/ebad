@@ -64,7 +64,6 @@ public class Oauth2Configuration extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        System.out.println(http);
         CookieCsrfTokenRepository cookieCsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         cookieCsrfTokenRepository.setCookiePath("/");
         cookieCsrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
