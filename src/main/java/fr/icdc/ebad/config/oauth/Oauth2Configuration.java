@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,6 +28,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 @Profile("!jwt")
+@Order(3)
 @Configuration
 @EnableOAuth2Client
 @EnableResourceServer

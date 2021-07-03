@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 
 @Getter
 @Setter
@@ -26,16 +27,13 @@ public class EbadProperties {
     @Getter
     @Setter
     public static class SecurityProperties {
-        private EbadProperties.SecurityProperties.RememberMeProperties rememberme = new EbadProperties.SecurityProperties.RememberMeProperties();
         private EbadProperties.SecurityProperties.AuthenticationProperties authentication = new EbadProperties.SecurityProperties.AuthenticationProperties();
         private EbadProperties.SecurityProperties.MappingUserProperties mappingUser = new EbadProperties.SecurityProperties.MappingUserProperties();
 
         @Getter
         @Setter
-        public static class RememberMeProperties {
-            @NotNull
-            private String key;
-        }
+        @NotNull
+        private String apiKeyHeaderName = "ebad-api-key";
 
         @Getter
         @Setter
@@ -68,13 +66,9 @@ public class EbadProperties {
     @Setter
     public static class SshProperties {
         @NotNull
-        private String login;
         private int port = 22;
         @NotNull
-        private String privateKeyPath;
-        private String privateKeyPassphrase;
-        private String passphrase;
-
+        private long timeoutInMs = Duration.ofDays(2).toMillis();
     }
 
     @Getter

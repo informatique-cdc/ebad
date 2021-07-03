@@ -34,13 +34,13 @@ import javax.validation.Valid;
 public class UserJWTController {
 
     private final TokenProvider tokenProvider;
-    private final AuthenticationManager authenticationManager;
+    private final AuthenticationManager customAuthenticationManager;
     private final UserService userService;
     private final MapperFacade mapper;
 
-    public UserJWTController(TokenProvider tokenProvider, AuthenticationManager authenticationManager, UserService userService, MapperFacade mapper) {
+    public UserJWTController(TokenProvider tokenProvider, AuthenticationManager customAuthenticationManager, UserService userService, MapperFacade mapper) {
         this.tokenProvider = tokenProvider;
-        this.authenticationManager = authenticationManager;
+        this.customAuthenticationManager = customAuthenticationManager;
         this.userService = userService;
         this.mapper = mapper;
     }
@@ -51,7 +51,7 @@ public class UserJWTController {
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
 
-        Authentication authentication = this.authenticationManager.authenticate(authenticationToken);
+        Authentication authentication = this.customAuthenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         boolean rememberMe = loginDto.isRememberMe();
         String jwt = tokenProvider.createToken(authentication, rememberMe);

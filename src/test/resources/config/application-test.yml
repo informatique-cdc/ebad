@@ -48,11 +48,7 @@ ebad:
                 # Token is valid 24 hours
                 token-validity-in-seconds: 86400
                 token-validity-in-seconds-for-remember-me: 2592000
-    ssh:
-        login: ebad
-        passphrase: password
-        private-key-passphrase: password
-        private-key-path: ./src/test/resources/fakekeys/fake_key
+
 
 org:
     jobrunr:
