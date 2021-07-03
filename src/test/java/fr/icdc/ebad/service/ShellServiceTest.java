@@ -59,10 +59,6 @@ public class ShellServiceTest {
     public void setup() throws IOException {
         shellService = new ShellService(ebadProperties, identityService);
         EbadProperties.SshProperties sshProperties = ebadProperties.getSsh();
-        sshProperties.setPrivateKeyPath("/key");
-        sshProperties.setPrivateKeyPassphrase("test");
-        sshProperties.setLogin(USERNAME);
-        sshProperties.setPassphrase(PASSWORD);
         sshProperties.setPort(2048);
         setupSSHServer();
     }

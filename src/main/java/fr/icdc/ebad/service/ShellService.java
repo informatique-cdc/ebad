@@ -53,7 +53,7 @@ public class ShellService {
                 channel.setOut(responseStream);
                 try {
                     channel.open();
-                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0L);
+                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), ebadProperties.getSsh().getTimeoutInMs());
                     commandOut = responseStream.toString();
                 } finally {
                     exitStatus = channel.getExitStatus();

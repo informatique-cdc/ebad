@@ -1,6 +1,7 @@
 package fr.icdc.ebad.web.rest.errors;
 
 
+import fr.icdc.ebad.security.UserNotActivatedException;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,7 @@ public class ExceptionTranslator implements ProblemHandling {
         return create(ex, problem, request);
     }
 
-    @ExceptionHandler(InsufficientAuthenticationException.class)
+    @ExceptionHandler({InsufficientAuthenticationException.class, UserNotActivatedException.class})
     public ResponseEntity<Problem> handleInsufficientAuthenticationException(InsufficientAuthenticationException ex, NativeWebRequest request) {
         LOGGER.warn("InsufficientAuthenticationException ! {}", ex.getMessage());
 
