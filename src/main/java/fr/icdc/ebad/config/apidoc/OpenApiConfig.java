@@ -27,20 +27,12 @@ public class OpenApiConfig {
                                 )
                                 .addSecuritySchemes(securitySchemeApiKey,
                                 new SecurityScheme()
+                                        .name(securitySchemeApiKey)
                                         .type(SecurityScheme.Type.APIKEY)
-                                        .scheme(securitySchemeApiKey)
                                         .in(SecurityScheme.In.HEADER)
                         )
                 )
                 .info(new Info().version("2.7.0").title("EBAD API").description(
                         "This documentation describe EBAD API."));
     }
-
-//    @Bean
-//    public OpenAPI customOpenAPI() {
-//        return new OpenAPI()
-//                .components(new Components())
-//                .info(new Info().title("EBAD API").description(
-//                        "This documentation describe EBAD API."));
-//    }
 }
