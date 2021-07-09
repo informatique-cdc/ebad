@@ -102,7 +102,8 @@ public class BatchResourceTest {
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/batchs/run/1?env=2");
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
-        when(batchService.jobRunBatch(1L, 2L, null, "user", any(UUID.class))).thenReturn(retourBatch);
+        when(batchService.jobRunBatch(eq(1L), eq(2L), isNull(), eq("user"), any(UUID.class))).thenReturn(retourBatch);
+
 
         restMvc.perform(builder)
                 .andExpect(status().isOk())
@@ -115,7 +116,7 @@ public class BatchResourceTest {
     public void runBatchError() throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/batchs/run/1?env=2");
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
-        when(batchService.jobRunBatch(1L, 2L, null, "user", any(UUID.class))).thenThrow(new EbadServiceException());
+        when(batchService.jobRunBatch(eq(1L), eq(2L), isNull(), eq("user"), any(UUID.class))).thenThrow(new EbadServiceException());
 
         restMvc.perform(builder)
                 .andExpect(status().isOk());
