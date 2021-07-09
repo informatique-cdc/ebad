@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_job_id
+      author: dtrouillet
+      changes:
+        - addColumn:
+            tableName: t_log_batch
+            columns:
+              - column:
+                  name: job_id
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+

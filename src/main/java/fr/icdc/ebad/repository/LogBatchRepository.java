@@ -16,6 +16,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Spring Data JPA repository for the Application entity.
@@ -41,6 +42,8 @@ public interface LogBatchRepository extends JpaRepository<LogBatch, Long>, Query
     Long avgTime();
 
     void deleteAllByBatchId(Long id);
+
+    Optional<LogBatch> getByJobId(String jobId);
 
     void deleteByEnvironnement(Environnement environnement);
 }

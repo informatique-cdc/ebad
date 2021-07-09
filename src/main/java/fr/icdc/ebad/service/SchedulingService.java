@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 public class SchedulingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingService.class);
@@ -75,10 +77,11 @@ public class SchedulingService {
         }
 
         String id;
+        UUID uuid = UUID.randomUUID();
         if (scheduling.getParameters() == null) {
-            id = jobScheduler.scheduleRecurrently(scheduling.getId().toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), "ebad"));
+            id = jobScheduler.scheduleRecurrently(uuid.toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), "ebad", uuid));
         } else {
-            id = jobScheduler.scheduleRecurrently(scheduling.getId().toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters(), "ebad"));
+            id = jobScheduler.scheduleRecurrently(uuid.toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters(), "ebad", uuid));
         }
         LOGGER.warn("id is {}", id);
     }

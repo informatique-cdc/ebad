@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 /**
  * Created by dtrouillet on 03/03/2016.
  */
@@ -50,10 +52,11 @@ public class ChaineService {
         retourChaine.setLogOut("");
         RetourBatch retourBatch;
         for (ChaineAssociation chaineAssociation : chaine.getChaineAssociations()) {
+            UUID uuid = UUID.randomUUID();
             batchService.addJob(chaine.getEnvironnement().getId(), chaineAssociation.getBatch().getId());
             try {
                 chaineAssociation.getBatch().setParams(chaineAssociation.getBatch().getDefaultParam());
-                retourBatch = batchService.runBatch(chaineAssociation.getBatch(), chaine.getEnvironnement(), login);
+                retourBatch = batchService.runBatch(chaineAssociation.getBatch(), chaine.getEnvironnement(), login, uuid);
                 retourChaine.setLogOut(retourChaine.getLogOut().concat(" " + retourBatch.getLogOut()));
                 retourChaine.setExecutionTime(retourChaine.getExecutionTime() + retourBatch.getExecutionTime());
             }finally {
