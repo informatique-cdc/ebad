@@ -7,6 +7,8 @@ import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.service.ApiTokenService;
 import fr.icdc.ebad.service.UserService;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,8 @@ public class ApiTokenHeaderTest {
         objectMapper.registerModule(new JavaTimeModule());
     }
 
-//    @Test
+    @Test
+    @Ignore
     @WithMockUser(username = "user", roles = {"ADMIN"})
     public void findToken() throws Exception {
         Principal mockPrincipal = Mockito.mock(Principal.class);
