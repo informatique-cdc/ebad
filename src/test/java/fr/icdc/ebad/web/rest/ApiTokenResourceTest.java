@@ -121,4 +121,5 @@ public class ApiTokenResourceTest {
         verify(apiTokenService).deleteToken(eq(1L));
 
     }
+
 }

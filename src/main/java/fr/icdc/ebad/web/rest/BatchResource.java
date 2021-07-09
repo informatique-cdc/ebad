@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/batchs")
@@ -65,14 +66,17 @@ public class BatchResource {
         LOGGER.debug("REST request to run batch");
         JobId jobId;
 
+        UUID uuid = UUID.randomUUID();
         if (param != null) {
-            jobId = jobScheduler.enqueue(() -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin()));
+            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin(), uuid));
         } else {
-            jobId = jobScheduler.enqueue(() -> batchService.jobRunBatch(id, env, SecurityUtils.getCurrentLogin()));
+            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, SecurityUtils.getCurrentLogin(), uuid));
         }
         LOGGER.debug("job id is {}", jobId);
         return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
     }
+
+
 
     /**
      * PUT  /batchs to add a new batch

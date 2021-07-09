@@ -27,8 +27,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -150,9 +149,9 @@ public class SchedulingServiceTest {
                 .cron(cron)
                 .build();
 
-        when(jobScheduler.scheduleRecurrently(eq(scheduling.getId().toString()), eq(cron), any(JobLambda.class))).thenReturn("myId");
+        when(jobScheduler.scheduleRecurrently(anyString(), eq(cron), any(JobLambda.class))).thenReturn("myId");
         schedulingService.run(scheduling);
-        verify(jobScheduler).scheduleRecurrently(eq(scheduling.getId().toString()), eq(cron), any(JobLambda.class));
+        verify(jobScheduler).scheduleRecurrently(anyString(), eq(cron), any(JobLambda.class));
 
 
     }

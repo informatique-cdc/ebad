@@ -7,6 +7,7 @@ import java.util.Date;
 @Data
 public class LogBatchDto {
     private Long id;
+    private String jobId;
     private BatchLogDto batch;
     private EnvironnementDto environnement;
     private Date logDate;

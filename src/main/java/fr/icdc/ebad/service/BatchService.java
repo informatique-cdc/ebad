@@ -77,7 +77,7 @@ public class BatchService {
 
     @Transactional
     @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
-    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login) throws EbadServiceException {
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login, UUID uuid) throws EbadServiceException {
         addJob(environnementId, batchId);
         try {
             Batch batch = batchRepository.getById(batchId);
@@ -85,7 +85,7 @@ public class BatchService {
                 batch.setParams(params);
             }
             Environnement environnement = environnementService.getEnvironnement(environnementId);
-            return runBatch(batch, environnement, login);
+            return runBatch(batch, environnement, login, uuid);
         }finally {
             deleteJob(environnementId, batchId);
         }
@@ -93,12 +93,12 @@ public class BatchService {
 
     @Transactional
     @Job(name = "Batch %0, Env %1, User %2", retries = 0)
-    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login) throws EbadServiceException {
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login, UUID uuid) throws EbadServiceException {
         addJob(environnementId, batchId);
         try {
             Batch batch = batchRepository.getById(batchId);
             Environnement environnement = environnementService.getEnvironnement(environnementId);
-            return runBatch(batch, environnement, login);
+            return runBatch(batch, environnement, login, uuid);
         }finally {
             deleteJob(environnementId, batchId);
         }
@@ -106,7 +106,7 @@ public class BatchService {
 
 
     @Transactional
-    public RetourBatch runBatch(Batch batch, Environnement environnement, String login) throws EbadServiceException {
+    public RetourBatch runBatch(Batch batch, Environnement environnement, String login, UUID uuid) throws EbadServiceException {
         String params = "";
         if (null != batch.getParams()) {
             params = batch.getParams();
@@ -128,6 +128,7 @@ public class BatchService {
             throw e;
         }
         LogBatch logBatch = new LogBatch();
+        logBatch.setJobId(uuid.toString());
         logBatch.setBatch(batch);
         logBatch.setEnvironnement(environnement);
         logBatch.setDateTraitement(dateTraitement);
