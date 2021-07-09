@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -126,7 +127,8 @@ public class BatchServiceTest {
         when(batchRepository.getById(batch.getId())).thenReturn(batch);
         when(userService.getUser("user")).thenReturn(Optional.of(user));
         when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
-        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), null, "user");
+        UUID uuid = UUID.randomUUID();
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), null, "user", uuid);
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
@@ -144,6 +146,7 @@ public class BatchServiceTest {
                                         && logBatch.getBatch().getId().equals(batch.getId())
                                         && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
                                         && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getJobId().equals(uuid.toString())
                                         && logBatch.getReturnCode() == retourBatch.getReturnCode();
                             } catch (ParseException e) {
                                 e.printStackTrace();
@@ -229,7 +232,8 @@ public class BatchServiceTest {
         when(normeService.getShellPath(eq(norme), eq("AA1"))).thenReturn(norme.getPathShell());
 
         when(userService.getUser("user")).thenReturn(Optional.of(user));
-        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), batch.getParams(), "user");
+        UUID uuid = UUID.randomUUID();
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), batch.getParams(), "user", uuid);
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
@@ -248,6 +252,7 @@ public class BatchServiceTest {
                                 && logBatch.getBatch().getId().equals(batch.getId())
                                 && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
                                 && logBatch.getUser().getId().equals(user.getId())
+                                && logBatch.getJobId().equals(uuid.toString())
                                 && logBatch.getReturnCode() == retourBatch.getReturnCode();
                     } catch (ParseException e) {
                         e.printStackTrace();
@@ -369,7 +374,8 @@ public class BatchServiceTest {
         when(batchRepository.getById(batch.getId())).thenReturn(batch);
         when(userService.getUser("user")).thenReturn(Optional.of(user));
         when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
-        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), "user");
+        UUID uuid = UUID.randomUUID();
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), "user", uuid);
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
@@ -387,6 +393,7 @@ public class BatchServiceTest {
                                         && logBatch.getBatch().getId().equals(batch.getId())
                                         && logBatch.getDateTraitement().equals(simpleDateFormat.parse("01/02/2018"))
                                         && logBatch.getUser().getId().equals(user.getId())
+                                        && logBatch.getJobId().equals(uuid.toString())
                                         && logBatch.getReturnCode() == retourBatch.getReturnCode();
                             } catch (ParseException e) {
                                 e.printStackTrace();
