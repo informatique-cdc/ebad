@@ -1,9 +1,12 @@
 package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.config.Constants;
+import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.LogBatch;
 import fr.icdc.ebad.security.permission.PermissionEnvironnement;
+import fr.icdc.ebad.service.JobRunrService;
 import fr.icdc.ebad.service.LogBatchService;
+import org.jobrunr.jobs.states.StateName;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +29,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -44,6 +49,9 @@ public class LogsResourceTest {
 
     @MockBean
     private LogBatchService logBatchService;
+
+    @MockBean
+    private JobRunrService jobRunrService;
 
     @MockBean
     private PermissionEnvironnement permissionEnvironnement;
@@ -145,5 +153,29 @@ public class LogsResourceTest {
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].id", is(1)))
                 .andExpect(jsonPath("$.content[1].id", is(2)));
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"ADMIN"})
+    public void getLogFromJobId() throws Exception {
+        Principal mockPrincipal = Mockito.mock(Principal.class);
+        Mockito.when(mockPrincipal.getName()).thenReturn("user");
+        UUID uuid = UUID.randomUUID();
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/logs/job/"+uuid.toString()).principal(mockPrincipal);
+
+        LogBatch logBatch1 = new LogBatch();
+        logBatch1.setId(2L);
+        logBatch1.setEnvironnement(Environnement.builder().id(1L).build());
+
+
+        when(logBatchService.getByJobId(uuid.toString())).thenReturn(Optional.of(logBatch1));
+        when(jobRunrService.getState(uuid)).thenReturn(StateName.SUCCEEDED);
+        when(permissionEnvironnement.canRead(eq(1L), any())).thenReturn(true);
+
+        restMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(uuid.toString())))
+                .andExpect(jsonPath("$.state", is("SUCCEEDED")))
+                .andExpect(jsonPath("$.log.id", is(2)));
     }
 }
