@@ -5,7 +5,9 @@ import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.QDirectory;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
+import ma.glasnost.orika.MapperFacade;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,10 +29,12 @@ import java.util.List;
 public class DirectoryService {
     private final DirectoryRepository directoryRepository;
     private final ShellService shellService;
+    private final MapperFacade mapper;
 
-    public DirectoryService(DirectoryRepository directoryRepository, ShellService shellService) {
+    public DirectoryService(DirectoryRepository directoryRepository, ShellService shellService, MapperFacade mapper) {
         this.directoryRepository = directoryRepository;
         this.shellService = shellService;
+        this.mapper = mapper;
     }
 
     @Transactional
@@ -49,7 +53,7 @@ public class DirectoryService {
                     return true;
                 })
                 .forEach(file ->
-                    filesDtoList.add(new FilesDto(directory, file.getFilename(), file.getAttributes().getSize(), Date.from(file.getAttributes().getModifyTime().toInstant()), Date.from(file.getAttributes().getModifyTime().toInstant()), file.getAttributes().isDirectory(), subDirectory))
+                    filesDtoList.add(new FilesDto(mapper.map(directory, DirectoryDto.class), file.getFilename(), file.getAttributes().getSize(), Date.from(file.getAttributes().getModifyTime().toInstant()), Date.from(file.getAttributes().getModifyTime().toInstant()), file.getAttributes().isDirectory(), subDirectory))
                 );
 
         return filesDtoList;
@@ -72,14 +76,15 @@ public class DirectoryService {
 
     @Transactional
     public void uploadFile(MultipartFile multipartFile, Long directoryId, String subDirectory) throws EbadServiceException {
-        FilesDto filesDTO = new FilesDto(getDirectory(directoryId), multipartFile.getOriginalFilename(), 0L, Date.from(Instant.now()), Date.from(Instant.now()), false, subDirectory);
+        Directory directory = getDirectory(directoryId);
+        FilesDto filesDTO = new FilesDto(mapper.map(directory, DirectoryDto.class), multipartFile.getOriginalFilename(), 0L, Date.from(Instant.now()), Date.from(Instant.now()), false, subDirectory);
 
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
         }
 
         try {
-            shellService.uploadFile(filesDTO.getDirectory(), multipartFile.getInputStream(), filesDTO.getName(), filesDTO.getSubDirectory());
+            shellService.uploadFile(directory, multipartFile.getInputStream(), filesDTO.getName(), filesDTO.getSubDirectory());
         } catch (IOException e) {
             throw new EbadServiceException("Erreur lors de l'écriture d'un fichier du dossiers " + filesDTO.getDirectory().getName(), e);
         }

@@ -22,7 +22,7 @@
   </scm>
     <groupId>fr.icdc.ebad</groupId>
     <artifactId>ebad</artifactId>
-    <version>2.7.1-SNAPSHOT</version>
+    <version>2.8.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Ebad</name>
@@ -52,7 +52,7 @@
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <pf4j-spring.version>0.7.0</pf4j-spring.version>
         <pf4j.version>3.6.0</pf4j.version>
-        <jobrunr.version>3.1.2</jobrunr.version>
+        <jobrunr.version>3.2.1</jobrunr.version>
         <git.user />
         <git.password />
         <jacoco.agent.ut.arg />
@@ -124,7 +124,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <version>2.12.3</version>
+            <version>2.12.4</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -307,7 +307,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>2.5.1</version>
+            <version>2.5.2</version>
         </dependency>
 
         <dependency>
@@ -463,7 +463,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.4.0</version>
+            <version>4.4.1</version>
         </dependency>
 
         <!-- WEBSOCKET -->

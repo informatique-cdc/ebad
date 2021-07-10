@@ -1,6 +1,5 @@
 package fr.icdc.ebad.web.rest.dto;
 
-import fr.icdc.ebad.domain.Directory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +11,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class FilesDto {
-    private Directory directory;
+    private DirectoryDto directory;
     private String name;
     private Long size;
     private Date updateDate;
@@ -20,7 +19,7 @@ public class FilesDto {
     private boolean isFolder;
     private String subDirectory;
 
-    public FilesDto(Directory directory, String name, Long size, Date updateDate, Date createDate, boolean isFolder, String subDirectory) {
+    public FilesDto(DirectoryDto directory, String name, Long size, Date updateDate, Date createDate, boolean isFolder, String subDirectory) {
         this.directory = directory;
         this.name = name;
         this.size = size;

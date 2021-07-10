@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,14 +73,14 @@ public class ChaineServiceTest {
         RetourBatch retourBatch1 = new RetourBatch("ok1", 0, 100L);
         RetourBatch retourBatch2 = new RetourBatch("ko1", 1, 200L);
 
-        when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"))).thenReturn(retourBatch1);
-        when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"))).thenReturn(retourBatch2);
+        when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"), any(UUID.class))).thenReturn(retourBatch1);
+        when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"), any(UUID.class))).thenReturn(retourBatch2);
 
         chaineService.runChaine(chaine, "user");
 
-        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement), eq("user"));
-        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement), eq("user"));
-        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement), eq("user"));
+        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement), eq("user"), any(UUID.class));
+        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement), eq("user"), any(UUID.class));
+        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement), eq("user"), any(UUID.class));
     }
 
     @Test
@@ -117,15 +118,15 @@ public class ChaineServiceTest {
         RetourBatch retourBatch1 = new RetourBatch("ok1", 0, 100L);
         RetourBatch retourBatch2 = new RetourBatch("ko1", 1, 200L);
 
-        when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"))).thenReturn(retourBatch1);
-        when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"))).thenReturn(retourBatch2);
+        when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"), any(UUID.class))).thenReturn(retourBatch1);
+        when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"), any(UUID.class))).thenReturn(retourBatch2);
 
         when(chaineService.getChaine(1L)).thenReturn(chaine);
         chaineService.jobRunChaine(1L, "user");
 
-        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement), eq("user"));
-        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement), eq("user"));
-        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement), eq("user"));
+        verify(batchService, times(1)).runBatch(eq(batch1), eq(environnement), eq("user"), any(UUID.class));
+        verify(batchService, times(1)).runBatch(eq(batch2), eq(environnement), eq("user"), any(UUID.class));
+        verify(batchService, times(0)).runBatch(eq(batch3), eq(environnement), eq("user"), any(UUID.class));
     }
 
     @Test
