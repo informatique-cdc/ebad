@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -54,7 +55,7 @@ public class ApplicationResource {
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public Page<ApplicationSimpleDto> findApplication(Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
+    public Page<ApplicationSimpleDto> findApplication(@ParameterObject Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
         LOGGER.debug("REST request to find Application - Read");
         return applicationService.findApplication(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
                 .map(application -> mapper.map(application, ApplicationSimpleDto.class));
