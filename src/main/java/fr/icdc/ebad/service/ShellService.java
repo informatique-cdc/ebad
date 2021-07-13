@@ -11,6 +11,7 @@ import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.core.CoreModuleProperties;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClientFactory;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.List;
 public class ShellService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellService.class);
     private static final String PATH_SEPARATOR = "/";
+    private static final Duration HEARTBEAT = Duration.ofSeconds(2L);
 
     private final EbadProperties ebadProperties;
     private final IdentityService identityService;
@@ -47,6 +50,7 @@ public class ShellService {
 
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
+        CoreModuleProperties.HEARTBEAT_INTERVAL.set(sshClient, HEARTBEAT);
         try (ClientSession session = createSession(sshClient, environnement)) {
             try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
                  ClientChannel channel = session.createChannel(org.apache.sshd.common.channel.Channel.CHANNEL_EXEC, commandWithInterpreteur)) {
@@ -151,9 +155,9 @@ public class ShellService {
                 .verify()
                 .getSession();
 
-        if(null != environnement.getIdentity().getPassword())
+        if (null != environnement.getIdentity().getPassword())
             session.addPasswordIdentity(environnement.getIdentity().getPassword());
-        if(null != environnement.getIdentity().getPrivatekey() || null != environnement.getIdentity().getPrivatekeyPath())
+        if (null != environnement.getIdentity().getPrivatekey() || null != environnement.getIdentity().getPrivatekeyPath())
             session.addPublicKeyIdentity(identityService.createKeyPair(environnement.getIdentity()));
 
         session.auth().verify();
