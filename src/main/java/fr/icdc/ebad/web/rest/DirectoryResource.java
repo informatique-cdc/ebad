@@ -7,6 +7,10 @@ import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
@@ -18,15 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -94,6 +90,10 @@ public class DirectoryResource {
 
 
     @PostMapping(value = "/files/read")
+    @ApiResponses(value = {
+            @ApiResponse(content = @Content(schema = @Schema(type = "string", format = "binary")))
+    })
+    @GetMapping("/{id}")
     @PreAuthorize("@permissionDirectory.canRead(#filesDTO.directory.id, #filesDTO.subDirectory, principal)")
     public void downloadFile(@RequestBody FilesDto filesDTO, HttpServletResponse httpServletResponse) throws EbadServiceException {
         LOGGER.debug("REST request to read file from directory {}", filesDTO.getName());
@@ -108,7 +108,7 @@ public class DirectoryResource {
     }
 
 
-    @PostMapping(value = "/files/upload")
+    @PostMapping(value = "/files/upload", consumes = "multipart/form-data")
     @PreAuthorize("@permissionDirectory.canWriteFile(#directory, #subDirectory, principal)")
     public ResponseEntity<Void> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("directory") Long directory, @RequestParam(value = "subDirectory", required = false) String subDirectory) throws EbadServiceException {
         LOGGER.debug("REST request to write file to directory {}", directory);

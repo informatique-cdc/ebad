@@ -17,9 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,7 +53,7 @@ public class DirectoryService {
                     return true;
                 })
                 .forEach(file ->
-                    filesDtoList.add(new FilesDto(mapper.map(directory, DirectoryDto.class), file.getFilename(), file.getAttributes().getSize(), Date.from(file.getAttributes().getModifyTime().toInstant()), Date.from(file.getAttributes().getModifyTime().toInstant()), file.getAttributes().isDirectory(), subDirectory))
+                    filesDtoList.add(new FilesDto(mapper.map(directory, DirectoryDto.class), file.getFilename(), file.getAttributes().getSize(), LocalDateTime.ofInstant(file.getAttributes().getModifyTime().toInstant(), ZoneId.systemDefault()), LocalDateTime.ofInstant(file.getAttributes().getModifyTime().toInstant(), ZoneId.systemDefault()), file.getAttributes().isDirectory(), subDirectory))
                 );
 
         return filesDtoList;
@@ -77,7 +77,7 @@ public class DirectoryService {
     @Transactional
     public void uploadFile(MultipartFile multipartFile, Long directoryId, String subDirectory) throws EbadServiceException {
         Directory directory = getDirectory(directoryId);
-        FilesDto filesDTO = new FilesDto(mapper.map(directory, DirectoryDto.class), multipartFile.getOriginalFilename(), 0L, Date.from(Instant.now()), Date.from(Instant.now()), false, subDirectory);
+        FilesDto filesDTO = new FilesDto(mapper.map(directory, DirectoryDto.class), multipartFile.getOriginalFilename(), 0L, LocalDateTime.now(), LocalDateTime.now(), false, subDirectory);
 
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
