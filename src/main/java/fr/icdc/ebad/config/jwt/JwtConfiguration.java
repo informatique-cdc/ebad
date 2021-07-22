@@ -1,8 +1,8 @@
 package fr.icdc.ebad.config.jwt;
 
-import com.google.common.collect.Lists;
 import fr.icdc.ebad.security.jwt.JWTConfigurer;
 import fr.icdc.ebad.security.jwt.TokenProvider;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -121,8 +121,10 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Lists.newArrayList("http://localhost:4200", "http://localhost:63342", "https://ebad-front.herokuapp.com"));
-        configuration.setAllowedMethods(Lists.newArrayList("GET", "POST", "OPTIONS", "HEAD", "PUT", "PATCH", "DELETE"));
+        String[] sites = {"http://localhost:4200", "http://localhost:63342", "https://ebad-front.herokuapp.com"};
+        String[] methods = {"GET", "POST", "OPTIONS", "HEAD", "PUT", "PATCH", "DELETE"};
+        configuration.setAllowedOrigins(Lists.newArrayList(Arrays.stream(sites).iterator()));
+        configuration.setAllowedMethods(Lists.newArrayList(Arrays.stream(methods).iterator()));
         configuration.setAllowCredentials(true);
         configuration.addAllowedHeader("*");
         configuration.setMaxAge(10L);

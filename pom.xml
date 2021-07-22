@@ -379,7 +379,11 @@
             <version>0.9.1</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-core</artifactId>
+            <version>5.0.0</version>
+        </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
@@ -388,7 +392,7 @@
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
-            <version>4.4.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
