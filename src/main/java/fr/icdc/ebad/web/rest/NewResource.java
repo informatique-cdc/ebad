@@ -7,10 +7,13 @@ import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.ActualiteDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -48,7 +51,8 @@ public class NewResource {
     @GetMapping
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<ActualiteDto> getAll(Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<ActualiteDto> getAll(@Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get all Actualites - Read");
         Page<Actualite> actualitePage = newService.getAllActualites(PaginationUtil.generatePageRequestOrDefault(pageable));
         return actualitePage.map(theNew -> mapper.map(theNew, ActualiteDto.class));
@@ -60,7 +64,8 @@ public class NewResource {
     @GetMapping("/public")
     @Timed
     @PreAuthorize("isAuthenticated()")
-    public Page<ActualiteDto> getActualityPublished(Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<ActualiteDto> getActualityPublished(@Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get all public Actualites - Read");
         Page<Actualite> actualitePage = newService.getAllActualitesPubliees(PaginationUtil.generatePageRequestOrDefault(pageable));
         return actualitePage.map(theNew -> mapper.map(theNew, ActualiteDto.class));

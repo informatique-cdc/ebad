@@ -11,6 +11,7 @@ import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.channel.Channel;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClientFactory;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class ShellService {
         sshClient.start();
         try (ClientSession session = createSession(sshClient, environnement)) {
             try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
-                 ClientChannel channel = session.createChannel(org.apache.sshd.common.channel.Channel.CHANNEL_EXEC, commandWithInterpreteur)) {
+                 ClientChannel channel = session.createChannel(Channel.CHANNEL_EXEC, commandWithInterpreteur)) {
                 channel.setOut(responseStream);
                 try {
                     channel.open();

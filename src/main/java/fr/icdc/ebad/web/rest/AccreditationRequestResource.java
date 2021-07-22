@@ -8,8 +8,12 @@ import fr.icdc.ebad.web.rest.dto.AccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.CreationAccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.ResponseAccreditationRequestDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -39,14 +43,16 @@ public class AccreditationRequestResource {
 
     @GetMapping("/need-answer")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public Page<AccreditationRequestDto> findAll(Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<AccreditationRequestDto> findAll(@Parameter(hidden = true) Pageable pageable) {
         Page<AccreditationRequest> accreditationRequests = accreditationRequestService.getAllAccreditationRequestToAnswer(PaginationUtil.generatePageRequestOrDefault(pageable));
         return accreditationRequests.map(accreditationRequest -> mapperFacade.map(accreditationRequest, AccreditationRequestDto.class));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public Page<AccreditationRequestDto> findAllMyRequest(Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<AccreditationRequestDto> findAllMyRequest(@Parameter(hidden = true) Pageable pageable) {
         Page<AccreditationRequest> accreditationRequests = accreditationRequestService.getMyAccreditationRequest(PaginationUtil.generatePageRequestOrDefault(pageable));
         return accreditationRequests.map(accreditationRequest -> mapperFacade.map(accreditationRequest, AccreditationRequestDto.class));
     }

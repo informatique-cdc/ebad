@@ -4,6 +4,7 @@ import fr.icdc.ebad.config.properties.EbadProperties;
 import fr.icdc.ebad.domain.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.data.rest.SpringDocDataRestConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,7 +19,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = SpringDocDataRestConfiguration.class)
 @EnableConfigurationProperties(EbadProperties.class)
 @EnableAsync
 @EnableScheduling

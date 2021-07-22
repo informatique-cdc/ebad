@@ -9,10 +9,13 @@ import fr.icdc.ebad.web.rest.dto.JobStateDto;
 import fr.icdc.ebad.web.rest.dto.LogBatchDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -50,7 +53,8 @@ public class LogsResource {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<LogBatchDto> getAllLog(@QuerydslPredicate(root = LogBatch.class) Predicate predicate, Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<LogBatchDto> getAllLog(@QuerydslPredicate(root = LogBatch.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("get all log");
         return logBatchService.getAllLogBatchWithPageable(predicate, pageable)
                 .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
@@ -59,7 +63,8 @@ public class LogsResource {
     @GetMapping(value = "/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
-    public Page<LogBatchDto> getAllLogFromEnv(@PathVariable Long env, @QuerydslPredicate(root = LogBatch.class) Predicate predicate, Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<LogBatchDto> getAllLogFromEnv(@PathVariable Long env, @QuerydslPredicate(root = LogBatch.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("get all log from env {}", env);
         Predicate envPredicate = QLogBatch.logBatch.environnement.id.eq(env).and(predicate);
         return logBatchService.getAllLogBatchWithPageable(envPredicate, PaginationUtil.generatePageRequestOrDefault(pageable))
@@ -84,9 +89,10 @@ public class LogsResource {
     @GetMapping(value = "/{env}/{batch}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env, principal)")
+    @PageableAsQueryParam
     public Page<LogBatchDto> getAllLogFromEnvBatch(@PathVariable Long env,
                                                    @PathVariable Long batch,
-                                                   @QuerydslPredicate(root = LogBatch.class) Predicate predicate, Pageable pageable
+                                                   @QuerydslPredicate(root = LogBatch.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable
     ) {
         LOGGER.debug("get all log from env {}", env);
 

@@ -10,10 +10,13 @@ import fr.icdc.ebad.web.rest.dto.EnvironnementDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementInfoDTO;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -49,7 +52,8 @@ public class EnvironnementResource {
     @PreAuthorize("@permissionApplication.canRead(#appId, principal) or @permissionApplication.canManage(#appId, principal)")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public Page<EnvironnementDto> getEnvironmentsFromApp(@RequestParam("applicationId") Long appId, @QuerydslPredicate(root = Environnement.class) Predicate predicate, Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<EnvironnementDto> getEnvironmentsFromApp(@RequestParam("applicationId") Long appId, @QuerydslPredicate(root = Environnement.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to getEnvironmentsFromApp {}", appId);
         Page<Environnement> environnementPage = environnementService.getEnvironmentFromApp(appId, predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         return environnementPage.map(env -> mapper.map(env, EnvironnementDto.class));
