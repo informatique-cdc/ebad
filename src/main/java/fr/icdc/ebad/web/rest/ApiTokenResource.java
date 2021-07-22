@@ -8,10 +8,13 @@ import fr.icdc.ebad.web.rest.dto.ApiTokenDto;
 import fr.icdc.ebad.web.rest.dto.ApiTokenWithKeyDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -38,7 +41,8 @@ public class ApiTokenResource {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public ResponseEntity<Page<ApiTokenDto>> findToken(Pageable pageable) {
+    @PageableAsQueryParam
+    public ResponseEntity<Page<ApiTokenDto>> findToken(@Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to find api token");
         Page<ApiToken> apiTokens = apiTokenService.findTokenByUser(SecurityUtils.getCurrentLogin(), PaginationUtil.generatePageRequestOrDefault(pageable));
         return ResponseEntity.ok().body(apiTokens.map(apiToken -> mapper.map(apiToken, ApiTokenDto.class)));

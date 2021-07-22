@@ -10,12 +10,15 @@ import fr.icdc.ebad.web.rest.dto.ChaineSimpleDto;
 import fr.icdc.ebad.web.rest.dto.JobDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -56,7 +59,8 @@ public class ChaineResource {
     @GetMapping(value = "/env/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionEnvironnement.canRead(#env,principal) or @permissionEnvironnement.canWrite(#env,principal)")
-    public ResponseEntity<Page<ChaineDto>> getAllFromEnv(Pageable pageable, @QuerydslPredicate(root = Chaine.class) Predicate predicate, @PathVariable Long env) {
+    @PageableAsQueryParam
+    public ResponseEntity<Page<ChaineDto>> getAllFromEnv(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Chaine.class) Predicate predicate, @PathVariable Long env) {
         LOGGER.debug("REST request to get all Chaines from environnement {}", env);
         Environnement environnement = Environnement.builder().id(env).build();
         Page<Chaine> page = chaineService.getAllChaineFromEnvironmentWithPageable(predicate, PaginationUtil.generatePageRequestOrDefault(pageable), environnement);

@@ -11,6 +11,7 @@ import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.channel.Channel;
 import org.apache.sshd.core.CoreModuleProperties;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClientFactory;
@@ -53,7 +54,7 @@ public class ShellService {
         CoreModuleProperties.HEARTBEAT_INTERVAL.set(sshClient, HEARTBEAT);
         try (ClientSession session = createSession(sshClient, environnement)) {
             try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
-                 ClientChannel channel = session.createChannel(org.apache.sshd.common.channel.Channel.CHANNEL_EXEC, commandWithInterpreteur)) {
+                 ClientChannel channel = session.createChannel(Channel.CHANNEL_EXEC, commandWithInterpreteur)) {
                 channel.setOut(responseStream);
                 try {
                     channel.open();
