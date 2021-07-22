@@ -5,7 +5,7 @@
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
-        <version>2.5.2</version>
+        <version>2.5.3</version>
         <relativePath />
     </parent>
     <licenses>
@@ -32,7 +32,7 @@
 
         <assertj-core.version>1.0.0m1</assertj-core.version>
         <awaitility.version>1.7.0</awaitility.version>
-        <commons-io.version>2.10.0</commons-io.version>
+        <commons-io.version>2.11.0</commons-io.version>
         <commons-lang.version>3.12.0</commons-lang.version>
         <gatling-maven-plugin.version>2.2.4</gatling-maven-plugin.version>
         <gatling.version>2.3.0</gatling.version>
@@ -375,21 +375,25 @@
             <version>0.9.1</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-core</artifactId>
+            <version>5.0.0</version>
+        </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
-            <version>4.4.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
-            <version>4.4.0</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>2.5.2</version>
+            <version>2.5.3</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -464,7 +468,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.4.1</version>
+            <version>4.4.2</version>
         </dependency>
 
         <!-- WEBSOCKET -->
@@ -483,7 +487,7 @@
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-commons</artifactId>
-                <version>2.5.2</version>
+                <version>2.5.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
