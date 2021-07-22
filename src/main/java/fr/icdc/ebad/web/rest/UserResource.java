@@ -10,10 +10,13 @@ import fr.icdc.ebad.web.rest.dto.RolesDTO;
 import fr.icdc.ebad.web.rest.dto.UserAccountDto;
 import fr.icdc.ebad.web.rest.dto.UserDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -66,7 +69,8 @@ public class UserResource {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<UserDto> getAll(Pageable pageable, @QuerydslPredicate(root = User.class) Predicate predicate) {
+    @PageableAsQueryParam
+    public Page<UserDto> getAll(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = User.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Users");
         Page<User> userPage = userService.getAllUsers(predicate, pageable);
         return userPage.map((user -> mapper.map(user, UserDto.class)));

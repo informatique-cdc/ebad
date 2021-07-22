@@ -11,10 +11,12 @@ import fr.icdc.ebad.web.rest.dto.UsageApplicationDto;
 import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -22,16 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Set;
@@ -54,7 +47,8 @@ public class ApplicationResource {
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public Page<ApplicationSimpleDto> findApplication(Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
+    @PageableAsQueryParam
+    public Page<ApplicationSimpleDto> findApplication(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
         LOGGER.debug("REST request to find Application - Read");
         return applicationService.findApplication(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
                 .map(application -> mapper.map(application, ApplicationSimpleDto.class));
@@ -66,7 +60,8 @@ public class ApplicationResource {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public Page<ApplicationDto> getAll(Pageable pageable, Principal principal) {
+    @PageableAsQueryParam
+    public Page<ApplicationDto> getAll(@Parameter(hidden = true) Pageable pageable, Principal principal) {
         LOGGER.debug("REST request to get all Application - Read");
         return applicationService.getAllApplicationsUsed(PaginationUtil.generatePageRequestOrDefault(pageable), principal.getName())
                 .map(application -> mapper.map(application, ApplicationDto.class));
@@ -87,7 +82,8 @@ public class ApplicationResource {
     @GetMapping(value = "/write", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public Page<ApplicationDto> getAllWrite(Pageable pageable, Principal principal) {
+    @PageableAsQueryParam
+    public Page<ApplicationDto> getAllWrite(@Parameter(hidden = true) Pageable pageable, Principal principal) {
         LOGGER.debug("REST request to get all Application - Write");
         return applicationService.getAllApplicationsManaged(
                 PaginationUtil.generatePageRequestOrDefault(pageable), principal.getName())
@@ -100,7 +96,8 @@ public class ApplicationResource {
     @GetMapping(value = "/gestion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<ApplicationDto> getAllManage(Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
+    @PageableAsQueryParam
+    public Page<ApplicationDto> getAllManage(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Application - Write");
         return applicationService.getAllApplications(predicate, pageable)
                 .map(application -> mapper.map(application, ApplicationDto.class));
@@ -168,7 +165,8 @@ public class ApplicationResource {
 
     @GetMapping(value = "/{id}/usages")
     @PreAuthorize("@permissionApplication.canManage(#id,principal) or @permissionApplication.canWrite(#id, principal)")
-    public Page<UsageApplicationDto> getAllUsages(@PathVariable Long id, Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<UsageApplicationDto> getAllUsages(@PathVariable Long id, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get all usages from Application");
         return applicationService.getUsage(pageable, id).map(usage -> mapper.map(usage, UsageApplicationDto.class));
     }

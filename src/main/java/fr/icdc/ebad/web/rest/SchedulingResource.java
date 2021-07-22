@@ -6,8 +6,10 @@ import fr.icdc.ebad.service.SchedulingService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.CreationSchedulingDto;
 import fr.icdc.ebad.web.rest.dto.SchedulingDto;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -46,14 +48,16 @@ public class SchedulingResource {
 
     @GetMapping("/env/{environmentId}")
     @PreAuthorize("@permissionEnvironnement.canRead(#environmentId, principal)")
-    public Page<SchedulingDto> listByEnvironment(@PathVariable Long environmentId, @PageableDefault Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<SchedulingDto> listByEnvironment(@PathVariable Long environmentId, @PageableDefault @Parameter(hidden = true) Pageable pageable) {
         Page<Scheduling> schedulings = schedulingService.listByEnvironment(environmentId, pageable);
         return schedulings.map(scheduling -> mapper.map(scheduling, SchedulingDto.class));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<SchedulingDto> listAll(@PageableDefault Pageable pageable) {
+    @PageableAsQueryParam
+    public Page<SchedulingDto> listAll(@PageableDefault @Parameter(hidden = true) Pageable pageable) {
         Page<Scheduling> schedulings = schedulingService.listAll(pageable);
         return schedulings.map(scheduling -> mapper.map(scheduling, SchedulingDto.class));
     }

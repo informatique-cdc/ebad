@@ -8,10 +8,13 @@ import fr.icdc.ebad.web.rest.dto.NormLabelIdDto;
 import fr.icdc.ebad.web.rest.dto.NormeDto;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,7 +55,8 @@ public class NormResource {
     @GetMapping
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public Page<NormeDto> getAll(Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
+    @PageableAsQueryParam
+    public Page<NormeDto> getAll(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Norme - Read");
         Page<Norme> normePage = normeService.getAllNormes(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         return normePage.map(norme -> mapper.map(norme, NormeDto.class));
@@ -64,7 +68,8 @@ public class NormResource {
     @GetMapping("/name")
     @Timed
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
-    public Page<NormLabelIdDto> getAllForList(Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
+    @PageableAsQueryParam
+    public Page<NormLabelIdDto> getAllForList(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Norme - Read");
         Page<Norme> normePage = normeService.getAllNormes(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         return normePage.map(norme -> mapper.map(norme, NormLabelIdDto.class));

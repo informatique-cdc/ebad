@@ -5,10 +5,13 @@ import fr.icdc.ebad.domain.TypeFichier;
 import fr.icdc.ebad.service.TypeFichierService;
 import fr.icdc.ebad.web.rest.dto.TypeFichierDto;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -49,7 +52,8 @@ public class TypeFichierResource {
     @GetMapping(value = "/application/{app}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canRead(#app,principal) or @permissionApplication.canWrite(#app,principal)")
-    public ResponseEntity<Page<TypeFichierDto>> getAllFromEnv(Pageable pageable, @QuerydslPredicate(root = TypeFichier.class) Predicate predicate, @PathVariable Long app) throws URISyntaxException {
+    @PageableAsQueryParam
+    public ResponseEntity<Page<TypeFichierDto>> getAllFromEnv(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = TypeFichier.class) Predicate predicate, @PathVariable Long app) throws URISyntaxException {
         LOGGER.debug("REST request to get all TypeFichier from application {}", app);
         Page<TypeFichier> pageTypeFichier = typeFichierService.getTypeFichierFromApplication(predicate, pageable, app);
 
