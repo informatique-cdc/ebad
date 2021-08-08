@@ -8,7 +8,6 @@ import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.service.util.RandomUtil;
 import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -18,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.Set;
 @Transactional
 public class UserService {
 
-    private static final int NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS = 30;
+    private static final long NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS = 30;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
@@ -125,7 +125,8 @@ public class UserService {
     @Scheduled(cron = "0 0 1 * * ?")
     @Transactional
     public void removeNotActivatedUsers() {
-        DateTime now = new DateTime();
+        LOGGER.info("Check to remove not activated users");
+        LocalDateTime now = LocalDateTime.now();
         List<User> users = userRepository.findAllByActivatedIsFalseAndCreatedDateBefore(now.minusDays(NUMBERS_OF_DAY_KEEP_INACTIVATE_USERS));
         for (User user : users) {
             LOGGER.debug("Deleting not activated user {}", user.getLogin());
@@ -136,7 +137,7 @@ public class UserService {
     @Transactional
     public User changeAutorisationApplication(AuthorityApplicationDTO authorityDTO) {
         Optional<User> userOptional = userRepository.findOneByLoginUser(authorityDTO.getLoginUser());
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             return null;
         }
         Application application = new Application();

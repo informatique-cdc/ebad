@@ -17,6 +17,7 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.querydsl.binding.SingleValueBinding;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredi
 
     Optional<User> findOneByActivationKey(String activationKey);
 
-    List<User> findAllByActivatedIsFalseAndCreatedDateBefore(DateTime dateTime);
+    List<User> findAllByActivatedIsFalseAndCreatedDateBefore(LocalDateTime dateTime);
 
     Optional<User> findOneByEmail(String email);
 
