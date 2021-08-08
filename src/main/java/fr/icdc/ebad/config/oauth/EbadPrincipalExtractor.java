@@ -9,10 +9,7 @@ import fr.icdc.ebad.security.EbadUserDetailsService;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class EbadPrincipalExtractor implements PrincipalExtractor {
     private final EbadUserDetailsService userDetailsService;
@@ -30,7 +27,7 @@ public class EbadPrincipalExtractor implements PrincipalExtractor {
     @Override
     @Transactional
     public Object extractPrincipal(Map<String, Object> map) {
-        String authoritiesString = (String) map.get(ebadProperties.getSecurity().getMappingUser().getAuthorities());
+        List<String> authoritiesString = (List<String>) map.get(ebadProperties.getSecurity().getMappingUser().getAuthorities());
         String login = (String) map.get(ebadProperties.getSecurity().getMappingUser().getLogin());
         String firstname = (String) map.get(ebadProperties.getSecurity().getMappingUser().getFirstname());
         String lastname = (String) map.get(ebadProperties.getSecurity().getMappingUser().getLastname());
@@ -39,8 +36,8 @@ public class EbadPrincipalExtractor implements PrincipalExtractor {
 
         Set<Authority> authorities = new HashSet<>();
 
-        for (String authority : authoritiesString.split(",")) {
-            authorities.add(authorityRepository.getById("ROLE" + authority));
+        for (String authority : authoritiesString) {
+            authorities.add(authorityRepository.getById("ROLE_" + authority));
         }
 
         if (userOptional.isPresent()) {

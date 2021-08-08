@@ -19,9 +19,9 @@ public class EbadAuthoritiesExtractor implements AuthoritiesExtractor {
     @Override
     public List<GrantedAuthority> extractAuthorities(Map<String, Object> map) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        String authoritiesString = (String) map.get(ebadProperties.getSecurity().getMappingUser().getAuthorities());
-        for (String authority : authoritiesString.split(",")) {
-            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE" + authority));
+        List<String> authoritiesString = (List<String>) map.get(ebadProperties.getSecurity().getMappingUser().getAuthorities());
+        for (String authority : authoritiesString) {
+            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + authority));
         }
         return grantedAuthorities;
     }
