@@ -79,9 +79,9 @@ public class SchedulingService {
         String id;
         UUID uuid = UUID.randomUUID();
         if (scheduling.getParameters() == null) {
-            id = jobScheduler.scheduleRecurrently(uuid.toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), "ebad", uuid));
+            id = jobScheduler.scheduleRecurrently(uuid.toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), "ebad", ""));
         } else {
-            id = jobScheduler.scheduleRecurrently(uuid.toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters(), "ebad", uuid));
+            id = jobScheduler.scheduleRecurrently(uuid.toString(), scheduling.getCron(), () -> batchService.jobRunBatch(scheduling.getBatch().getId(), scheduling.getEnvironnement().getId(), scheduling.getParameters(), "ebad", ""));
         }
         LOGGER.warn("id is {}", id);
     }

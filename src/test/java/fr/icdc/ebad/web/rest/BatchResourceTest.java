@@ -33,7 +33,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,7 +105,7 @@ public class BatchResourceTest {
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/batchs/run/1?env=2");
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
-        when(batchService.jobRunBatch(eq(1L), eq(2L), isNull(), eq("user"), any(UUID.class))).thenReturn(retourBatch);
+        when(batchService.jobRunBatch(eq(1L), eq(2L), isNull(), eq("user"), anyString())).thenReturn(retourBatch);
 
 
         restMvc.perform(builder)
@@ -116,7 +119,7 @@ public class BatchResourceTest {
     public void runBatchError() throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/batchs/run/1?env=2");
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
-        when(batchService.jobRunBatch(eq(1L), eq(2L), isNull(), eq("user"), any(UUID.class))).thenThrow(new EbadServiceException());
+        when(batchService.jobRunBatch(eq(1L), eq(2L), isNull(), eq("user"), anyString())).thenThrow(new EbadServiceException());
 
         restMvc.perform(builder)
                 .andExpect(status().isOk());
@@ -152,7 +155,7 @@ public class BatchResourceTest {
         batch.setEnvironnements(environnements);
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
                 .put("/batchs")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(batchDto));
         when(permissionBatch.canWrite(any(BatchDto.class), any())).thenReturn(true);
         when(batchService.saveBatch(argThat((argBatch ->
