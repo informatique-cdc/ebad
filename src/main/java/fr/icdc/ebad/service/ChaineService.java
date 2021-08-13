@@ -56,7 +56,7 @@ public class ChaineService {
             batchService.addJob(chaine.getEnvironnement().getId(), chaineAssociation.getBatch().getId());
             try {
                 chaineAssociation.getBatch().setParams(chaineAssociation.getBatch().getDefaultParam());
-                retourBatch = batchService.runBatch(chaineAssociation.getBatch(), chaine.getEnvironnement(), login, uuid);
+                retourBatch = batchService.runBatch(chaineAssociation.getBatch(), chaine.getEnvironnement(), login, uuid.toString());
                 retourChaine.setLogOut(retourChaine.getLogOut().concat(" " + retourBatch.getLogOut()));
                 retourChaine.setExecutionTime(retourChaine.getExecutionTime() + retourBatch.getExecutionTime());
             }finally {

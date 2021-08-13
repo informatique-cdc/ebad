@@ -77,7 +77,7 @@ public class BatchService {
 
     @Transactional
     @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
-    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login, UUID uuid) throws EbadServiceException {
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login, String uuid) throws EbadServiceException {
         addJob(environnementId, batchId);
         try {
             Batch batch = batchRepository.getById(batchId);
@@ -93,7 +93,7 @@ public class BatchService {
 
     @Transactional
     @Job(name = "Batch %0, Env %1, User %2", retries = 0)
-    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login, UUID uuid) throws EbadServiceException {
+    public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login, String uuid) throws EbadServiceException {
         addJob(environnementId, batchId);
         try {
             Batch batch = batchRepository.getById(batchId);
@@ -106,7 +106,7 @@ public class BatchService {
 
 
     @Transactional
-    public RetourBatch runBatch(Batch batch, Environnement environnement, String login, UUID uuid) throws EbadServiceException {
+    public RetourBatch runBatch(Batch batch, Environnement environnement, String login, String uuid) throws EbadServiceException {
         String params = "";
         if (null != batch.getParams()) {
             params = batch.getParams();
@@ -128,7 +128,9 @@ public class BatchService {
             throw e;
         }
         LogBatch logBatch = new LogBatch();
-        logBatch.setJobId(uuid.toString());
+        if(StringUtils.hasText(uuid)) {
+            logBatch.setJobId(uuid);
+        }
         logBatch.setBatch(batch);
         logBatch.setEnvironnement(environnement);
         logBatch.setDateTraitement(dateTraitement);
@@ -156,7 +158,7 @@ public class BatchService {
     private String getParameters(Environnement environnement, String params, Date dateTraitement) {
         String[] paramsArray = params.split(" ");
         LOGGER.info("paramsArray = {}", paramsArray);
-        StringBuilder realParams = new StringBuilder("");
+        StringBuilder realParams = new StringBuilder();
         for (String param : paramsArray) {
             if ("${DATE_TRAITEMENT}".equals(param)) {
 

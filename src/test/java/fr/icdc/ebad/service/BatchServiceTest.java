@@ -128,7 +128,7 @@ public class BatchServiceTest {
         when(userService.getUser("user")).thenReturn(Optional.of(user));
         when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
         UUID uuid = UUID.randomUUID();
-        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), null, "user", uuid);
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), null, "user", uuid.toString());
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
@@ -233,7 +233,7 @@ public class BatchServiceTest {
 
         when(userService.getUser("user")).thenReturn(Optional.of(user));
         UUID uuid = UUID.randomUUID();
-        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), batch.getParams(), "user", uuid);
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), batch.getParams(), "user", uuid.toString());
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
@@ -375,7 +375,7 @@ public class BatchServiceTest {
         when(userService.getUser("user")).thenReturn(Optional.of(user));
         when(environnementService.getEnvironnement(environnementIntegration.getId())).thenReturn(environnementIntegration);
         UUID uuid = UUID.randomUUID();
-        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), "user", uuid);
+        batchService.jobRunBatch(batch.getId(), environnementIntegration.getId(), "user", uuid.toString());
 
         verify(environnementService, times(1)).getDateTraiement(
                 argThat(environnement -> environnementIntegration.getId().equals(environnement))
