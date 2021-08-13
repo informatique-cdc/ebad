@@ -16,7 +16,6 @@ import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,9 +71,9 @@ public class BatchResource {
 
         UUID uuid = UUID.randomUUID();
         if (param != null) {
-            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin(), uuid));
+            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin(), uuid.toString()));
         } else {
-            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, SecurityUtils.getCurrentLogin(), uuid));
+            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, SecurityUtils.getCurrentLogin(), uuid.toString()));
         }
         LOGGER.debug("job id is {}", jobId);
         return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
