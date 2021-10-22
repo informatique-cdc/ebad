@@ -1,9 +1,9 @@
 package fr.icdc.ebad.service.mapper;
 
+import dev.akkinoc.spring.boot.orika.OrikaMapperFactoryConfigurer;
 import fr.icdc.ebad.domain.LogBatch;
 import fr.icdc.ebad.web.rest.dto.LogBatchDto;
 import ma.glasnost.orika.MapperFactory;
-import net.rakugakibox.spring.boot.orika.OrikaMapperFactoryConfigurer;
 import org.springframework.stereotype.Component;
 
 @Component
