@@ -5,6 +5,7 @@ on: [ push ]
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - uses: actions/checkout@v1
       - name: Cache Maven Repo
