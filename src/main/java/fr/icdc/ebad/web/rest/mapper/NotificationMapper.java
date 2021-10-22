@@ -1,5 +1,6 @@
 package fr.icdc.ebad.web.rest.mapper;
 
+import dev.akkinoc.spring.boot.orika.OrikaMapperFactoryConfigurer;
 import fr.icdc.ebad.domain.Notification;
 import fr.icdc.ebad.web.rest.dto.NotificationDto;
 import ma.glasnost.orika.CustomConverter;
@@ -7,7 +8,6 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.ConverterFactory;
 import ma.glasnost.orika.metadata.Type;
-import net.rakugakibox.spring.boot.orika.OrikaMapperFactoryConfigurer;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
