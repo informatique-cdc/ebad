@@ -313,7 +313,7 @@
         <dependency>
             <groupId>net.rakugakibox.spring.boot</groupId>
             <artifactId>orika-spring-boot-starter</artifactId>
-            <version>1.9.0</version>
+            <version>1.10.1</version>
         </dependency>
         <dependency>
             <groupId>ma.glasnost.orika</groupId>
