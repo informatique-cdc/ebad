@@ -1,56 +1,60 @@
 server:
-    port: 10344
-    address: localhost
-async:
-    corePoolSize: 2
-    maxPoolSize: 50
-    queueCapacity: 10000
-spring:
-    datasource:
-        dataSourceClassName: org.h2.Driver
-        url: jdbc:h2:mem:ebad;DB_CLOSE_DELAY=-1
-        databaseName:
-        serverName:
-        username:
-        password:
+  port: 10344
+  address: localhost
 
-    jpa:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-        database: H2
-        openInView: false
-        show_sql: false
-        generate-ddl: false
-        hibernate:
-            ddl-auto: create-drop
-            naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-        properties:
-            hibernate.cache.use_second_level_cache: false
-            hibernate.cache.use_query_cache: false
-            hibernate.generate_statistics: true
-            javax.persistence.schema-generation.database.action: drop-and-create
-            javax.persistence.schema-generation.drop-source: script-then-metadata
-            javax.persistence.schema-generation.create-source: metadata-then-script
-            javax.persistence.schema-generation.drop-script-source: drop-tables.sql
-            javax.persistence.schema-generation.create-script-source: nop.sql
-    main:
-        allow-bean-definition-overriding: true
-        banner-mode: "off"
-    liquibase:
-        enabled: false
+async:
+  corePoolSize: 2
+  maxPoolSize: 50
+  queueCapacity: 10000
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:ebad;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    driverClassName: org.h2.Driver
+    username:
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    database: H2
+    openInView: false
+    show_sql: false
+    generate-ddl: false
+    hibernate:
+      ddl-auto: create-drop
+      naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
+      javax.persistence.schema-generation.database.action: drop-and-create
+      javax.persistence.schema-generation.drop-source: metadata
+      javax.persistence.schema-generation.create-source: metadata-then-script
+#      javax.persistence.schema-generation.drop-script-source: drop-tables.sql
+      javax.persistence.schema-generation.create-script-source: nop.sql
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: "off"
+  liquibase:
+    enabled: false
 metrics:
-    jmx.enabled: false
+  jmx.enabled: false
 
 ebad:
-    security:
-        authentication:
-            jwt:
-                secret: test
-                # Token is valid 24 hours
-                token-validity-in-seconds: 86400
-                token-validity-in-seconds-for-remember-me: 2592000
+  security:
+    authentication:
+      jwt:
+        secret: test
+        # Token is valid 24 hours
+        token-validity-in-seconds: 86400
+        token-validity-in-seconds-for-remember-me: 2592000
 
 
-org:
-    jobrunr:
-        dashboard:
-            enabled: false
+org.jobrunr:
+  dashboard:
+    enabled: false
+  background-job-server:
+    enabled: true
+
