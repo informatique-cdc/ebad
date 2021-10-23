@@ -11,6 +11,11 @@
 
 EBAD is a project to run your batchs on remote server from a central place.
 
+:warning: To build EBAD please read this : :warning:
+
+You need a github token to get all maven package.
+Please read this article : https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry
+
 ## Getting Started
 These instructions womm get you a working application.
 
@@ -105,6 +110,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 the project needs Java 8 and a PostgreSQL database.
 To build the project, Maven 3+ is required.
+  
+:warning: You need a github token to get all maven package. Please read this article : https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry :warning:
+
 
 ### Installing
 
