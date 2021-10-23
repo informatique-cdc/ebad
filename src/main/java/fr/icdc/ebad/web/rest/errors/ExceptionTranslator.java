@@ -1,20 +1,24 @@
 package fr.icdc.ebad.web.rest.errors;
 
 
+import fr.icdc.ebad.security.UserNotActivatedException;
 import fr.icdc.ebad.service.util.EbadNotFoundException;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -30,6 +34,12 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
  */
 @ControllerAdvice
 public class ExceptionTranslator extends ResponseEntityExceptionHandler {
+    private final MessageSource messageSource;
+
+    public ExceptionTranslator(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
     /**
      * Handle MissingServletRequestParameterException. Triggered when a 'required' request parameter is missing.
      *
@@ -189,12 +199,10 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
         return buildResponseEntity(new ApiError(BAD_REQUEST,ex.getMessage(), ex));
     }
 
-    /**
-     * Handle Exception
-     */
-    @ExceptionHandler(Exception.class)
-    protected ResponseEntity<Object> handleException(Exception ex) {
-        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error", ex));
+
+    @ExceptionHandler({InsufficientAuthenticationException.class, UserNotActivatedException.class, AccessDeniedException.class})
+    public ResponseEntity<Object> handleInsufficientAuthenticationException(Exception ex){
+        return buildResponseEntity(new ApiError(HttpStatus.FORBIDDEN,messageSource.getMessage(ErrorConstants.ERR_FORBIDDEN, null, LocaleContextHolder.getLocale()), ex));
     }
 
 
@@ -226,6 +234,15 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
         apiError.setMessage(String.format("The parameter '%s' of value '%s' could not be converted to type '%s'", ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName()));
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);
+    }
+
+
+    /**
+     * Handle Exception
+     */
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<Object> handleException(Exception ex) {
+        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error", ex));
     }
 
 

@@ -111,7 +111,7 @@ public class AccountResource {
     @PostMapping(value = "/account/change_password", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> changePassword(@RequestBody String password) {
-        if (StringUtils.hasText(password) || password.length() < SIZE_MIN_PASSWORD || password.length() > SIZE_MAX_PASSWORD) {
+        if (!StringUtils.hasText(password) || password.length() < SIZE_MIN_PASSWORD || password.length() > SIZE_MAX_PASSWORD) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         userService.changePassword(password);
