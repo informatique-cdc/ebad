@@ -181,6 +181,23 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
         return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,ex.getMessage(), ex));
     }
 
+    /**
+     * Handle IllegalStateException
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    protected ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
+        return buildResponseEntity(new ApiError(BAD_REQUEST,ex.getMessage(), ex));
+    }
+
+    /**
+     * Handle Exception
+     */
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<Object> handleException(Exception ex) {
+        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error", ex));
+    }
+
+
 
     /**
      * Handle DataIntegrityViolationException, inspects the cause for different DB causes.
