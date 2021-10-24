@@ -9,7 +9,9 @@ import fr.icdc.ebad.service.util.EbadNotFoundException;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.util.TestUtil;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
+import fr.icdc.ebad.web.rest.dto.NormeDto;
 import fr.icdc.ebad.web.rest.errors.ExceptionTranslator;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +32,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import javax.management.RuntimeMBeanException;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.Locale;
 import java.util.Set;
 
@@ -134,7 +140,11 @@ public class ExceptionTranslatorTest {
     @WithMockUser(roles = {"ADMIN"})
     public void testHandleConstraintViolation() throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put("/norms").content("{\"name\": \"toto\"}").contentType("application/json");
-        ConstraintViolationException constraintViolationException = new ConstraintViolationException(Set.of());
+        NormeDto normeDto = new NormeDto();
+        ValidatorFactory  validatorFactory = Validation.buildDefaultValidatorFactory();
+        Validator validator = validatorFactory.getValidator();
+        Set<ConstraintViolation<NormeDto>> constraintViolations = validator.validate(normeDto);
+        ConstraintViolationException constraintViolationException = new ConstraintViolationException(constraintViolations);
         when(normeService.saveNorme(any())).thenThrow(constraintViolationException);
         restMvc.perform(builder)
                 .andExpect(status().isBadRequest())
