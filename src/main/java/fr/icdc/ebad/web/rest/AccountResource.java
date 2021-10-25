@@ -61,12 +61,11 @@ public class AccountResource {
     /**
      * GET  /authenticate to check if the user is authenticated, and return its login.
      *
-     * @param request the http request
      * @return user login
      */
     @GetMapping(value = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public String isAuthenticated(HttpServletRequest request) {
+    public String isAuthenticated() {
         LOGGER.debug("REST request to check if the current user is authenticated");
         return SecurityUtils.getCurrentLogin();
     }
@@ -112,7 +111,7 @@ public class AccountResource {
     @PostMapping(value = "/account/change_password", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<Void> changePassword(@RequestBody String password) {
-        if (StringUtils.isEmpty(password) || password.length() < SIZE_MIN_PASSWORD || password.length() > SIZE_MAX_PASSWORD) {
+        if (!StringUtils.hasText(password) || password.length() < SIZE_MIN_PASSWORD || password.length() > SIZE_MAX_PASSWORD) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         userService.changePassword(password);
