@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
+import javax.validation.Valid;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -87,7 +88,7 @@ public class BatchResource {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
-    public ResponseEntity<BatchDto> addBatch(@RequestBody BatchDto batchDto) {
+    public ResponseEntity<BatchDto> addBatch(@RequestBody @Valid BatchDto batchDto) {
         LOGGER.debug("REST request to add a new batch");
         Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
         return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);

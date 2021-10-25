@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
@@ -93,7 +94,7 @@ public class NormResource {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<NormeDto> save(@RequestBody NormeDto normeDto) {
+    public ResponseEntity<NormeDto> save(@RequestBody @Valid  NormeDto normeDto) {
         LOGGER.debug("REST request to save Norme");
         if (normeDto.getId() != null) {
             return ResponseEntity.badRequest().build();
