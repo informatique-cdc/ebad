@@ -677,6 +677,7 @@
                 <configuration>
                     <wait>6000</wait>
                     <executable>true</executable>
+                    <layout>LAYERED_JAR</layout>
                 </configuration>
             </plugin>
         </plugins>
