@@ -676,7 +676,7 @@
                 </executions>
                 <configuration>
                     <wait>6000</wait>
-                    <executable>true</executable>
+                    <executable>false</executable>
                     <layers>
                         <enabled>true</enabled>
                         <configuration>${project.basedir}/layers.xml</configuration>
