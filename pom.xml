@@ -677,7 +677,10 @@
                 <configuration>
                     <wait>6000</wait>
                     <executable>true</executable>
-                    <layout>LAYERED_JAR</layout>
+                    <layers>
+                        <enabled>true</enabled>
+                        <configuration>${project.basedir}/layers.xml</configuration>
+                    </layers>
                 </configuration>
             </plugin>
         </plugins>
