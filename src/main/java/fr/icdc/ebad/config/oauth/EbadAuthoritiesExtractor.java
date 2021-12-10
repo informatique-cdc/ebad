@@ -20,6 +20,10 @@ public class EbadAuthoritiesExtractor implements AuthoritiesExtractor {
     public List<GrantedAuthority> extractAuthorities(Map<String, Object> map) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         String authoritiesString = (String) map.get(ebadProperties.getSecurity().getMappingUser().getAuthorities());
+        authoritiesString = authoritiesString.replaceAll(" ", "");
+        authoritiesString = authoritiesString.replace("[", "");
+        authoritiesString = authoritiesString.replace("]", "");
+        authoritiesString = authoritiesString.replace(ebadProperties.getApplicationIdentifier(), "");
         for (String authority : authoritiesString.split(",")) {
             grantedAuthorities.add(new SimpleGrantedAuthority("ROLE" + authority));
         }
