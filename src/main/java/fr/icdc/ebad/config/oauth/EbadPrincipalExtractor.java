@@ -38,6 +38,8 @@ public class EbadPrincipalExtractor implements PrincipalExtractor {
         Optional<User> userOptional = userRepository.findOneByLogin(login);
 
         Set<Authority> authorities = new HashSet<>();
+        authoritiesString = authoritiesString.replaceAll(" ", "");
+        authoritiesString = authoritiesString.replace(ebadProperties.getApplicationIdentifier(), "");
 
         for (String authority : authoritiesString.split(",")) {
             Optional<Authority> authority1 = authorityRepository.findById("ROLE" + authority);

@@ -71,10 +71,11 @@ public class BatchResource {
         JobId jobId;
 
         UUID uuid = UUID.randomUUID();
+        String login = SecurityUtils.getCurrentLogin();
         if (param != null) {
-            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, param, SecurityUtils.getCurrentLogin(), uuid.toString()));
+            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, param, login, uuid.toString()));
         } else {
-            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, SecurityUtils.getCurrentLogin(), uuid.toString()));
+            jobId = jobScheduler.enqueue(uuid, () -> batchService.jobRunBatch(id, env, login, uuid.toString()));
         }
         LOGGER.debug("job id is {}", jobId);
         return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);

@@ -20,6 +20,10 @@ public class EbadProperties {
 
     @Getter
     @Setter
+    private String applicationIdentifier = "";
+
+    @Getter
+    @Setter
     public static class PluginProperties {
         private String path = "plugins";
     }
