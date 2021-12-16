@@ -18,7 +18,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
@@ -42,13 +41,15 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
     private final TokenProvider tokenProvider;
     private final SecurityProblemSupport problemSupport;
     private final Environment environment;
+    private final PasswordEncoder passwordEncoder;
 
-    public JwtConfiguration(AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService, TokenProvider tokenProvider, SecurityProblemSupport problemSupport, Environment environment) {
+    public JwtConfiguration(AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService, TokenProvider tokenProvider, SecurityProblemSupport problemSupport, Environment environment, PasswordEncoder passwordEncoder) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDetailsService = userDetailsService;
         this.tokenProvider = tokenProvider;
         this.problemSupport = problemSupport;
         this.environment = environment;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
@@ -56,16 +57,13 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
         try {
             authenticationManagerBuilder
                     .userDetailsService(userDetailsService)
-                    .passwordEncoder(passwordEncoder());
+                    .passwordEncoder(passwordEncoder);
         } catch (Exception e) {
             throw new BeanInitializationException("Security configuration failed", e);
         }
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 
 
     @Bean
