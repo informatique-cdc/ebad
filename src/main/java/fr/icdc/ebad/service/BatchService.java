@@ -141,8 +141,8 @@ public class BatchService {
         logBatch.setParams(realParams);
         logBatch.setReturnCode(batchRetour.getReturnCode());
         logBatch.setExecutionTime(batchRetour.getExecutionTime());
-        logBatch.setStderr(batchRetour.getLogOut());
-        logBatch.setStderr(batchRetour.getLogOut());
+        logBatch.setStdout(batchRetour.getLogOut());
+        logBatch.setStderr(batchRetour.getLogErr());
         try {
             User user = userService.getUser(login).orElseThrow(EbadServiceException::new);
             logBatch.setUser(user);
