@@ -116,7 +116,7 @@ public class ChaineResourceTest {
         when(mockPrincipal.getName()).thenReturn("user");
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/chains/1/run").principal(mockPrincipal);
 
-        RetourBatch retourBatch = new RetourBatch("noout", 2, 111L);
+        RetourBatch retourBatch = new RetourBatch("noout", "err", 2, 111L);
 
         when(chaineService.jobRunChaine(1L, "user")).thenReturn(retourBatch);
         when(permissionChaine.canRead(eq(1L), any())).thenReturn(true);
