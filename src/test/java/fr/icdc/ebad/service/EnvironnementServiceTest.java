@@ -93,7 +93,7 @@ public class EnvironnementServiceTest {
         environnement.setNorme(norme);
         Application application = new Application();
         environnement.setApplication(application);
-        RetourBatch retourBatch = new RetourBatch("20160101", 0, 10L);
+        RetourBatch retourBatch = new RetourBatch("20160101", "err", 0, 10L);
         when(shellService.runCommandNew(eq(environnement), anyString())).thenReturn(retourBatch);
         when(environnementRepository.getById(environnement.getId())).thenReturn(environnement);
         Date dateTraitement = environnementService.getDateTraiement(environnement.getId());

@@ -69,8 +69,8 @@ public class ChaineServiceTest {
         chaine.getChaineAssociations().add(chaineAssociation3);
         chaine.setEnvironnement(environnement);
 
-        RetourBatch retourBatch1 = new RetourBatch("ok1", 0, 100L);
-        RetourBatch retourBatch2 = new RetourBatch("ko1", 1, 200L);
+        RetourBatch retourBatch1 = new RetourBatch("ok1", "err",  0, 100L);
+        RetourBatch retourBatch2 = new RetourBatch("ko1", "err", 1, 200L);
 
         when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"), anyString())).thenReturn(retourBatch1);
         when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"), anyString())).thenReturn(retourBatch2);
@@ -114,8 +114,8 @@ public class ChaineServiceTest {
         chaine.getChaineAssociations().add(chaineAssociation3);
         chaine.setEnvironnement(environnement);
 
-        RetourBatch retourBatch1 = new RetourBatch("ok1", 0, 100L);
-        RetourBatch retourBatch2 = new RetourBatch("ko1", 1, 200L);
+        RetourBatch retourBatch1 = new RetourBatch("ok1", "err", 0, 100L);
+        RetourBatch retourBatch2 = new RetourBatch("ko1", "err", 1, 200L);
 
         when(batchService.runBatch(eq(batch1), eq(environnement), eq("user"), anyString())).thenReturn(retourBatch1);
         when(batchService.runBatch(eq(batch2), eq(environnement), eq("user"), anyString())).thenReturn(retourBatch2);

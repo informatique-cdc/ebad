@@ -47,6 +47,7 @@ public class ShellService {
         Long start = System.currentTimeMillis();
         int exitStatus;
         String commandOut;
+        String commandErr;
         String commandWithInterpreteur = environnement.getNorme().getCommandLine().replace("$1", command);
 
         SshClient sshClient = SshClient.setUpDefaultClient();
@@ -54,12 +55,15 @@ public class ShellService {
         CoreModuleProperties.HEARTBEAT_INTERVAL.set(sshClient, HEARTBEAT);
         try (ClientSession session = createSession(sshClient, environnement)) {
             try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+                 ByteArrayOutputStream responseErrStream = new ByteArrayOutputStream();
                  ClientChannel channel = session.createChannel(Channel.CHANNEL_EXEC, commandWithInterpreteur)) {
                 channel.setOut(responseStream);
+                channel.setErr(responseErrStream);
                 try {
                     channel.open();
                     channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), ebadProperties.getSsh().getTimeoutInMs());
                     commandOut = responseStream.toString();
+                    commandErr = responseErrStream.toString();
                 } finally {
                     exitStatus = channel.getExitStatus();
                     channel.close(true);
@@ -73,7 +77,8 @@ public class ShellService {
 
         Long end = System.currentTimeMillis();
         LOGGER.debug("Command out : {}", commandOut);
-        return new RetourBatch(commandOut, exitStatus, end - start);
+        LOGGER.debug("Command err : {}", commandErr);
+        return new RetourBatch(commandOut,commandErr, exitStatus, end - start);
     }
 
     private static String constructSubDir(String originalSubDirectory) {

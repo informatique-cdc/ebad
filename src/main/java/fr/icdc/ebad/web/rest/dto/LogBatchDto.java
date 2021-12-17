@@ -16,5 +16,7 @@ public class LogBatchDto {
     private String params;
     private Date dateTraitement;
     private String login;
+    private String stdout;
+    private String stderr;
 }
 
