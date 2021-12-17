@@ -9,14 +9,16 @@ import lombok.Data;
 public class RetourBatch {
 
     private String logOut;
+    private String logErr;
     private int returnCode;
     private Long executionTime;
 
     public RetourBatch(){
     }
 
-    public RetourBatch(String pLogOut, int pReturnCode, Long pExecutionTime){
+    public RetourBatch(String pLogOut,String pLogErr, int pReturnCode, Long pExecutionTime){
         logOut = pLogOut;
+        logErr = pLogErr;
         returnCode = pReturnCode;
         executionTime = pExecutionTime;
     }

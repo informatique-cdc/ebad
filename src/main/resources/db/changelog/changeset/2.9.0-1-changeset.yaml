@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_stderr_stdout
+      author: dtrouillet
+      changes:
+        - addColumn:
+            tableName: t_log_batch
+            columns:
+              - column:
+                  name: stdout
+                  type: TEXT
+              - column:
+                  name: stderr
+                  type: TEXT
+
+
