@@ -23,7 +23,7 @@ public class JobRunrService {
 
     @Scheduled(fixedDelay = 1000 * 60)
     public void aliveCheck() {
-        LOGGER.info("Alive check...");
+        LOGGER.debug("Alive check...");
         var isRunning = backgroundJobServerk.isRunning();
         if (!isRunning) {
             LOGGER.warn("backgroundJobServer is not running...");
