@@ -2,11 +2,9 @@ package fr.icdc.ebad.service;
 
 
 import fr.icdc.ebad.config.properties.EbadProperties;
-import org.codehaus.janino.Java;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
