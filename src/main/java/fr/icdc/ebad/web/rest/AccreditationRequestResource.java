@@ -7,7 +7,7 @@ import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.AccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.CreationAccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.ResponseAccreditationRequestDto;
-import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

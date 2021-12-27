@@ -6,7 +6,7 @@ import fr.icdc.ebad.service.SchedulingService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.CreationSchedulingDto;
 import fr.icdc.ebad.web.rest.dto.SchedulingDto;
-import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.converters.models.PageableAsQueryParam;

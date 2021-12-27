@@ -5,7 +5,7 @@ import fr.icdc.ebad.service.GlobalSettingService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.GlobalSettingKeyValueDto;
 import fr.icdc.ebad.web.rest.dto.GlobalSettingValueDto;
-import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

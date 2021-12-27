@@ -5,7 +5,7 @@ import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.NewService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.ActualiteDto;
-import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;

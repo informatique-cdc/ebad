@@ -1,6 +1,7 @@
-package fr.icdc.ebad.web.rest.mapstruct;
+package fr.icdc.ebad.mapper;
 
 import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.web.rest.dto.*;
 import org.mapstruct.*;
 
@@ -54,6 +55,7 @@ public interface MapStructMapper {
     UsageApplicationDto convert(UsageApplication usageApplication);
 
     UsageApplication convert(UsageApplicationDto usageApplicationDto);
+    UsageApplicationSimpleDto convertToUsageApplicationSimpleDto(UsageApplication usageApplication);
 
     //CHAINS
     ChaineSimpleDto convertToChaineSimpleDto(Chaine chaine);
@@ -102,8 +104,10 @@ public interface MapStructMapper {
     }
 
     //LOGS BATCHS
+    @Mapping(source = "user.login", target = "login")
     LogBatchDto convert(LogBatch logBatch);
 
+    @Mapping(source = "login", target = "user.login")
     LogBatch convert(LogBatchDto logBatchDto);
 
     //NORMS
@@ -112,6 +116,15 @@ public interface MapStructMapper {
     NormeDto convertToNormeDto(Norme norme);
 
     Norme convert(NormeDto normeDto);
+
+
+    List<NormeDiscoverDto> convertToNormeDiscoverDtoList(List<Norme> normeList);
+
+    @Mappings({
+            @Mapping(source = "pathShellDirectory", target = "pathShell"),
+            @Mapping(source = "fileDate", target = "ctrlMDate")
+    })
+    Norme convert(NormeDiscoverDto normeDiscoverDto);
 
     //NOTIFICATIONS
     List<NotificationDto> convertToNotificationDtoList(List<Notification> notificationList);
@@ -123,4 +136,6 @@ public interface MapStructMapper {
     TypeFichierDto convert(TypeFichier typeFichier);
 
     TypeFichier convert(TypeFichierDto typeFichierDto);
+
+
 }

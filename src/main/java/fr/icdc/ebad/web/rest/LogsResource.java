@@ -7,7 +7,7 @@ import fr.icdc.ebad.service.JobRunrService;
 import fr.icdc.ebad.service.LogBatchService;
 import fr.icdc.ebad.web.rest.dto.JobStateDto;
 import fr.icdc.ebad.web.rest.dto.LogBatchDto;
-import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;

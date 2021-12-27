@@ -2,14 +2,29 @@ package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.config.Constants;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.GlobalSetting;
+import fr.icdc.ebad.domain.Identity;
+import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.QEnvironnement;
+import fr.icdc.ebad.domain.Scheduling;
 import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
-import fr.icdc.ebad.repository.*;
+import fr.icdc.ebad.repository.ApplicationRepository;
+import fr.icdc.ebad.repository.BatchRepository;
+import fr.icdc.ebad.repository.ChaineRepository;
+import fr.icdc.ebad.repository.DirectoryRepository;
+import fr.icdc.ebad.repository.EnvironnementRepository;
+import fr.icdc.ebad.repository.IdentityRepository;
+import fr.icdc.ebad.repository.LogBatchRepository;
+import fr.icdc.ebad.repository.NormeRepository;
+import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.scheduling.JobScheduler;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
@@ -30,11 +45,25 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by dtrouillet on 10/02/2017.
@@ -70,7 +99,7 @@ public class EnvironnementServiceTest {
     @Mock
     private JobScheduler jobScheduler;
     @Spy
-    private MapperFacade mapperFacade;
+    private MapStructMapper mapStructMapper;
     @Spy
     private List<EnvironnementConnectorPlugin> environnementConnectorPluginList = new ArrayList<>();
 

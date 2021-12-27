@@ -1,11 +1,15 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.AccreditationRequest;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.StateRequest;
+import fr.icdc.ebad.domain.UsageApplication;
+import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import ma.glasnost.orika.MapperFacade;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,12 +26,23 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.mail.MessagingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccreditationRequestServiceTest {
@@ -50,7 +65,7 @@ public class AccreditationRequestServiceTest {
     private SecurityContext securityContext;
 
     @Mock
-    private MapperFacade mapperFacade;
+    private MapStructMapper mapStructMapper;
 
     @Mock
     private SimpMessagingTemplate messagingTemplate;

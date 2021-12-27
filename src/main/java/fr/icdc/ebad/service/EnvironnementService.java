@@ -1,14 +1,27 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.GlobalSetting;
+import fr.icdc.ebad.domain.Identity;
+import fr.icdc.ebad.domain.QEnvironnement;
+import fr.icdc.ebad.domain.Scheduling;
 import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.plugin.dto.EnvironnementDiscoverDto;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
 import fr.icdc.ebad.plugin.plugin.EnvironnementConnectorPlugin;
-import fr.icdc.ebad.repository.*;
+import fr.icdc.ebad.repository.ApplicationRepository;
+import fr.icdc.ebad.repository.BatchRepository;
+import fr.icdc.ebad.repository.ChaineRepository;
+import fr.icdc.ebad.repository.DirectoryRepository;
+import fr.icdc.ebad.repository.EnvironnementRepository;
+import fr.icdc.ebad.repository.IdentityRepository;
+import fr.icdc.ebad.repository.LogBatchRepository;
+import fr.icdc.ebad.repository.NormeRepository;
+import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.scheduling.JobScheduler;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
@@ -26,7 +39,12 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static fr.icdc.ebad.config.Constants.GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID;
 
@@ -48,7 +66,7 @@ public class EnvironnementService {
     private final ChaineRepository chaineRepository;
     private final DirectoryRepository directoryRepository;
     private final NormeRepository normeRepository;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
     private final List<EnvironnementConnectorPlugin> environnementConnectorPluginList;
     private final ApplicationRepository applicationRepository;
     private final SpringPluginManager springPluginManager;
@@ -57,7 +75,7 @@ public class EnvironnementService {
     private final GlobalSettingService globalSettingService;
     private final IdentityRepository identityRepository;
 
-    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapperFacade mapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler, GlobalSettingService globalSettingService, IdentityRepository identityRepository) {
+    public EnvironnementService(ShellService shellService, EnvironnementRepository environnementRepository, BatchRepository batchRepository, LogBatchRepository logBatchRepository, ChaineRepository chaineRepository, DirectoryRepository directoryRepository, NormeRepository normeRepository, MapStructMapper mapStructMapper, List<EnvironnementConnectorPlugin> environnementConnectorPluginList, ApplicationRepository applicationRepository, SpringPluginManager springPluginManager, SchedulingRepository schedulingRepository, JobScheduler jobScheduler, GlobalSettingService globalSettingService, IdentityRepository identityRepository) {
         this.shellService = shellService;
         this.environnementRepository = environnementRepository;
         this.batchRepository = batchRepository;
@@ -65,7 +83,7 @@ public class EnvironnementService {
         this.chaineRepository = chaineRepository;
         this.directoryRepository = directoryRepository;
         this.normeRepository = normeRepository;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
         this.environnementConnectorPluginList = environnementConnectorPluginList;
         this.applicationRepository = applicationRepository;
         this.springPluginManager = springPluginManager;
@@ -183,7 +201,7 @@ public class EnvironnementService {
     public Set<Environnement> importEnvironments(Long applicationId) throws EbadServiceException {
         Application application = applicationRepository.findById(applicationId).orElseThrow(() -> new EbadServiceException("No application with id " + applicationId));
         Set<Environnement> environnements = new HashSet<>();
-        List<NormeDiscoverDto> normeDiscoverDtos = mapper.mapAsList(normeRepository.findAll(), NormeDiscoverDto.class);
+        List<NormeDiscoverDto> normeDiscoverDtos = mapStructMapper.convertToNormeDiscoverDtoList(normeRepository.findAll());
         GlobalSetting defaultIdentityId = globalSettingService.getValue(GLOBAL_SETTINGS_DEFAULT_IDENTITY_ID);
         Identity identity = identityRepository.getById(Long.valueOf(defaultIdentityId.getValue()));
 
@@ -201,7 +219,7 @@ public class EnvironnementService {
                     environnement.setHost(environnementDiscoverDto.getHost());
                     environnement.setHomePath(environnementDiscoverDto.getHome());
                     environnement.setPrefix(environnementDiscoverDto.getPrefix());
-                    environnement.setNorme(mapper.map(environnementDiscoverDto.getNorme(), Norme.class));
+                    environnement.setNorme(mapStructMapper.convert(environnementDiscoverDto.getNorme()));
                     environnement.setExternalId(environnementDiscoverDto.getId());
                     environnement.setPluginId(pluginId);
                     environnement.setApplication(application);

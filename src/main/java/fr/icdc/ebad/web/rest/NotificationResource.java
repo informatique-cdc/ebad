@@ -3,7 +3,7 @@ package fr.icdc.ebad.web.rest;
 import fr.icdc.ebad.domain.Notification;
 import fr.icdc.ebad.service.NotificationService;
 import fr.icdc.ebad.web.rest.dto.NotificationDto;
-import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -4,7 +4,7 @@ import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.TypeFichier;
 import fr.icdc.ebad.service.TypeFichierService;
 import fr.icdc.ebad.web.rest.dto.TypeFichierDto;
-import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
