@@ -61,11 +61,11 @@ public class LogBatch {
     private Date dateTraitement;
 
     @Lob
-    @Column(unique = false, nullable = true, name = "stdout")
+    @Column(unique = false, nullable = true, name = "stdout", columnDefinition = "TEXT")
     private String stdout;
 
     @Lob
-    @Column(unique = false, nullable = true, name = "stderr")
+    @Column(unique = false, nullable = true, name = "stderr", columnDefinition = "TEXT")
     private String stderr;
 
 }
