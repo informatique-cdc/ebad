@@ -7,14 +7,13 @@ import fr.icdc.ebad.service.JobRunrService;
 import fr.icdc.ebad.service.LogBatchService;
 import fr.icdc.ebad.web.rest.dto.JobStateDto;
 import fr.icdc.ebad.web.rest.dto.LogBatchDto;
+import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,11 +40,11 @@ public class LogsResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogsResource.class);
 
     private final LogBatchService logBatchService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
     private final JobRunrService jobRunrService;
 
-    public LogsResource(LogBatchService logBatchService, MapperFacade mapper, JobRunrService jobRunrService) {
-        this.mapper = mapper;
+    public LogsResource(LogBatchService logBatchService, MapStructMapper mapStructMapper, JobRunrService jobRunrService) {
+        this.mapStructMapper = mapStructMapper;
         this.logBatchService = logBatchService;
         this.jobRunrService = jobRunrService;
     }
@@ -57,7 +56,7 @@ public class LogsResource {
     public Page<LogBatchDto> getAllLog(@QuerydslPredicate(root = LogBatch.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("get all log");
         return logBatchService.getAllLogBatchWithPageable(predicate, pageable)
-                .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
+                .map(mapStructMapper::convert);
     }
 
     @GetMapping(value = "/{env}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -68,7 +67,7 @@ public class LogsResource {
         LOGGER.debug("get all log from env {}", env);
         Predicate envPredicate = QLogBatch.logBatch.environnement.id.eq(env).and(predicate);
         return logBatchService.getAllLogBatchWithPageable(envPredicate, PaginationUtil.generatePageRequestOrDefault(pageable))
-                .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
+                .map(mapStructMapper::convert);
     }
 
     @GetMapping(value = "/job/{jobId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,7 +80,7 @@ public class LogsResource {
         jobStateDto.setId(jobId);
         jobStateDto.setState(state);
         Optional<LogBatchDto> logBatchDtoOptional = logBatchService.getByJobId(jobId)
-                .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
+                .map(mapStructMapper::convert);
         logBatchDtoOptional.ifPresent(jobStateDto::setLog);
         return ResponseEntity.ok(jobStateDto);
     }
@@ -103,6 +102,6 @@ public class LogsResource {
         return logBatchService
                 .getAllLogBatchWithPageable(envBatchPredicate, PaginationUtil.generatePageRequestOrDefault(pageable)
                 )
-                .map(logBatch -> mapper.map(logBatch, LogBatchDto.class));
+                .map(mapStructMapper::convert);
     }
 }

@@ -6,14 +6,13 @@ import fr.icdc.ebad.service.NormeService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.NormLabelIdDto;
 import fr.icdc.ebad.web.rest.dto.NormeDto;
+import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,14 +21,7 @@ import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -42,12 +34,12 @@ public class NormResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(NormResource.class);
 
     private final NormeService normeService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
     @Autowired
-    public NormResource(NormeService normeService, MapperFacade mapper) {
+    public NormResource(NormeService normeService, MapStructMapper mapStructMapper) {
         this.normeService = normeService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     /**
@@ -60,7 +52,7 @@ public class NormResource {
     public Page<NormeDto> getAll(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Norme - Read");
         Page<Norme> normePage = normeService.getAllNormes(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
-        return normePage.map(norme -> mapper.map(norme, NormeDto.class));
+        return normePage.map(mapStructMapper::convertToNormeDto);
     }
 
     /**
@@ -73,7 +65,7 @@ public class NormResource {
     public Page<NormLabelIdDto> getAllForList(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Norme.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Norme - Read");
         Page<Norme> normePage = normeService.getAllNormes(predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
-        return normePage.map(norme -> mapper.map(norme, NormLabelIdDto.class));
+        return normePage.map(mapStructMapper::convertToNormLabelIdDto);
     }
 
     /**
@@ -84,7 +76,7 @@ public class NormResource {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NormeDto> getOne(@PathVariable("id") Long id) {
         LOGGER.debug("REST request to get Norme with id {}", id);
-        Optional<NormeDto> normeDto = normeService.findNormeById(id).map(norme -> mapper.map(norme, NormeDto.class));
+        Optional<NormeDto> normeDto = normeService.findNormeById(id).map(mapStructMapper::convertToNormeDto);
         return ResponseUtil.wrapOrNotFound(normeDto);
     }
 
@@ -99,8 +91,8 @@ public class NormResource {
         if (normeDto.getId() != null) {
             return ResponseEntity.badRequest().build();
         }
-        Norme norme = normeService.saveNorme(mapper.map(normeDto, Norme.class));
-        return ResponseEntity.ok(mapper.map(norme, NormeDto.class));
+        Norme norme = normeService.saveNorme(mapStructMapper.convert(normeDto));
+        return ResponseEntity.ok(mapStructMapper.convertToNormeDto(norme));
     }
 
     /**
@@ -126,7 +118,7 @@ public class NormResource {
         if (normeDto.getId() == null) {
             return ResponseEntity.badRequest().build();
         }
-        Norme norme = normeService.saveNorme(mapper.map(normeDto, Norme.class));
-        return ResponseEntity.ok(mapper.map(norme, NormeDto.class));
+        Norme norme = normeService.saveNorme(mapStructMapper.convert(normeDto));
+        return ResponseEntity.ok(mapStructMapper.convertToNormeDto(norme));
     }
 }

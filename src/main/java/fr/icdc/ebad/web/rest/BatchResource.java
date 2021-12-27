@@ -7,16 +7,17 @@ import fr.icdc.ebad.service.BatchService;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
 import fr.icdc.ebad.web.rest.dto.CurrentJobDto;
 import fr.icdc.ebad.web.rest.dto.JobDto;
+import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -39,13 +40,13 @@ public class BatchResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchResource.class);
 
     private final BatchService batchService;
-    private final MapperFacade mapper;
     private final JobScheduler jobScheduler;
+    private final MapStructMapper mapStructMapper;
 
-    public BatchResource(BatchService batchService, MapperFacade mapper, JobScheduler jobScheduler) {
+    public BatchResource(BatchService batchService, JobScheduler jobScheduler, ConversionService conversionService, MapStructMapper mapStructMapper) {
         this.batchService = batchService;
-        this.mapper = mapper;
         this.jobScheduler = jobScheduler;
+        this.mapStructMapper = mapStructMapper;
     }
 
     /**
@@ -57,7 +58,8 @@ public class BatchResource {
     @PageableAsQueryParam
     public Page<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get Batchs ");
-        return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable)).map(batch -> mapper.map(batch, BatchDto.class));
+        return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
+                .map(batch -> mapStructMapper.convert(batch));
     }
 
     /**
@@ -91,8 +93,8 @@ public class BatchResource {
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
     public ResponseEntity<BatchDto> addBatch(@RequestBody @Valid BatchDto batchDto) {
         LOGGER.debug("REST request to add a new batch");
-        Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
-        return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);
+        Batch batch = batchService.saveBatch(mapStructMapper.convert(batchDto));
+        return new ResponseEntity<>(mapStructMapper.convert(batch), HttpStatus.OK);
     }
 
     /**
@@ -103,8 +105,8 @@ public class BatchResource {
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
     public ResponseEntity<BatchDto> updateBatch(@RequestBody BatchDto batchDto) {
         LOGGER.debug("REST request to update a batch");
-        Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
-        return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);
+        Batch batch = batchService.saveBatch(mapStructMapper.convert(batchDto));
+        return new ResponseEntity<>(mapStructMapper.convert(batch), HttpStatus.OK);
     }
 
     /**

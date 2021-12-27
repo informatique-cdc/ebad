@@ -6,6 +6,7 @@ import fr.icdc.ebad.service.DirectoryService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
+import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,10 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,11 +41,11 @@ public class DirectoryResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryResource.class);
 
     private final DirectoryService directoryService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public DirectoryResource(DirectoryService directoryService, MapperFacade mapper) {
+    public DirectoryResource(DirectoryService directoryService, MapStructMapper mapStructMapper) {
         this.directoryService = directoryService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     /**
@@ -59,7 +58,7 @@ public class DirectoryResource {
     public ResponseEntity<Page<DirectoryDto>> getAllFromEnv(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Directory.class) Predicate predicate, @PathVariable Long env) throws URISyntaxException {
         LOGGER.debug("REST request to get all Directory from environnement {}", env);
         Page<Directory> page = directoryService.findDirectoryFromEnvironnement(predicate, pageable, env);
-        Page<DirectoryDto> directoryDtos = page.map(directory -> mapper.map(directory, DirectoryDto.class));
+        Page<DirectoryDto> directoryDtos = page.map(mapStructMapper::convert);
 
         return new ResponseEntity<>(directoryDtos, HttpStatus.OK);
     }
@@ -132,8 +131,8 @@ public class DirectoryResource {
     @PreAuthorize("@permissionDirectory.canWrite(#directoryDto, principal)")
     public ResponseEntity<DirectoryDto> addDirectory(@RequestBody DirectoryDto directoryDto) {
         LOGGER.debug("REST request to add a new directory");
-        Directory directory = directoryService.saveDirectory(mapper.map(directoryDto, Directory.class));
-        return new ResponseEntity<>(mapper.map(directory, DirectoryDto.class), HttpStatus.OK);
+        Directory directory = directoryService.saveDirectory(mapStructMapper.convert(directoryDto));
+        return new ResponseEntity<>(mapStructMapper.convert(directory), HttpStatus.OK);
     }
 
     /**
@@ -157,7 +156,7 @@ public class DirectoryResource {
     @PreAuthorize("@permissionDirectory.canWrite(#directoryDto, principal)")
     public ResponseEntity<DirectoryDto> updateDirectory(@RequestBody DirectoryDto directoryDto) {
         LOGGER.debug("REST request to update a directory");
-        Directory directory = directoryService.saveDirectory(mapper.map(directoryDto, Directory.class));
-        return new ResponseEntity<>(mapper.map(directory, DirectoryDto.class), HttpStatus.OK);
+        Directory directory = directoryService.saveDirectory(mapStructMapper.convert(directoryDto));
+        return new ResponseEntity<>(mapStructMapper.convert(directory), HttpStatus.OK);
     }
 }

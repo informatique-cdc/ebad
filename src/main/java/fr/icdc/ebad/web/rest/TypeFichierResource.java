@@ -4,13 +4,12 @@ import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.TypeFichier;
 import fr.icdc.ebad.service.TypeFichierService;
 import fr.icdc.ebad.web.rest.dto.TypeFichierDto;
+import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,14 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
 
@@ -38,11 +30,11 @@ public class TypeFichierResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeFichierResource.class);
 
     private final TypeFichierService typeFichierService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public TypeFichierResource(TypeFichierService typeFichierService, MapperFacade mapper) {
+    public TypeFichierResource(TypeFichierService typeFichierService, MapStructMapper mapStructMapper) {
         this.typeFichierService = typeFichierService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
 
@@ -57,9 +49,7 @@ public class TypeFichierResource {
         LOGGER.debug("REST request to get all TypeFichier from application {}", app);
         Page<TypeFichier> pageTypeFichier = typeFichierService.getTypeFichierFromApplication(predicate, pageable, app);
 
-        Page<TypeFichierDto> pageTypeFichierDto = pageTypeFichier.map(typeFichier ->
-                mapper.map(typeFichier, TypeFichierDto.class)
-        );
+        Page<TypeFichierDto> pageTypeFichierDto = pageTypeFichier.map(mapStructMapper::convert);
         return new ResponseEntity<>(pageTypeFichierDto, HttpStatus.OK);
     }
 
@@ -71,8 +61,8 @@ public class TypeFichierResource {
     @PreAuthorize("@permissionApplication.canWrite(#typeFichierDto.application.id,principal)")
     public ResponseEntity<TypeFichierDto> addTypeFichier(@RequestBody TypeFichierDto typeFichierDto) {
         LOGGER.debug("REST request to add a new type fichier");
-        TypeFichier typeFichier = typeFichierService.saveTypeFichier(mapper.map(typeFichierDto, TypeFichier.class));
-        return new ResponseEntity<>(mapper.map(typeFichier, TypeFichierDto.class), HttpStatus.OK);
+        TypeFichier typeFichier = typeFichierService.saveTypeFichier(mapStructMapper.convert(typeFichierDto));
+        return new ResponseEntity<>(mapStructMapper.convert(typeFichier), HttpStatus.OK);
     }
 
     /**
@@ -97,7 +87,7 @@ public class TypeFichierResource {
     @PreAuthorize("@permissionApplication.canWrite(#typeFichierDto.application.id,principal)")
     public ResponseEntity<TypeFichierDto> updateTypeFichier(@RequestBody TypeFichierDto typeFichierDto) {
         LOGGER.debug("REST request to update a type fichier");
-        TypeFichier typeFichier = typeFichierService.saveTypeFichier(mapper.map(typeFichierDto, TypeFichier.class));
-        return new ResponseEntity<>(mapper.map(typeFichier, TypeFichierDto.class), HttpStatus.OK);
+        TypeFichier typeFichier = typeFichierService.saveTypeFichier(mapStructMapper.convert(typeFichierDto));
+        return new ResponseEntity<>(mapStructMapper.convert(typeFichier), HttpStatus.OK);
     }
 }

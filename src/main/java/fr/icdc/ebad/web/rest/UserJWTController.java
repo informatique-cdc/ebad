@@ -8,9 +8,9 @@ import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.LoginDto;
 import fr.icdc.ebad.web.rest.dto.UserDto;
+import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -36,13 +36,13 @@ public class UserJWTController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManager customAuthenticationManager;
     private final UserService userService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public UserJWTController(TokenProvider tokenProvider, AuthenticationManager customAuthenticationManager, UserService userService, MapperFacade mapper) {
+    public UserJWTController(TokenProvider tokenProvider, AuthenticationManager customAuthenticationManager, UserService userService, MapStructMapper mapStructMapper) {
         this.tokenProvider = tokenProvider;
         this.customAuthenticationManager = customAuthenticationManager;
         this.userService = userService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     @PostMapping("/authenticate")
@@ -61,7 +61,7 @@ public class UserJWTController {
 
         User user = userService.getUserWithAuthorities();
         user.setToken(jwt);
-        return new ResponseEntity<>(mapper.map(user, UserDto.class), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(mapStructMapper.convert(user), httpHeaders, HttpStatus.OK);
     }
 
 

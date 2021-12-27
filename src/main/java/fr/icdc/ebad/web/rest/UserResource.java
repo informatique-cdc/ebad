@@ -9,13 +9,12 @@ import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
 import fr.icdc.ebad.web.rest.dto.RolesDTO;
 import fr.icdc.ebad.web.rest.dto.UserAccountDto;
 import fr.icdc.ebad.web.rest.dto.UserDto;
+import fr.icdc.ebad.web.rest.mapstruct.MapStructMapper;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,14 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -47,11 +39,11 @@ public class UserResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     private final UserService userService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public UserResource(UserService userService, MapperFacade mapper) {
+    public UserResource(UserService userService, MapStructMapper mapStructMapper) {
         this.userService = userService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     @GetMapping("/current")
@@ -60,7 +52,7 @@ public class UserResource {
     public ResponseEntity<UserDto> currentUser() throws EbadServiceException {
         User user = this.userService.getUserWithAuthorities();
 
-        return new ResponseEntity<>(mapper.map(user, UserDto.class), HttpStatus.OK);
+        return new ResponseEntity<>(mapStructMapper.convert(user), HttpStatus.OK);
     }
 
     /**
@@ -73,7 +65,7 @@ public class UserResource {
     public Page<UserDto> getAll(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = User.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Users");
         Page<User> userPage = userService.getAllUsers(predicate, pageable);
-        return userPage.map((user -> mapper.map(user, UserDto.class)));
+        return userPage.map(mapStructMapper::convert);
     }
 
     /*
@@ -84,7 +76,7 @@ public class UserResource {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> getUser(@PathVariable String login) {
         LOGGER.debug("REST request to get User : {}", login);
-        Optional<UserDto> userDto = userService.getUser(login).map(user -> mapper.map(user, UserDto.class));
+        Optional<UserDto> userDto = userService.getUser(login).map(mapStructMapper::convert);
         return ResponseUtil.wrapOrNotFound(userDto);
     }
 
@@ -107,7 +99,7 @@ public class UserResource {
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> inactivateAccount(@PathVariable String login) throws EbadServiceException {
-        Optional<UserDto> userDto = userService.inactivateAccount(login).map(user -> mapper.map(user, UserDto.class));
+        Optional<UserDto> userDto = userService.inactivateAccount(login).map(mapStructMapper::convert);
         return ResponseUtil.wrapOrNotFound(userDto);
     }
 
@@ -120,7 +112,7 @@ public class UserResource {
     public ResponseEntity<UserDto> saveUser(@Valid @RequestBody UserAccountDto userDto) throws EbadServiceException {
         LOGGER.debug("REST request to save new User");
         User user = userService.createUser(userDto.getLogin(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName(), userDto.getPassword());
-        return ResponseEntity.ok(mapper.map(user, UserDto.class));
+        return ResponseEntity.ok(mapStructMapper.convert(user));
     }
 
     /**
@@ -132,7 +124,7 @@ public class UserResource {
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) throws EbadServiceException {
         LOGGER.debug("REST request to save  User");
         User user = userService.updateUser(userDto.getId(), userDto.getLogin(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName(), userDto.getPassword());
-        return new ResponseEntity<>(mapper.map(user, UserDto.class), HttpStatus.OK);
+        return new ResponseEntity<>(mapStructMapper.convert(user), HttpStatus.OK);
     }
 
 
@@ -145,7 +137,7 @@ public class UserResource {
     public ResponseEntity<UserDto> changeRoles(@RequestBody RolesDTO roles) throws EbadServiceException {
         LOGGER.debug("REST request to change role User : {}", roles.getLoginUser());
         User user = userService.changeRoles(roles.getLoginUser(), roles.isRoleAdmin(), roles.isRoleUser());
-        return ResponseEntity.ok(mapper.map(user, UserDto.class));
+        return ResponseEntity.ok(mapStructMapper.convert(user));
     }
 
     /**
@@ -160,7 +152,7 @@ public class UserResource {
         if(user == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }else{
-            return new ResponseEntity<>(mapper.map(user, UserDto.class), HttpStatus.OK);
+            return new ResponseEntity<>(mapStructMapper.convert(user), HttpStatus.OK);
         }
     }
 }
