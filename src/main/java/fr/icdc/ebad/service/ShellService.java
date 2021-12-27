@@ -78,7 +78,7 @@ public class ShellService {
         Long end = System.currentTimeMillis();
         LOGGER.debug("Command out : {}", commandOut);
         LOGGER.debug("Command err : {}", commandErr);
-        return new RetourBatch(commandOut,commandErr, exitStatus, end - start);
+        return new RetourBatch(commandOut, commandErr, exitStatus, end - start);
     }
 
     private static String constructSubDir(String originalSubDirectory) {

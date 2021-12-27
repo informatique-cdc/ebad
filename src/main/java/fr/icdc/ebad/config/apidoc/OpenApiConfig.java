@@ -33,6 +33,6 @@ public class OpenApiConfig {
                                         .in(SecurityScheme.In.HEADER)
                         )
                 )
-                .info(new Info().version("2.7.0").title("EBAD API").description("This documentation describe EBAD API."));
+                .info(new Info().version("2.9.0").title("EBAD API").description("This documentation describe EBAD API."));
     }
 }
