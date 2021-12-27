@@ -40,6 +40,7 @@ public interface MapStructMapper {
     Application convert(ApplicationDto applicationDto);
 
     //USERS
+    @IterableMapping(qualifiedByName = "UserSimpleDto")
     Set<UserSimpleDto> convertUserSimpleDtoSet(Set<User> users);
 
     @Named("UserSimpleDto")
