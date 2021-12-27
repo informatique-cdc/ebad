@@ -55,6 +55,8 @@ public interface MapStructMapper {
     UsageApplicationDto convert(UsageApplication usageApplication);
 
     UsageApplication convert(UsageApplicationDto usageApplicationDto);
+
+    @Mapping(source = "application.id", target = "applicationId")
     UsageApplicationSimpleDto convertToUsageApplicationSimpleDto(UsageApplication usageApplication);
 
     //CHAINS
