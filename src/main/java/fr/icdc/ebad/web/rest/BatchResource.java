@@ -2,12 +2,12 @@ package fr.icdc.ebad.web.rest;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.BatchService;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
 import fr.icdc.ebad.web.rest.dto.CurrentJobDto;
 import fr.icdc.ebad.web.rest.dto.JobDto;
-import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,7 +17,6 @@ import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -43,7 +42,7 @@ public class BatchResource {
     private final JobScheduler jobScheduler;
     private final MapStructMapper mapStructMapper;
 
-    public BatchResource(BatchService batchService, JobScheduler jobScheduler, ConversionService conversionService, MapStructMapper mapStructMapper) {
+    public BatchResource(BatchService batchService, JobScheduler jobScheduler, MapStructMapper mapStructMapper) {
         this.batchService = batchService;
         this.jobScheduler = jobScheduler;
         this.mapStructMapper = mapStructMapper;
@@ -59,7 +58,7 @@ public class BatchResource {
     public Page<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get Batchs ");
         return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
-                .map(batch -> mapStructMapper.convert(batch));
+                .map(mapStructMapper::convert);
     }
 
     /**
@@ -82,7 +81,6 @@ public class BatchResource {
         LOGGER.debug("job id is {}", jobId);
         return new ResponseEntity<>(JobDto.builder().id(jobId.asUUID()).build(), HttpStatus.OK);
     }
-
 
 
     /**

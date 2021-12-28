@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.NullValueMappingStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
