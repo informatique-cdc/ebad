@@ -21,7 +21,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 14
+          java-version: 17
       - name: Set env
         run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/*/}
       - name: Dockerize with Maven
