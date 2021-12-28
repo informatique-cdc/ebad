@@ -39,8 +39,11 @@ jobs:
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
+#    - name: Autobuild
+#      uses: github/codeql-action/autobuild@v1
+#      env:
+#        USENAME: ${{github.actor}}
+#        PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
@@ -52,6 +55,11 @@ jobs:
     #- run: |
     #   make bootstrap
     #   make release
+    - name: Build with Maven
+      run: mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:prepare-agent  package -Djava.version=${{ matrix.java }} --file pom.xml --settings settings.xml
+      env:
+        USENAME: ${{github.actor}}
+        PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
