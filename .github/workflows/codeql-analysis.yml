@@ -56,7 +56,7 @@ jobs:
     #   make bootstrap
     #   make release
     - name: Build with Maven
-      run: mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:prepare-agent  package -Djava.version=${{ matrix.java }} --file pom.xml --settings settings.xml
+      run: mvn -B --no-transfer-progress -DskipTests=true  package -Djava.version=17 --file pom.xml --settings settings.xml
       env:
         USENAME: ${{github.actor}}
         PASSWORD: ${{ secrets.GITHUB_TOKEN }}
