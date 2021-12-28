@@ -8,16 +8,15 @@ import fr.icdc.ebad.service.ChaineService;
 import fr.icdc.ebad.web.rest.dto.ChaineDto;
 import fr.icdc.ebad.web.rest.dto.ChaineSimpleDto;
 import fr.icdc.ebad.web.rest.dto.JobDto;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,15 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/chains")
@@ -44,12 +35,12 @@ public class ChaineResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChaineResource.class);
 
     private final ChaineService chaineService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
     private final JobScheduler jobScheduler;
 
-    public ChaineResource(ChaineService chaineService, MapperFacade mapper, JobScheduler jobScheduler) {
+    public ChaineResource(ChaineService chaineService, MapStructMapper mapStructMapper, JobScheduler jobScheduler) {
         this.chaineService = chaineService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
         this.jobScheduler = jobScheduler;
     }
 
@@ -65,7 +56,7 @@ public class ChaineResource {
         Environnement environnement = Environnement.builder().id(env).build();
         Page<Chaine> page = chaineService.getAllChaineFromEnvironmentWithPageable(predicate, PaginationUtil.generatePageRequestOrDefault(pageable), environnement);
 
-        return new ResponseEntity<>(page.map((chain) -> mapper.map(chain, ChaineDto.class)), HttpStatus.OK);
+        return new ResponseEntity<>(page.map(mapStructMapper::convertToChaineDto), HttpStatus.OK);
     }
 
     /**
@@ -91,8 +82,8 @@ public class ChaineResource {
     @PreAuthorize("@permissionEnvironnement.canWrite(#chaineDto.environnement.id,principal)")
     public ChaineSimpleDto addChaine(@RequestBody ChaineDto chaineDto) {
         LOGGER.debug("REST request to add a new chaine");
-        Chaine chaine = chaineService.addChaine(mapper.map(chaineDto, Chaine.class));
-        return mapper.map(chaine, ChaineSimpleDto.class);
+        Chaine chaine = chaineService.addChaine(mapStructMapper.convert(chaineDto));
+        return mapStructMapper.convertToChaineSimpleDto(chaine);
     }
 
     /**
@@ -115,7 +106,7 @@ public class ChaineResource {
     @PreAuthorize("@permissionChaine.canWrite(#chaineDto,principal)")
     public ResponseEntity<ChaineSimpleDto> updateChaine(@RequestBody ChaineDto chaineDto) {
         LOGGER.debug("REST request to update a chaine");
-        Chaine chaine = chaineService.updateChaine(mapper.map(chaineDto, Chaine.class));
-        return new ResponseEntity<>(mapper.map(chaine, ChaineSimpleDto.class), HttpStatus.OK);
+        Chaine chaine = chaineService.updateChaine(mapStructMapper.convert(chaineDto));
+        return new ResponseEntity<>(mapStructMapper.convertToChaineSimpleDto(chaine), HttpStatus.OK);
     }
 }

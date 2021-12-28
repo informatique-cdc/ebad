@@ -1,14 +1,19 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.AccreditationRequest;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.QAccreditationRequest;
+import fr.icdc.ebad.domain.StateRequest;
+import fr.icdc.ebad.domain.UsageApplication;
+import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.AccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -30,16 +35,16 @@ public class AccreditationRequestService {
     private final ApplicationRepository applicationRepository;
     private final NotificationService notificationService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final MapperFacade mapperFacade;
+    private final MapStructMapper mapStructMapper;
     private final MailService mailService;
 
-    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository, NotificationService notificationService, SimpMessagingTemplate messagingTemplate, MapperFacade mapperFacade, MailService mailService) {
+    public AccreditationRequestService(AccreditationRequestRepository accreditationRequestRepository, UserService userService, ApplicationRepository applicationRepository, NotificationService notificationService, SimpMessagingTemplate messagingTemplate, MapStructMapper mapStructMapper, MailService mailService) {
         this.accreditationRequestRepository = accreditationRequestRepository;
         this.userService = userService;
         this.applicationRepository = applicationRepository;
         this.notificationService = notificationService;
         this.messagingTemplate = messagingTemplate;
-        this.mapperFacade = mapperFacade;
+        this.mapStructMapper = mapStructMapper;
         this.mailService = mailService;
     }
 
@@ -57,7 +62,7 @@ public class AccreditationRequestService {
 
         AccreditationRequest result = accreditationRequestRepository.save(accreditationRequest);
 
-        AccreditationRequestDto[] sendNotif = {mapperFacade.map(result, AccreditationRequestDto.class)};
+        AccreditationRequestDto[] sendNotif = {mapStructMapper.convert(result)};
         application.getUsageApplications()
                 .parallelStream()
                 .filter(UsageApplication::isCanManage)
@@ -117,7 +122,7 @@ public class AccreditationRequestService {
             }
         }
 
-        AccreditationRequestDto[] accreditationRequestDtos = {mapperFacade.map(accreditationRequest, AccreditationRequestDto.class)};
+        AccreditationRequestDto[] accreditationRequestDtos = {mapStructMapper.convert(accreditationRequest)};
         accreditationRequest.getApplication().getUsageApplications()
                 .parallelStream()
                 .filter(UsageApplication::isCanManage)

@@ -5,28 +5,20 @@ import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.NewService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.ActualiteDto;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -38,11 +30,11 @@ public class NewResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(NewResource.class);
 
     private final NewService newService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public NewResource(NewService newService, MapperFacade mapper) {
+    public NewResource(NewService newService, MapStructMapper mapStructMapper) {
         this.newService = newService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     /**
@@ -55,7 +47,7 @@ public class NewResource {
     public Page<ActualiteDto> getAll(@Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get all Actualites - Read");
         Page<Actualite> actualitePage = newService.getAllActualites(PaginationUtil.generatePageRequestOrDefault(pageable));
-        return actualitePage.map(theNew -> mapper.map(theNew, ActualiteDto.class));
+        return actualitePage.map(mapStructMapper::convert);
     }
 
     /**
@@ -68,7 +60,7 @@ public class NewResource {
     public Page<ActualiteDto> getActualityPublished(@Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get all public Actualites - Read");
         Page<Actualite> actualitePage = newService.getAllActualitesPubliees(PaginationUtil.generatePageRequestOrDefault(pageable));
-        return actualitePage.map(theNew -> mapper.map(theNew, ActualiteDto.class));
+        return actualitePage.map(mapStructMapper::convert);
     }
 
     /**
@@ -79,7 +71,7 @@ public class NewResource {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ActualiteDto> getOne(@PathVariable("id") Long id) {
         LOGGER.debug("REST request to get Actualite with id {}", id);
-        Optional<ActualiteDto> actualiteDtoOptional = newService.getActualite(id).map(actualite -> mapper.map(actualite, ActualiteDto.class));
+        Optional<ActualiteDto> actualiteDtoOptional = newService.getActualite(id).map(mapStructMapper::convert);
         return ResponseUtil.wrapOrNotFound(actualiteDtoOptional);
     }
 
@@ -95,7 +87,7 @@ public class NewResource {
             return ResponseEntity.badRequest().build();
         }
         actualiteDto.setCreatedBy(SecurityUtils.getCurrentLogin());
-        newService.saveActualite(mapper.map(actualiteDto, Actualite.class));
+        newService.saveActualite(mapStructMapper.convert(actualiteDto));
         return ResponseEntity.ok().build();
     }
 
@@ -123,7 +115,7 @@ public class NewResource {
         if (actualiteDto.getId() == null) {
             return ResponseEntity.badRequest().build();
         }
-        newService.saveActualite(mapper.map(actualiteDto, Actualite.class));
+        newService.saveActualite(mapStructMapper.convert(actualiteDto));
         return ResponseEntity.ok().build();
     }
 }

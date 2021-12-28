@@ -6,14 +6,13 @@ import fr.icdc.ebad.service.ApiTokenService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.ApiTokenDto;
 import fr.icdc.ebad.web.rest.dto.ApiTokenWithKeyDto;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,11 +30,11 @@ public class ApiTokenResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiTokenResource.class);
 
     private final ApiTokenService apiTokenService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public ApiTokenResource(ApiTokenService apiTokenService, MapperFacade mapper) {
+    public ApiTokenResource(ApiTokenService apiTokenService, MapStructMapper mapStructMapper) {
         this.apiTokenService = apiTokenService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -45,7 +44,7 @@ public class ApiTokenResource {
     public ResponseEntity<Page<ApiTokenDto>> findToken(@Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to find api token");
         Page<ApiToken> apiTokens = apiTokenService.findTokenByUser(SecurityUtils.getCurrentLogin(), PaginationUtil.generatePageRequestOrDefault(pageable));
-        return ResponseEntity.ok().body(apiTokens.map(apiToken -> mapper.map(apiToken, ApiTokenDto.class)));
+        return ResponseEntity.ok().body(apiTokens.map(mapStructMapper::convert));
     }
 
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -54,7 +53,7 @@ public class ApiTokenResource {
     public ResponseEntity<ApiTokenWithKeyDto> createToken(@Valid @RequestBody ApiTokenDto apiTokenDto) throws EbadServiceException {
         LOGGER.debug("REST request to create api token");
         ApiToken apiToken = apiTokenService.createToken(SecurityUtils.getCurrentLogin(), apiTokenDto.getName());
-        return ResponseEntity.ok().body(mapper.map(apiToken, ApiTokenWithKeyDto.class));
+        return ResponseEntity.ok().body(mapStructMapper.convertToTokenWithKeyDto(apiToken));
     }
 
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -6,14 +6,13 @@ import fr.icdc.ebad.service.IdentityService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.CompleteIdentityDto;
 import fr.icdc.ebad.web.rest.dto.PublicIdentityDto;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,11 +35,11 @@ public class IdentityResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityResource.class);
 
     private final IdentityService identityService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public IdentityResource(IdentityService identityService, MapperFacade mapper) {
+    public IdentityResource(IdentityService identityService, MapStructMapper mapStructMapper) {
         this.identityService = identityService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     /**
@@ -51,8 +50,8 @@ public class IdentityResource {
     @PreAuthorize("@permissionIdentity.canWriteByApplication(#identityDto.availableApplication, principal)")
     public ResponseEntity<CompleteIdentityDto> addIdentity(@RequestBody @Valid CompleteIdentityDto identityDto) {
         LOGGER.debug("REST request to add a new identity");
-        Identity identity = identityService.saveIdentity(mapper.map(identityDto, Identity.class));
-        return new ResponseEntity<>(mapper.map(identity, CompleteIdentityDto.class), HttpStatus.OK);
+        Identity identity = identityService.saveIdentity(mapStructMapper.convert(identityDto));
+        return new ResponseEntity<>(mapStructMapper.convertToCompleteIdentityDto(identity), HttpStatus.OK);
     }
 
     /**
@@ -64,7 +63,7 @@ public class IdentityResource {
     public ResponseEntity<CompleteIdentityDto> getOneIdentity(@PathVariable Long id) {
         LOGGER.debug("REST request to get an identity");
         Optional<CompleteIdentityDto> optionalCompleteIdentityDto = identityService.getIdentity(id)
-                .map(identity -> mapper.map(identity, CompleteIdentityDto.class));
+                .map(mapStructMapper::convertToCompleteIdentityDto);
         return ResponseUtil.wrapOrNotFound(optionalCompleteIdentityDto);
     }
 
@@ -85,7 +84,7 @@ public class IdentityResource {
             identities = identityService.findAllByApplication(applicationId, predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
         }
 
-        return new ResponseEntity<>(identities.map(identity -> mapper.map(identity, PublicIdentityDto.class)), HttpStatus.OK);
+        return new ResponseEntity<>(identities.map(mapStructMapper::convertToPublicIdentityDto), HttpStatus.OK);
     }
 
 
@@ -98,8 +97,8 @@ public class IdentityResource {
     @PreAuthorize("@permissionIdentity.canWrite(#identityDto.id, principal) && @permissionIdentity.canWriteByApplication(#identityDto.availableApplication, principal)")
     public ResponseEntity<CompleteIdentityDto> updateIdentity(@RequestBody CompleteIdentityDto identityDto) {
         LOGGER.debug("REST request to update an identity");
-        Identity identity = identityService.saveIdentity(mapper.map(identityDto, Identity.class));
-        return new ResponseEntity<>(mapper.map(identity, CompleteIdentityDto.class), HttpStatus.OK);
+        Identity identity = identityService.saveIdentity(mapStructMapper.convert(identityDto));
+        return new ResponseEntity<>(mapStructMapper.convertToCompleteIdentityDto(identity), HttpStatus.OK);
     }
 
     /**

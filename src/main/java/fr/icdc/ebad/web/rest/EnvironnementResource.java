@@ -8,14 +8,13 @@ import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.EnvironnementCreationDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementDto;
 import fr.icdc.ebad.web.rest.dto.EnvironnementInfoDTO;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.api.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/environments")
@@ -39,11 +39,11 @@ public class EnvironnementResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironnementResource.class);
 
     private final EnvironnementService environnementService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public EnvironnementResource(EnvironnementService environnementService, MapperFacade mapper) {
+    public EnvironnementResource(EnvironnementService environnementService, MapStructMapper mapStructMapper) {
         this.environnementService = environnementService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     /**
@@ -56,7 +56,7 @@ public class EnvironnementResource {
     public Page<EnvironnementDto> getEnvironmentsFromApp(@RequestParam("applicationId") Long appId, @QuerydslPredicate(root = Environnement.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to getEnvironmentsFromApp {}", appId);
         Page<Environnement> environnementPage = environnementService.getEnvironmentFromApp(appId, predicate, PaginationUtil.generatePageRequestOrDefault(pageable));
-        return environnementPage.map(env -> mapper.map(env, EnvironnementDto.class));
+        return environnementPage.map(mapStructMapper::convert);
     }
 
     /**
@@ -81,7 +81,7 @@ public class EnvironnementResource {
     public ResponseEntity<EnvironnementDto> get(@PathVariable Long env) {
         LOGGER.debug("REST request to get one environnement {}", env);
         Optional<EnvironnementDto> environnementDtoOptional = environnementService.findEnvironnement(env)
-                .map(environnement -> mapper.map(environnement, EnvironnementDto.class));
+                .map(mapStructMapper::convert);
         return ResponseUtil.wrapOrNotFound(environnementDtoOptional);
     }
 
@@ -109,8 +109,8 @@ public class EnvironnementResource {
             env.setPrefix("");
         }
 
-        Environnement environnement = environnementService.saveEnvironnement(mapper.map(env, Environnement.class));
-        return new ResponseEntity<>(mapper.map(environnement, EnvironnementDto.class), HttpStatus.OK);
+        Environnement environnement = environnementService.saveEnvironnement(mapStructMapper.convert(env));
+        return new ResponseEntity<>(mapStructMapper.convert(environnement), HttpStatus.OK);
     }
 
     /**
@@ -121,8 +121,8 @@ public class EnvironnementResource {
     @PreAuthorize("@permissionEnvironnement.canWrite(#env, principal) && @permissionIdentity.canRead(#env.identity.id, principal)")
     public ResponseEntity<EnvironnementDto> updateEnvironnement(@RequestBody EnvironnementDto env) {
         LOGGER.debug("REST request to update an environnement {}", env.getId());
-        Environnement result = environnementService.updateEnvironnement(mapper.map(env, Environnement.class));
-        return new ResponseEntity<>(mapper.map(result, EnvironnementDto.class), HttpStatus.OK);
+        Environnement result = environnementService.updateEnvironnement(mapStructMapper.convert(env));
+        return new ResponseEntity<>(mapStructMapper.convert(result), HttpStatus.OK);
     }
 
     /**
@@ -144,9 +144,9 @@ public class EnvironnementResource {
     @PostMapping(value = "/import/application/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionApplication.canWrite(#id, principal)")
-    public List<EnvironnementDto> importEnvApp(@PathVariable Long id) throws EbadServiceException {
+    public Set<EnvironnementDto> importEnvApp(@PathVariable Long id) throws EbadServiceException {
         LOGGER.debug("REST request to import all env for app {} ", id);
-        return mapper.mapAsList(environnementService.importEnvironments(id), EnvironnementDto.class);
+        return mapStructMapper.convertToEnvironmentDtoSet(environnementService.importEnvironments(id));
     }
 
     @PostMapping(value = "/import-all", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -154,6 +154,6 @@ public class EnvironnementResource {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<EnvironnementDto> importAll() throws EbadServiceException {
         LOGGER.debug("REST request to import all Environments ");
-        return mapper.mapAsList(environnementService.importEnvironments(), EnvironnementDto.class);
+        return mapStructMapper.convertToEnvironmentDtoList(environnementService.importEnvironments());
     }
 }

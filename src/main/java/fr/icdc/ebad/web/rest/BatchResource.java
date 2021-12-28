@@ -2,6 +2,7 @@ package fr.icdc.ebad.web.rest;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.BatchService;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
@@ -11,7 +12,6 @@ import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
@@ -39,13 +39,13 @@ public class BatchResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchResource.class);
 
     private final BatchService batchService;
-    private final MapperFacade mapper;
     private final JobScheduler jobScheduler;
+    private final MapStructMapper mapStructMapper;
 
-    public BatchResource(BatchService batchService, MapperFacade mapper, JobScheduler jobScheduler) {
+    public BatchResource(BatchService batchService, JobScheduler jobScheduler, MapStructMapper mapStructMapper) {
         this.batchService = batchService;
-        this.mapper = mapper;
         this.jobScheduler = jobScheduler;
+        this.mapStructMapper = mapStructMapper;
     }
 
     /**
@@ -57,7 +57,8 @@ public class BatchResource {
     @PageableAsQueryParam
     public Page<BatchDto> getByPredicate(@QuerydslPredicate(root = Batch.class) Predicate predicate, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get Batchs ");
-        return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable)).map(batch -> mapper.map(batch, BatchDto.class));
+        return batchService.getAllBatchWithPredicate(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
+                .map(mapStructMapper::convert);
     }
 
     /**
@@ -82,7 +83,6 @@ public class BatchResource {
     }
 
 
-
     /**
      * PUT  /batchs to add a new batch
      */
@@ -91,8 +91,8 @@ public class BatchResource {
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
     public ResponseEntity<BatchDto> addBatch(@RequestBody @Valid BatchDto batchDto) {
         LOGGER.debug("REST request to add a new batch");
-        Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
-        return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);
+        Batch batch = batchService.saveBatch(mapStructMapper.convert(batchDto));
+        return new ResponseEntity<>(mapStructMapper.convert(batch), HttpStatus.OK);
     }
 
     /**
@@ -103,8 +103,8 @@ public class BatchResource {
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
     public ResponseEntity<BatchDto> updateBatch(@RequestBody BatchDto batchDto) {
         LOGGER.debug("REST request to update a batch");
-        Batch batch = batchService.saveBatch(mapper.map(batchDto, Batch.class));
-        return new ResponseEntity<>(mapper.map(batch, BatchDto.class), HttpStatus.OK);
+        Batch batch = batchService.saveBatch(mapStructMapper.convert(batchDto));
+        return new ResponseEntity<>(mapStructMapper.convert(batch), HttpStatus.OK);
     }
 
     /**

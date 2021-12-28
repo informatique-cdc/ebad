@@ -9,11 +9,11 @@ import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import fr.icdc.ebad.web.rest.dto.ApplicationSimpleDto;
 import fr.icdc.ebad.web.rest.dto.UsageApplicationDto;
 import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -37,11 +37,11 @@ public class ApplicationResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationResource.class);
 
     private final ApplicationService applicationService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public ApplicationResource(ApplicationService applicationService, MapperFacade mapper) {
+    public ApplicationResource(ApplicationService applicationService, MapStructMapper mapStructMapper) {
         this.applicationService = applicationService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -51,7 +51,7 @@ public class ApplicationResource {
     public Page<ApplicationSimpleDto> findApplication(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
         LOGGER.debug("REST request to find Application - Read");
         return applicationService.findApplication(predicate, PaginationUtil.generatePageRequestOrDefault(pageable))
-                .map(application -> mapper.map(application, ApplicationSimpleDto.class));
+                .map(mapStructMapper::convertToApplicationSimpleDto);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ApplicationResource {
     public Page<ApplicationDto> getAll(@Parameter(hidden = true) Pageable pageable, Principal principal) {
         LOGGER.debug("REST request to get all Application - Read");
         return applicationService.getAllApplicationsUsed(PaginationUtil.generatePageRequestOrDefault(pageable), principal.getName())
-                .map(application -> mapper.map(application, ApplicationDto.class));
+                .map(mapStructMapper::convertToApplicationDto);
     }
 
     @PostMapping(value = "/import-all", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -87,7 +87,7 @@ public class ApplicationResource {
         LOGGER.debug("REST request to get all Application - Write");
         return applicationService.getAllApplicationsManaged(
                 PaginationUtil.generatePageRequestOrDefault(pageable), principal.getName())
-                .map(application -> mapper.map(application, ApplicationDto.class));
+                .map(mapStructMapper::convertToApplicationDto);
     }
 
     /**
@@ -100,7 +100,7 @@ public class ApplicationResource {
     public Page<ApplicationDto> getAllManage(@Parameter(hidden = true) Pageable pageable, @QuerydslPredicate(root = Application.class) Predicate predicate) {
         LOGGER.debug("REST request to get all Application - Write");
         return applicationService.getAllApplications(predicate, pageable)
-                .map(application -> mapper.map(application, ApplicationDto.class));
+                .map(mapStructMapper::convertToApplicationDto);
     }
 
     /**
@@ -112,8 +112,8 @@ public class ApplicationResource {
     public ApplicationDto createApplication(@RequestBody ApplicationDto applicationDto) {
         LOGGER.debug("REST request to create Application");
         applicationDto.setCreatedBy(SecurityUtils.getCurrentLogin());
-        Application application = applicationService.saveApplication(mapper.map(applicationDto, Application.class));
-        return mapper.map(application, ApplicationDto.class);
+        Application application = applicationService.saveApplication(mapStructMapper.convert(applicationDto));
+        return mapStructMapper.convertToApplicationDto(application);
     }
 
     /**
@@ -124,9 +124,9 @@ public class ApplicationResource {
     @PreAuthorize("@permissionApplication.canManage(#applicationDto,principal)")
     public ApplicationDto updateApplication(@RequestBody ApplicationDto applicationDto) throws EbadServiceException {
         LOGGER.debug("REST request to update Application");
-        Application application = mapper.map(applicationDto, Application.class);
+        Application application = mapStructMapper.convert(applicationDto);
         Application applicationSaved = applicationService.updateApplication(application);
-        return mapper.map(applicationSaved, ApplicationDto.class);
+        return mapStructMapper.convertToApplicationDto(applicationSaved);
     }
 
     /**
@@ -149,7 +149,7 @@ public class ApplicationResource {
     @PreAuthorize("@permissionApplication.canManage(#id,principal) or @permissionApplication.canWrite(#id, principal)")
     public Set<UserSimpleDto> getUsersFromApplication(@PathVariable Long id) {
         LOGGER.debug("REST request to get all users from Application");
-        return mapper.mapAsSet(applicationService.getUsers(id), UserSimpleDto.class);
+        return mapStructMapper.convertUserSimpleDtoSet(applicationService.getUsers(id));
     }
 
     /**
@@ -160,7 +160,7 @@ public class ApplicationResource {
     @PreAuthorize("@permissionApplication.canManage(#id,principal) or @permissionApplication.canWrite(#id, principal)")
     public Set<UserSimpleDto> getModeratorsFromApplication(@PathVariable Long id) {
         LOGGER.debug("REST request to get all users from Application");
-        return mapper.mapAsSet(applicationService.getManagers(id), UserSimpleDto.class);
+        return mapStructMapper.convertUserSimpleDtoSet(applicationService.getManagers(id));
     }
 
     @GetMapping(value = "/{id}/usages")
@@ -168,6 +168,6 @@ public class ApplicationResource {
     @PageableAsQueryParam
     public Page<UsageApplicationDto> getAllUsages(@PathVariable Long id, @Parameter(hidden = true) Pageable pageable) {
         LOGGER.debug("REST request to get all usages from Application");
-        return applicationService.getUsage(pageable, id).map(usage -> mapper.map(usage, UsageApplicationDto.class));
+        return applicationService.getUsage(pageable, id).map(mapStructMapper::convert);
     }
 }

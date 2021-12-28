@@ -6,22 +6,16 @@ import fr.icdc.ebad.service.SchedulingService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.CreationSchedulingDto;
 import fr.icdc.ebad.web.rest.dto.SchedulingDto;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import ma.glasnost.orika.MapperFacade;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -31,18 +25,18 @@ import java.net.URI;
 @Tag(name = "Scheduling", description = "the scheduling API")
 public class SchedulingResource {
     private final SchedulingService schedulingService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public SchedulingResource(SchedulingService schedulingService, MapperFacade mapper) {
+    public SchedulingResource(SchedulingService schedulingService, MapStructMapper mapStructMapper) {
         this.schedulingService = schedulingService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     @PutMapping
     @PreAuthorize("@permissionEnvironnement.canRead(#scheduledDto.environmentId, principal)")
     public ResponseEntity<SchedulingDto> addScheduling(@RequestBody @Valid CreationSchedulingDto scheduledDto) throws EbadServiceException {
         Scheduling scheduling = schedulingService.saveAndRun(scheduledDto.getBatchId(), scheduledDto.getEnvironmentId(), scheduledDto.getParameters(), scheduledDto.getCron());
-        SchedulingDto schedulingDto = mapper.map(scheduling, SchedulingDto.class);
+        SchedulingDto schedulingDto = mapStructMapper.convert(scheduling);
         return ResponseEntity.created(URI.create("/core/scheduling/" + schedulingDto.getId())).body(schedulingDto);
     }
 
@@ -51,7 +45,7 @@ public class SchedulingResource {
     @PageableAsQueryParam
     public Page<SchedulingDto> listByEnvironment(@PathVariable Long environmentId, @PageableDefault @Parameter(hidden = true) Pageable pageable) {
         Page<Scheduling> schedulings = schedulingService.listByEnvironment(environmentId, pageable);
-        return schedulings.map(scheduling -> mapper.map(scheduling, SchedulingDto.class));
+        return schedulings.map(mapStructMapper::convert);
     }
 
     @GetMapping
@@ -59,14 +53,14 @@ public class SchedulingResource {
     @PageableAsQueryParam
     public Page<SchedulingDto> listAll(@PageableDefault @Parameter(hidden = true) Pageable pageable) {
         Page<Scheduling> schedulings = schedulingService.listAll(pageable);
-        return schedulings.map(scheduling -> mapper.map(scheduling, SchedulingDto.class));
+        return schedulings.map(mapStructMapper::convert);
     }
 
     @GetMapping("/{schedulingId}")
     @PreAuthorize("@permissionScheduling.canRead(#schedulingId, principal)")
     public ResponseEntity<SchedulingDto> get(@PathVariable Long schedulingId) {
         Scheduling scheduling = schedulingService.get(schedulingId);
-        SchedulingDto schedulingDto = mapper.map(scheduling, SchedulingDto.class);
+        SchedulingDto schedulingDto = mapStructMapper.convert(scheduling);
         return ResponseEntity.ok(schedulingDto);
     }
 

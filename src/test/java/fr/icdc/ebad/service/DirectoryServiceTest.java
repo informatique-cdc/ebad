@@ -4,11 +4,11 @@ import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.QDirectory;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
-import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.io.IOUtils;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.joda.time.DateTime;
@@ -29,8 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DirectoryServiceTest {
@@ -39,7 +46,7 @@ public class DirectoryServiceTest {
     @Mock
     private ShellService shellService;
     @Mock
-    private MapperFacade mapperFacade;
+    private MapStructMapper mapStructMapper;
     @InjectMocks
     private DirectoryService directoryService;
 
@@ -102,7 +109,7 @@ public class DirectoryServiceTest {
         Directory directory = Directory.builder().id(1L).name("test").canWrite(true).build();
         DirectoryDto directoryDto = DirectoryDto.builder().id(1L).name("test").canWrite(true).build();
         when(directoryRepository.getById(eq(1L))).thenReturn(directory);
-        when(mapperFacade.map(eq(directory),eq(DirectoryDto.class))).thenReturn(directoryDto);
+        when(mapStructMapper.convert(eq(directory))).thenReturn(directoryDto);
         MockMultipartFile secondFile = new MockMultipartFile("data", "other-file-name.data", "text/plain", "some other type".getBytes());
 
         doNothing().when(shellService).uploadFile(eq(directory), notNull(), eq("other-file-name.data"), anyString());

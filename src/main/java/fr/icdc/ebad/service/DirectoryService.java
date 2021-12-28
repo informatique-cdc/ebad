@@ -3,11 +3,10 @@ package fr.icdc.ebad.service;
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.QDirectory;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.repository.DirectoryRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
-import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
-import ma.glasnost.orika.MapperFacade;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +28,12 @@ import java.util.List;
 public class DirectoryService {
     private final DirectoryRepository directoryRepository;
     private final ShellService shellService;
-    private final MapperFacade mapper;
+    private final MapStructMapper mapStructMapper;
 
-    public DirectoryService(DirectoryRepository directoryRepository, ShellService shellService, MapperFacade mapper) {
+    public DirectoryService(DirectoryRepository directoryRepository, ShellService shellService, MapStructMapper mapStructMapper) {
         this.directoryRepository = directoryRepository;
         this.shellService = shellService;
-        this.mapper = mapper;
+        this.mapStructMapper = mapStructMapper;
     }
 
     @Transactional
@@ -53,7 +52,7 @@ public class DirectoryService {
                     return true;
                 })
                 .forEach(file ->
-                    filesDtoList.add(new FilesDto(mapper.map(directory, DirectoryDto.class), file.getFilename(), file.getAttributes().getSize(), LocalDateTime.ofInstant(file.getAttributes().getModifyTime().toInstant(), ZoneId.systemDefault()), LocalDateTime.ofInstant(file.getAttributes().getModifyTime().toInstant(), ZoneId.systemDefault()), file.getAttributes().isDirectory(), subDirectory))
+                    filesDtoList.add(new FilesDto(mapStructMapper.convert(directory), file.getFilename(), file.getAttributes().getSize(), LocalDateTime.ofInstant(file.getAttributes().getModifyTime().toInstant(), ZoneId.systemDefault()), LocalDateTime.ofInstant(file.getAttributes().getModifyTime().toInstant(), ZoneId.systemDefault()), file.getAttributes().isDirectory(), subDirectory))
                 );
 
         return filesDtoList;
@@ -77,7 +76,7 @@ public class DirectoryService {
     @Transactional
     public void uploadFile(MultipartFile multipartFile, Long directoryId, String subDirectory) throws EbadServiceException {
         Directory directory = getDirectory(directoryId);
-        FilesDto filesDTO = new FilesDto(mapper.map(directory, DirectoryDto.class), multipartFile.getOriginalFilename(), 0L, LocalDateTime.now(), LocalDateTime.now(), false, subDirectory);
+        FilesDto filesDTO = new FilesDto(mapStructMapper.convert(directory), multipartFile.getOriginalFilename(), 0L, LocalDateTime.now(), LocalDateTime.now(), false, subDirectory);
 
         if (filesDTO.getDirectory() == null) {
             throw new IllegalAccessError("Pas de permission pour supprimer ce fichier");
