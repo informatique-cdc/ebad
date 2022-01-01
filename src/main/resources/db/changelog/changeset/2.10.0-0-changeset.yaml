@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2.10.0-0-changeset
+      author: dtrouillet
+      changes:
+        - insert:
+            tableName: t_global_setting
+            columns:
+              - column:
+                  name: key
+                  value: TERMINAL_ENABLED
+              - column:
+                  name: value
+                  value: false
+              - column:
+                  name: description
+                  value: Allow to run terminal
+              - column:
+                  name: label
+                  value: Terminal enabled

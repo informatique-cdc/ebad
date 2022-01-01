@@ -8,6 +8,7 @@ import fr.icdc.ebad.service.util.EbadServiceException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.session.ClientSession;
@@ -15,15 +16,21 @@ import org.apache.sshd.common.channel.Channel;
 import org.apache.sshd.core.CoreModuleProperties;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClientFactory;
+import org.jobrunr.jobs.annotations.Job;
+import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by dtrouillet on 03/03/2016.
@@ -36,10 +43,15 @@ public class ShellService {
 
     private final EbadProperties ebadProperties;
     private final IdentityService identityService;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final JobScheduler jobScheduler;
+    private final ConcurrentHashMap<String,ChannelShell> channelsShell = new ConcurrentHashMap<>();
 
-    public ShellService(EbadProperties ebadProperties, IdentityService identityService) {
+    public ShellService(EbadProperties ebadProperties, IdentityService identityService, SimpMessagingTemplate messagingTemplate, JobScheduler jobScheduler) {
         this.ebadProperties = ebadProperties;
         this.identityService = identityService;
+        this.messagingTemplate = messagingTemplate;
+        this.jobScheduler = jobScheduler;
     }
 
     public RetourBatch runCommandNew(Environnement environnement, String command) throws EbadServiceException {
@@ -196,6 +208,51 @@ public class ShellService {
             throw new EbadServiceException("Error when try to upload file on the server", e);
         } finally {
             sshClient.stop();
+        }
+    }
+
+    public ChannelShell startShell(Environnement environnement, String login, String idTerminal) throws IOException, EbadServiceException {
+        SshClient sshClient = SshClient.setUpDefaultClient();
+        sshClient.start();
+        CoreModuleProperties.HEARTBEAT_INTERVAL.set(sshClient, Duration.ofSeconds(10));
+        ClientSession session = createSession(sshClient, environnement);
+
+        PipedOutputStream out = new PipedOutputStream();
+        PipedInputStream channelIn = new PipedInputStream(out);
+        ChannelShell channel = session.createShellChannel();
+        channel.setPtyType("xterm");
+        channel.setIn(channelIn);
+
+        channel.open().verify(Duration.ofSeconds(5));
+
+        //with jobrunr
+        channelsShell.put(idTerminal, channel);
+        jobScheduler.enqueue(UUID.fromString(idTerminal), () -> terminal(login, idTerminal));
+
+
+        return channel;
+    }
+
+    @Job(name = "Terminal", retries = 0)
+    public void terminal(String login, String idTerminal) throws IOException {
+        InputStream inputStream = channelsShell.get(idTerminal).getInvertedOut();
+        try {
+            byte[] buffer = new byte[1024];
+            int i = 0;
+            while ((i = inputStream.read(buffer)) != -1) {
+                byte[] message = Arrays.copyOfRange(buffer, 0, i);
+                messagingTemplate.convertAndSendToUser(login, "/queue/terminal-"+idTerminal, message);
+            }
+        } finally {
+            try {
+                channelsShell.get(idTerminal).close();
+                channelsShell.remove(idTerminal);
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

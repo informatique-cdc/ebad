@@ -10,6 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.cache.annotation.CacheRemoveAll;
 import java.util.List;
 
 @Service
@@ -37,7 +38,7 @@ public class GlobalSettingService {
         return globalSettingRepository.save(globalSetting);
     }
 
-    @CachePut("global_settings")
+    @CacheRemoveAll(cacheName = "global_settings")
     @Transactional
     public GlobalSetting setValue(String key, String value) throws EbadServiceException {
         GlobalSetting globalSetting = globalSettingRepository.findById(key).orElseThrow(EbadServiceException::new);

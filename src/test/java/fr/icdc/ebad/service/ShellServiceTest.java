@@ -17,6 +17,7 @@ import org.apache.sshd.server.shell.ProcessShellCommandFactory;
 import org.apache.sshd.server.subsystem.SubsystemFactory;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
+import org.jobrunr.scheduling.JobScheduler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -47,6 +49,12 @@ public class ShellServiceTest {
     @Mock
     private IdentityService identityService;
 
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Mock
+    private JobScheduler jobScheduler;
+
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
@@ -57,7 +65,7 @@ public class ShellServiceTest {
 
     @Before
     public void setup() throws IOException {
-        shellService = new ShellService(ebadProperties, identityService);
+        shellService = new ShellService(ebadProperties, identityService, messagingTemplate, jobScheduler);
         EbadProperties.SshProperties sshProperties = ebadProperties.getSsh();
         sshProperties.setPort(2048);
         setupSSHServer();

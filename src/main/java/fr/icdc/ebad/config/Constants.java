@@ -18,6 +18,7 @@ public final class Constants {
     public static final String GLOBAL_SETTINGS_APPLICATION_IMPORT_ENABLED = "APPLICATION_IMPORT_ENABLED";
     public static final String GLOBAL_SETTINGS_ENVIRONMENT_CREATE_ENABLED = "ENVIRONMENT_CREATE_ENABLED";
     public static final String GLOBAL_SETTINGS_APPLICATION_CREATE_ENABLED = "APPLICATION_CREATE_ENABLED";
+    public static final String GLOBAL_SETTINGS_TERMINAL_ENABLED = "TERMINAL_ENABLED";
 
     private Constants() {
     }

@@ -42,6 +42,10 @@ public class PermissionServiceOpen {
         return getServiceOpen(GLOBAL_SETTINGS_APPLICATION_CREATE_ENABLED);
     }
 
+    public boolean canRunTerminal() {
+        return getServiceOpen(GLOBAL_SETTINGS_TERMINAL_ENABLED);
+    }
+
     public boolean canCreateOrUpdateUser() {
         return Arrays.stream(env.getActiveProfiles()).anyMatch("jwt"::equalsIgnoreCase);
     }
