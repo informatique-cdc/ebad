@@ -90,41 +90,6 @@ public class TerminalsResourceTest {
                 List.of(new WebSocketTransport(new StandardWebSocketClient()))));
     }
 
-    @Test
-    public void sendCommand() throws ExecutionException, InterruptedException, TimeoutException {
-        BlockingQueue<String> blockingQueue = new ArrayBlockingQueue(1);
-        webSocketStompClient.setMessageConverter(new StringMessageConverter());
-
-        StompSession session = webSocketStompClient
-                .connect("ws://localhost:11006/ebad/ws", new StompSessionHandlerAdapter() {}, new StompHeaders())
-                .get(1, TimeUnit.SECONDS);
-
-        session.subscribe("/user/queue/terminal-dsadasd", new StompFrameHandler() {
-
-            @Override
-            public Type getPayloadType(StompHeaders headers) {
-                return String.class;
-            }
-
-            @Override
-            public void handleFrame(StompHeaders headers, Object payload) {
-                System.out.println("Received message: " + payload);
-                blockingQueue.add((String) payload);
-            }
-        });
-
-        session.send("/ebad/terminal", "{id: this.terminalId, key: e.key}");
-
-        assertEquals("Hello, Mike!", blockingQueue.poll(1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void handleSessionSubscribeEvent() {
-    }
-
-    @Test
-    public void handleSessionUnsubscribeEvent() {
-    }
 
     @Test
     @WithMockUser(username = "user", roles = {"ADMIN"})

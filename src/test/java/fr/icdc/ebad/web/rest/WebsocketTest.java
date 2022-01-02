@@ -158,7 +158,7 @@ public class WebsocketTest {
         when(channelShellMock.getSession()).thenReturn(mock(Session.class));
         when(channelShellMock.getClientSession()).thenReturn(mock(ClientSession.class));
 
-        StompSession.Subscription subscription = stompSession.subscribe(SUBSCRIBE_TERMINAL_ENDPOINT + newTerminalDto.getId(), new CreateGameStompFrameHandler());
+        StompSession.Subscription subscription = stompSession.subscribe(SUBSCRIBE_TERMINAL_ENDPOINT + newTerminalDto.getId(), new StringStompFrameHandler());
         TerminalCommandDto terminalCommandDto = new TerminalCommandDto();
         terminalCommandDto.setId(newTerminalDto.getId());
         terminalCommandDto.setKey("l");
@@ -178,35 +178,10 @@ public class WebsocketTest {
         verify(channelShellMock).getClientSession();
         verify(channelShellMock).close(true);
 
-
-        //verify(shellService).startShell(any(),any(),eq(newTerminalDto.getId()));
-
     }
 
-    @Test
-    public void testMakeMoveEndpoint() throws InterruptedException, ExecutionException, TimeoutException {
-        String uuid = UUID.randomUUID().toString();
 
-        WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createTransportClient()));
-        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-
-        StompSession stompSession = stompClient.connect(URL, new StompSessionHandlerAdapter() {
-        }).get(1, SECONDS);
-
-//        stompSession.subscribe(SUBSCRIBE_MOVE_ENDPOINT + uuid, new CreateGameStompFrameHandler());
-//        stompSession.send(SEND_MOVE_ENDPOINT + uuid, new Move(1, 0));
-        String gameStateAfterMove = completableFuture.get(5, SECONDS);
-
-        assertNotNull(gameStateAfterMove);
-    }
-
-    private List<Transport> createTransportClient() {
-        List<Transport> transports = new ArrayList<>(1);
-        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-        return transports;
-    }
-
-    private class CreateGameStompFrameHandler implements StompFrameHandler {
+    private class StringStompFrameHandler implements StompFrameHandler {
         @Override
         public Type getPayloadType(StompHeaders stompHeaders) {
             System.out.println(stompHeaders.toString());
