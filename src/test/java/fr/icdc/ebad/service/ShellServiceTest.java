@@ -181,17 +181,19 @@ public class ShellServiceTest {
         executor.submit(() -> {
             try {
                 shellService.terminal("user",uuid);
-                //verify(messagingTemplate).convertAndSendToUser(eq("user"), eq("/queue/terminal-" + uuid), anyString());
+                verify(messagingTemplate).convertAndSendToUser(eq("user"), eq("/queue/terminal-" + uuid), anyString());
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         });
-        sleep(1000);
+        Thread.sleep(1000);
         OutputStream outputStream = channelShell.getInvertedIn();
-        outputStream.write("echo hello".getBytes());
+        outputStream.write("echo hello\n".getBytes());
         outputStream.flush();
-        sleep(1000);
+        outputStream.write("exit\n".getBytes());
+        outputStream.flush();
+        Thread.sleep(1000);
         executor.awaitTermination(10, TimeUnit.SECONDS);
     }
 }
