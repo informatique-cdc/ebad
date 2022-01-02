@@ -45,7 +45,7 @@ public class ShellService {
     private final IdentityService identityService;
     private final SimpMessagingTemplate messagingTemplate;
     private final JobScheduler jobScheduler;
-    private final ConcurrentHashMap<String,ChannelShell> channelsShell = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ChannelShell> channelsShell = new ConcurrentHashMap<>();
 
     public ShellService(EbadProperties ebadProperties, IdentityService identityService, SimpMessagingTemplate messagingTemplate, JobScheduler jobScheduler) {
         this.ebadProperties = ebadProperties;
@@ -217,42 +217,41 @@ public class ShellService {
         CoreModuleProperties.HEARTBEAT_INTERVAL.set(sshClient, Duration.ofSeconds(10));
         ClientSession session = createSession(sshClient, environnement);
 
-        PipedOutputStream out = new PipedOutputStream();
-        PipedInputStream channelIn = new PipedInputStream(out);
         ChannelShell channel = session.createShellChannel();
-        channel.setPtyType("xterm");
-        channel.setIn(channelIn);
 
-        channel.open().verify(Duration.ofSeconds(5));
-
-        //with jobrunr
         channelsShell.put(idTerminal, channel);
         jobScheduler.enqueue(UUID.fromString(idTerminal), () -> terminal(login, idTerminal));
-
 
         return channel;
     }
 
     @Job(name = "Terminal", retries = 0)
     public void terminal(String login, String idTerminal) throws IOException {
-        InputStream inputStream = channelsShell.get(idTerminal).getInvertedOut();
-        try {
+        ChannelShell channel = channelsShell.get(idTerminal);
+        channel.setPtyType("xterm");
+        InputStream inputStream = null;
+        try (
+                PipedOutputStream out = new PipedOutputStream();
+                PipedInputStream channelIn = new PipedInputStream(out);
+        ) {
+            channel.setIn(channelIn);
+            channel.open().verify(Duration.ofSeconds(5));
+            inputStream = channel.getInvertedOut();
+
+
             byte[] buffer = new byte[1024];
             int i = 0;
             while ((i = inputStream.read(buffer)) != -1) {
                 byte[] message = Arrays.copyOfRange(buffer, 0, i);
-                messagingTemplate.convertAndSendToUser(login, "/queue/terminal-"+idTerminal, message);
+                messagingTemplate.convertAndSendToUser(login, "/queue/terminal-" + idTerminal, message);
             }
         } finally {
-            try {
-                channelsShell.get(idTerminal).close();
-                channelsShell.remove(idTerminal);
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (inputStream != null) {
+                inputStream.close();
             }
+            channel.getClientSession().close();
+            channel.close();
+            channelsShell.remove(idTerminal);
         }
     }
 }

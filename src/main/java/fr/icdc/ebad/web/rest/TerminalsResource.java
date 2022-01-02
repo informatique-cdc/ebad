@@ -68,7 +68,7 @@ public class TerminalsResource {
         String simpDestination = (String) message.getHeaders().get("simpDestination");
         String simpSessionId = (String) message.getHeaders().get("simpSessionId");
 
-        if (simpDestination.contains("terminal-")) {
+        if (simpDestination != null && simpDestination.contains("terminal-")) {
             String id = simpDestination.replace("/user/queue/terminal-", "");
             if(id.equals("")){
                 return;
@@ -83,7 +83,7 @@ public class TerminalsResource {
 
     @EventListener
     @Transactional
-    public void handleSessionUnsubscribeEvent(SessionUnsubscribeEvent event) throws IOException, EbadServiceException {
+    public void handleSessionUnsubscribeEvent(SessionUnsubscribeEvent event) throws IOException {
         GenericMessage message = (GenericMessage) event.getMessage();
         String simpSessionId = (String) message.getHeaders().get("simpSessionId");
 
