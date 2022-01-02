@@ -235,7 +235,7 @@ public class ShellService {
                 PipedInputStream channelIn = new PipedInputStream(out);
         ) {
             channel.setIn(channelIn);
-            channel.open().verify(Duration.ofSeconds(5));
+            channel.open().verify();
             inputStream = channel.getInvertedOut();
 
 

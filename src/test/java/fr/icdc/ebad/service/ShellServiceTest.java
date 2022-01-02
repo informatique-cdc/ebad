@@ -8,6 +8,7 @@ import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
@@ -17,6 +18,7 @@ import org.apache.sshd.server.shell.ProcessShellCommandFactory;
 import org.apache.sshd.server.subsystem.SubsystemFactory;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
+import org.jobrunr.jobs.lambdas.JobLambda;
 import org.jobrunr.scheduling.JobScheduler;
 import org.junit.After;
 import org.junit.Before;
@@ -35,9 +37,19 @@ import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShellServiceTest {
@@ -146,5 +158,40 @@ public class ShellServiceTest {
         assertEquals(1, dirEntries3.size());
     }
 
+    @Test
+    public void startShell() throws EbadServiceException, IOException {
+        Norme norme = Norme.builder().commandLine("$1").build();
+        Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
+        Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
+        String uuid = UUID.randomUUID().toString();
+        ChannelShell channelShell = shellService.startShell(environnement, "user", uuid);
+        assertNotNull(channelShell);
+        verify(jobScheduler).enqueue(eq(UUID.fromString(uuid)),any(JobLambda.class));
+    }
 
+    @Test
+    public void terminal() throws EbadServiceException, IOException, InterruptedException {
+        Norme norme = Norme.builder().commandLine("$1").build();
+        Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
+        Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
+        String uuid = UUID.randomUUID().toString();
+        ChannelShell channelShell = shellService.startShell(environnement, "user", uuid);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                shellService.terminal("user",uuid);
+                //verify(messagingTemplate).convertAndSendToUser(eq("user"), eq("/queue/terminal-" + uuid), anyString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+        sleep(1000);
+        OutputStream outputStream = channelShell.getInvertedIn();
+        outputStream.write("echo hello".getBytes());
+        outputStream.flush();
+        sleep(1000);
+        executor.awaitTermination(10, TimeUnit.SECONDS);
+    }
 }
