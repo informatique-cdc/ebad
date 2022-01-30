@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2.10.0-1-changeset
+      author: dtrouillet
+      changes:
+        - createTable:
+            tableName: t_terminal
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: t_terminal_pkey
+                  name: id
+                  type: UUID
+              - column:
+                  name: session_id
+                  type: VARCHAR(100)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: environment_id
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: t_terminal
+            constraintName: t_terminal_user
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: t_user
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: environment_id
+            baseTableName: t_terminal
+            constraintName: t_terminal_environment
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: t_environnement
+            validate: true

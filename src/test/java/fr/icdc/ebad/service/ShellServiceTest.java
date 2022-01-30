@@ -6,6 +6,7 @@ import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.domain.Norme;
 import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.repository.TerminalRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sshd.client.channel.ChannelShell;
@@ -65,6 +66,9 @@ public class ShellServiceTest {
     private SimpMessagingTemplate messagingTemplate;
 
     @Mock
+    private TerminalRepository terminalRepository;
+
+    @Mock
     private JobScheduler jobScheduler;
 
     @Rule
@@ -77,7 +81,7 @@ public class ShellServiceTest {
 
     @Before
     public void setup() throws IOException {
-        shellService = new ShellService(ebadProperties, identityService, messagingTemplate, jobScheduler);
+        shellService = new ShellService(ebadProperties, identityService, messagingTemplate, jobScheduler, terminalRepository);
         EbadProperties.SshProperties sshProperties = ebadProperties.getSsh();
         sshProperties.setPort(2048);
         setupSSHServer();
@@ -164,7 +168,7 @@ public class ShellServiceTest {
         Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
         Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
         String uuid = UUID.randomUUID().toString();
-        ChannelShell channelShell = shellService.startShell(environnement, "user", uuid);
+        ChannelShell channelShell = shellService.startShell("sessionIdTest");
         assertNotNull(channelShell);
         verify(jobScheduler).enqueue(eq(UUID.fromString(uuid)),any(JobLambda.class));
     }
@@ -175,12 +179,12 @@ public class ShellServiceTest {
         Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
         Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
         String uuid = UUID.randomUUID().toString();
-        ChannelShell channelShell = shellService.startShell(environnement, "user", uuid);
+        ChannelShell channelShell = shellService.startShell("sessionIdTest");
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
-                shellService.terminal("user",uuid);
+                shellService.terminal("user","sessionIdTest");
                 verify(messagingTemplate).convertAndSendToUser(eq("user"), eq("/queue/terminal-" + uuid), anyString());
             } catch (IOException e) {
                 e.printStackTrace();

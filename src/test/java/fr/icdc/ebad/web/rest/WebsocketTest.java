@@ -152,7 +152,7 @@ public class WebsocketTest {
         NewTerminalDto newTerminalDto = new ObjectMapper().readValue(json, NewTerminalDto.class);
 
         ChannelShell channelShellMock = mock(ChannelShell.class);
-        when(shellService.startShell(env,"user",newTerminalDto.getId())).thenReturn(channelShellMock);
+        when(shellService.startShell("sessionIdTest")).thenReturn(channelShellMock);
         OutputStream outputStream = mock(OutputStream.class);
         when(channelShellMock.getInvertedIn()).thenReturn(outputStream);
         when(channelShellMock.getSession()).thenReturn(mock(Session.class));
@@ -167,7 +167,7 @@ public class WebsocketTest {
         Thread.sleep(2000);
         verify(permissionEnvironnement).canWrite(eq(1L),any());
         verify(environnementService).getEnvironnement(1L);
-        verify(shellService).startShell(env,"user",newTerminalDto.getId());
+        verify(shellService).startShell("sessionIdTest");
         verify(channelShellMock).getInvertedIn();
         verify(outputStream).write("l".getBytes());
 
