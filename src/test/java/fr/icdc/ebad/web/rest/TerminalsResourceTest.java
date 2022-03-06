@@ -7,11 +7,11 @@ import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Terminal;
 import fr.icdc.ebad.domain.User;
-import fr.icdc.ebad.repository.TerminalRepository;
-import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.security.permission.PermissionServiceOpen;
 import fr.icdc.ebad.service.EnvironnementService;
+import fr.icdc.ebad.service.TerminalService;
+import fr.icdc.ebad.service.UserService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,9 +37,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class TerminalsResourceTest {
     @MockBean
-    private UserRepository userRepository;
+    private UserService userService;
 
     @MockBean
     private EnvironnementService environnementService;
@@ -61,7 +61,7 @@ public class TerminalsResourceTest {
     private PermissionServiceOpen permissionServiceOpen;
 
     @MockBean
-    private TerminalRepository terminalRepository;
+    private TerminalService terminalService;
 
     @Autowired
     private TerminalsResource terminalsResource;
@@ -103,8 +103,8 @@ public class TerminalsResourceTest {
         when(permissionEnvironnement.canWrite(eq(1L),any())).thenReturn(true);
 
         when(environnementService.getEnvironnement(1L)).thenReturn(environnement);
-        when(userRepository.findOneByLogin("user")).thenReturn(Optional.of(user));
-        when(terminalRepository.save(any())).thenReturn(Terminal.builder().id(uuid).environment(environnement).user(user).build());
+        when(userService.getUser("user")).thenReturn(Optional.of(user));
+        when(terminalService.save(any())).thenReturn(Terminal.builder().id(uuid).environment(environnement).user(user).build());
         restMvc.perform(builder)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(uuid.toString())));

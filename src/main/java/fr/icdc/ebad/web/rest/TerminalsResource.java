@@ -6,6 +6,8 @@ import fr.icdc.ebad.repository.TerminalRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.service.EnvironnementService;
 import fr.icdc.ebad.service.ShellService;
+import fr.icdc.ebad.service.TerminalService;
+import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.NewTerminalDto;
 import fr.icdc.ebad.web.rest.dto.TerminalCommandDto;
@@ -38,21 +40,21 @@ import java.util.UUID;
 public class TerminalsResource {
     private final ShellService shellService;
     private final EnvironnementService environnementService;
-    private final UserRepository userRepository; //FIXME DTROUILLET REMOVE THIS REPO
-    private final TerminalRepository terminalRepository; //FIXME DTROUILLET REMOVE THIS REPO
+    private final UserService userService;
+    private final TerminalService terminalService;
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminalsResource.class);
 
-    public TerminalsResource(ShellService shellService, EnvironnementService environnementService, UserRepository userRepository, TerminalRepository terminalRepository) {
+    public TerminalsResource(ShellService shellService, EnvironnementService environnementService, UserService userService, TerminalService terminalService) {
         this.shellService = shellService;
         this.environnementService = environnementService;
-        this.userRepository = userRepository;
-        this.terminalRepository = terminalRepository;
+        this.userService = userService;
+        this.terminalService = terminalService;
     }
 
     @MessageMapping("/terminal")
     @Transactional
     public void sendCommand(TerminalCommandDto terminalCommandDto, Principal principal) throws IOException {
-        Optional<Terminal> terminal = terminalRepository.findById(UUID.fromString(terminalCommandDto.getId()));
+        Optional<Terminal> terminal = terminalService.findById(UUID.fromString(terminalCommandDto.getId()));
         if(terminal.isEmpty())
             return;
 
@@ -68,7 +70,6 @@ public class TerminalsResource {
     }
 
     @EventListener
-    @Transactional
     public void handleSessionSubscribeEvent(SessionSubscribeEvent event) throws IOException, EbadServiceException {
         GenericMessage message = (GenericMessage) event.getMessage();
         String simpDestination = (String) message.getHeaders().get("simpDestination");
@@ -80,11 +81,13 @@ public class TerminalsResource {
                 return;
             }
             LOGGER.debug("Terminal Id is {}", id);
-            Terminal result = terminalRepository.getById(UUID.fromString(id));
-            result.setSessionId(simpSessionId);
-            terminalRepository.save(result);
-            terminalRepository.flush();
-            shellService.startShell(id);
+            Optional<Terminal> optionalResult = terminalService.findById(UUID.fromString(id));
+            if (optionalResult.isPresent()) {
+                Terminal result = optionalResult.get();
+                result.setSessionId(simpSessionId);
+                terminalService.save(result);
+                shellService.startShell(id);
+            }
         }
     }
 
@@ -96,7 +99,7 @@ public class TerminalsResource {
 
         if (simpSessionId != null) {
             LOGGER.debug("Terminal simpSessionId is {}", simpSessionId);
-            for(Terminal terminal : terminalRepository.findAllBySessionId(simpSessionId)) {
+            for(Terminal terminal : terminalService.findBySessionId(simpSessionId)) {
                 shellService.deleteLocalChannelShell(terminal.getId().toString());
             }
         }
@@ -108,9 +111,10 @@ public class TerminalsResource {
     public NewTerminalDto startTerminal(@PathVariable Long environmentId, Principal principal) {
         Terminal terminal = new Terminal();
         terminal.setEnvironment(environnementService.getEnvironnement(environmentId));
-        Optional<User> userOptional = userRepository.findOneByLogin(principal.getName());
+
+        Optional<User> userOptional = userService.getUser(principal.getName());
         terminal.setUser(userOptional.orElseThrow());
-        Terminal result = terminalRepository.save(terminal);
+        Terminal result = terminalService.save(terminal);
         return NewTerminalDto.builder().id(result.getId().toString()).build();
     }
 }
