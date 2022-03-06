@@ -102,8 +102,8 @@ public class TerminalsResourceTest {
         when(permissionServiceOpen.canRunTerminal()).thenReturn(true);
         when(permissionEnvironnement.canWrite(eq(1L),any())).thenReturn(true);
 
-        when(environnementService.getEnvironnement(eq(1L))).thenReturn(environnement);
-        when(userRepository.findOneByLogin(eq("user"))).thenReturn(Optional.of(user));
+        when(environnementService.getEnvironnement(1L)).thenReturn(environnement);
+        when(userRepository.findOneByLogin("user")).thenReturn(Optional.of(user));
         when(terminalRepository.save(any())).thenReturn(Terminal.builder().id(uuid).environment(environnement).user(user).build());
         restMvc.perform(builder)
                 .andExpect(status().isOk())

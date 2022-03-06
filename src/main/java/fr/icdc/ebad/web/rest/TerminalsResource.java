@@ -1,6 +1,7 @@
 package fr.icdc.ebad.web.rest;
 
 import fr.icdc.ebad.domain.Terminal;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.TerminalRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.service.EnvironnementService;
@@ -107,7 +108,8 @@ public class TerminalsResource {
     public NewTerminalDto startTerminal(@PathVariable Long environmentId, Principal principal) {
         Terminal terminal = new Terminal();
         terminal.setEnvironment(environnementService.getEnvironnement(environmentId));
-        terminal.setUser(userRepository.findOneByLogin(principal.getName()).get());
+        Optional<User> userOptional = userRepository.findOneByLogin(principal.getName());
+        terminal.setUser(userOptional.orElseThrow());
         Terminal result = terminalRepository.save(terminal);
         return NewTerminalDto.builder().id(result.getId().toString()).build();
     }
