@@ -4,10 +4,14 @@ package fr.icdc.ebad.web.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.icdc.ebad.config.Constants;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.Terminal;
+import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.repository.TerminalRepository;
+import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.security.permission.PermissionServiceOpen;
 import fr.icdc.ebad.service.EnvironnementService;
-import fr.icdc.ebad.service.ShellService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,11 +20,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.messaging.converter.StringMessageConverter;
-import org.springframework.messaging.simp.stomp.StompFrameHandler;
-import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -33,19 +32,14 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
-import java.lang.reflect.Type;
 import java.security.Principal;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.Optional;
+import java.util.UUID;
 
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class TerminalsResourceTest {
     @MockBean
-    private ShellService shellService;
+    private UserRepository userRepository;
 
     @MockBean
     private EnvironnementService environnementService;
@@ -65,6 +59,9 @@ public class TerminalsResourceTest {
 
     @MockBean
     private PermissionServiceOpen permissionServiceOpen;
+
+    @MockBean
+    private TerminalRepository terminalRepository;
 
     @Autowired
     private TerminalsResource terminalsResource;
@@ -98,11 +95,18 @@ public class TerminalsResourceTest {
         when(mockPrincipal.getName()).thenReturn("user");
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/terminals/1").principal(mockPrincipal);
 
+        UUID uuid = UUID.randomUUID();
+        Environnement environnement = Environnement.builder().id(2L).build();
+        User user = User.builder().login("user").build();
+
         when(permissionServiceOpen.canRunTerminal()).thenReturn(true);
         when(permissionEnvironnement.canWrite(eq(1L),any())).thenReturn(true);
 
+        when(environnementService.getEnvironnement(eq(1L))).thenReturn(environnement);
+        when(userRepository.findOneByLogin(eq("user"))).thenReturn(Optional.of(user));
+        when(terminalRepository.save(any())).thenReturn(Terminal.builder().id(uuid).environment(environnement).user(user).build());
         restMvc.perform(builder)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", notNullValue()));
+                .andExpect(jsonPath("$.id", is(uuid.toString())));
     }
 }

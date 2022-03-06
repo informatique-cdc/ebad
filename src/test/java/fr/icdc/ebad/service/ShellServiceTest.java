@@ -5,6 +5,8 @@ import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.Terminal;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.TerminalRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
@@ -38,6 +40,7 @@ import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,6 +54,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShellServiceTest {
@@ -167,10 +171,13 @@ public class ShellServiceTest {
         Norme norme = Norme.builder().commandLine("$1").build();
         Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
         Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
-        String uuid = UUID.randomUUID().toString();
-        ChannelShell channelShell = shellService.startShell("sessionIdTest");
+        UUID uuid = UUID.randomUUID();
+
+        User user = User.builder().login("test").build();
+        when(terminalRepository.getById(uuid)).thenReturn(Terminal.builder().environment(environnement).user(user).id(uuid).build());
+
+        ChannelShell channelShell = shellService.startShell(uuid.toString());
         assertNotNull(channelShell);
-        verify(jobScheduler).enqueue(eq(UUID.fromString(uuid)),any(JobLambda.class));
     }
 
     @Test
@@ -178,13 +185,17 @@ public class ShellServiceTest {
         Norme norme = Norme.builder().commandLine("$1").build();
         Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
         Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
-        String uuid = UUID.randomUUID().toString();
-        ChannelShell channelShell = shellService.startShell("sessionIdTest");
+        UUID uuid = UUID.randomUUID();
+
+        User user = User.builder().login("user").build();
+        when(terminalRepository.getById(uuid)).thenReturn(Terminal.builder().environment(environnement).user(user).id(uuid).build());
+
+        ChannelShell channelShell = shellService.startShell(uuid.toString());
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
-                shellService.terminal("user","sessionIdTest");
+                shellService.terminal("user",uuid.toString());
                 verify(messagingTemplate).convertAndSendToUser(eq("user"), eq("/queue/terminal-" + uuid), anyString());
             } catch (IOException e) {
                 e.printStackTrace();
