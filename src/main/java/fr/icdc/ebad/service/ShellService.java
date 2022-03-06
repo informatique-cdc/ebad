@@ -19,7 +19,6 @@ import org.apache.sshd.core.CoreModuleProperties;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClientFactory;
 import org.jobrunr.jobs.annotations.Job;
-import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -55,14 +54,12 @@ public class ShellService {
     private final EbadProperties ebadProperties;
     private final IdentityService identityService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final JobScheduler jobScheduler;
     private final TerminalRepository terminalRepository;
     private final ConcurrentHashMap<String, ChannelShell> channelsShell = new ConcurrentHashMap<>();
-    public ShellService(EbadProperties ebadProperties, IdentityService identityService, SimpMessagingTemplate messagingTemplate, JobScheduler jobScheduler, TerminalRepository terminalRepository) {
+    public ShellService(EbadProperties ebadProperties, IdentityService identityService, SimpMessagingTemplate messagingTemplate, TerminalRepository terminalRepository) {
         this.ebadProperties = ebadProperties;
         this.identityService = identityService;
         this.messagingTemplate = messagingTemplate;
-        this.jobScheduler = jobScheduler;
         this.terminalRepository = terminalRepository;
     }
 
