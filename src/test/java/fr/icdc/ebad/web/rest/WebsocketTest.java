@@ -14,6 +14,8 @@ import fr.icdc.ebad.security.permission.PermissionEnvironnement;
 import fr.icdc.ebad.security.permission.PermissionServiceOpen;
 import fr.icdc.ebad.service.EnvironnementService;
 import fr.icdc.ebad.service.ShellService;
+import fr.icdc.ebad.service.TerminalService;
+import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.web.rest.dto.NewTerminalDto;
 import fr.icdc.ebad.web.rest.dto.TerminalCommandDto;
 import org.apache.sshd.client.channel.ChannelShell;
@@ -93,10 +95,10 @@ public class WebsocketTest {
     @MockBean
     private PermissionEnvironnement permissionEnvironnement;
     @MockBean
-    private UserRepository userRepository;
+    private UserService userService;
 
     @MockBean
-    private TerminalRepository terminalRepository;
+    private TerminalService terminalService;
 
     @MockBean
     private ShellService shellService;
@@ -149,8 +151,8 @@ public class WebsocketTest {
         Principal mockPrincipal = mock(Principal.class);
         when(mockPrincipal.getName()).thenReturn("user");
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/terminals/1").principal(mockPrincipal);
-        when(userRepository.findOneByLogin(any())).thenReturn(Optional.ofNullable(User.builder().id(1L).login("user").build()));
-        when(terminalRepository.save(any())).thenReturn(Terminal.builder().id(UUID.fromString(uuid)).build());
+        when(userService.getUser(any())).thenReturn(Optional.ofNullable(User.builder().id(1L).login("user").build()));
+        when(terminalService.save(any())).thenReturn(Terminal.builder().id(UUID.fromString(uuid)).build());
         when(permissionServiceOpen.canRunTerminal()).thenReturn(true);
         when(permissionEnvironnement.canWrite(eq(1L),any())).thenReturn(true);
         Environnement env = Environnement.builder().build();
@@ -165,14 +167,14 @@ public class WebsocketTest {
         ChannelShell channelShellMock = mock(ChannelShell.class);
         when(shellService.startShell(uuid)).thenReturn(channelShellMock);
         when(shellService.getLocalChannelShell(uuid)).thenReturn(channelShellMock);
-        when(terminalRepository.findById(UUID.fromString(uuid))).thenReturn(Optional.of(Terminal.builder().user(User.builder().login("user").build()).id(UUID.fromString(uuid)).build()));
+        when(terminalService.findById(UUID.fromString(uuid))).thenReturn(Optional.of(Terminal.builder().user(User.builder().login("user").build()).id(UUID.fromString(uuid)).build()));
         OutputStream outputStream = mock(OutputStream.class);
         when(channelShellMock.getInvertedIn()).thenReturn(outputStream);
         when(channelShellMock.getSession()).thenReturn(mock(Session.class));
         when(channelShellMock.getClientSession()).thenReturn(mock(ClientSession.class));
 
 
-        when(terminalRepository.getById(UUID.fromString(uuid))).thenReturn(Terminal.builder().id(UUID.fromString(uuid)).build());
+        when(terminalService.findById(UUID.fromString(uuid))).thenReturn(Optional.of(Terminal.builder().id(UUID.fromString(uuid)).user(User.builder().login("user").build()).build()));
         StompSession.Subscription subscription = stompSession.subscribe(SUBSCRIBE_TERMINAL_ENDPOINT + newTerminalDto.getId(), new StringStompFrameHandler());
         TerminalCommandDto terminalCommandDto = new TerminalCommandDto();
         terminalCommandDto.setId(newTerminalDto.getId());
