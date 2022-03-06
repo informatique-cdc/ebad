@@ -1,18 +1,18 @@
 package fr.icdc.ebad.config.apidoc;
 
 import com.querydsl.core.types.Predicate;
+import org.springdoc.core.customizers.DataRestDelegatingMethodParameterCustomizer;
 import org.springdoc.core.customizers.DelegatingMethodParameterCustomizer;
-import org.springdoc.data.rest.customisers.DataRestDelegatingMethodParameterCustomizer;
+import org.springdoc.core.providers.RepositoryRestConfigurationProvider;
+import org.springdoc.core.providers.SpringDataWebPropertiesProvider;
 import org.springdoc.data.rest.customisers.QuerydslPredicateOperationCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.querydsl.binding.QuerydslBindingsFactory;
-import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 
 import java.util.Optional;
 
@@ -31,15 +31,15 @@ public class CustomSpringDocDataRestConfiguration {
     /**
      * Delegating method parameter customizer delegating method parameter customizer.
      *
-     * @param optionalSpringDataWebProperties the optional spring data web properties
+     * @param optionalSpringDataWebPropertiesProvider the optional spring data web properties provider
      * @param optionalRepositoryRestConfiguration the optional repository rest configuration
      * @return the delegating method parameter customizer
      */
     @Bean
     @ConditionalOnMissingBean
     @Lazy(false)
-    DelegatingMethodParameterCustomizer delegatingMethodParameterCustomizer(Optional<SpringDataWebProperties> optionalSpringDataWebProperties, Optional<RepositoryRestConfiguration> optionalRepositoryRestConfiguration) {
-        return new DataRestDelegatingMethodParameterCustomizer(optionalSpringDataWebProperties, optionalRepositoryRestConfiguration);
+    DelegatingMethodParameterCustomizer delegatingMethodParameterCustomizer(Optional<SpringDataWebPropertiesProvider> optionalSpringDataWebPropertiesProvider, Optional<RepositoryRestConfigurationProvider> optionalRepositoryRestConfiguration) {
+        return new DataRestDelegatingMethodParameterCustomizer(optionalSpringDataWebPropertiesProvider, optionalRepositoryRestConfiguration);
     }
 
 
