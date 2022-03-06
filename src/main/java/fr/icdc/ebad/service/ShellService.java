@@ -3,7 +3,9 @@ package fr.icdc.ebad.service;
 import fr.icdc.ebad.config.properties.EbadProperties;
 import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.Terminal;
 import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.repository.TerminalRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -17,13 +19,19 @@ import org.apache.sshd.core.CoreModuleProperties;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.client.SftpClientFactory;
 import org.jobrunr.jobs.annotations.Job;
-import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +39,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by dtrouillet on 03/03/2016.
@@ -44,14 +54,36 @@ public class ShellService {
     private final EbadProperties ebadProperties;
     private final IdentityService identityService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final JobScheduler jobScheduler;
+    private final TerminalRepository terminalRepository;
     private final ConcurrentHashMap<String, ChannelShell> channelsShell = new ConcurrentHashMap<>();
-
-    public ShellService(EbadProperties ebadProperties, IdentityService identityService, SimpMessagingTemplate messagingTemplate, JobScheduler jobScheduler) {
+    public ShellService(EbadProperties ebadProperties, IdentityService identityService, SimpMessagingTemplate messagingTemplate, TerminalRepository terminalRepository) {
         this.ebadProperties = ebadProperties;
         this.identityService = identityService;
         this.messagingTemplate = messagingTemplate;
-        this.jobScheduler = jobScheduler;
+        this.terminalRepository = terminalRepository;
+    }
+
+    public ChannelShell getLocalChannelShell(String id) {
+        return channelsShell.get(id);
+    }
+
+    public ChannelShell addLocalChannelShell(String id, ChannelShell channelShell) {
+        return channelsShell.put(id, channelShell);
+    }
+
+    public void deleteLocalChannelShell(String id) throws IOException {
+        ChannelShell channelShell = channelsShell.get(id);
+        if(channelShell == null)
+            return;
+
+        if(channelShell.getSession() != null)
+            channelShell.getSession().close();
+
+        if(channelShell.getClientSession() != null)
+            channelShell.getClientSession().close();
+
+        channelShell.close(true);
+        channelsShell.remove(id);
     }
 
     public RetourBatch runCommandNew(Environnement environnement, String command) throws EbadServiceException {
@@ -211,23 +243,39 @@ public class ShellService {
         }
     }
 
-    public ChannelShell startShell(Environnement environnement, String login, String idTerminal) throws IOException, EbadServiceException {
+    @Transactional
+    public ChannelShell startShell(String id) throws IOException, EbadServiceException {
+        Terminal terminal = terminalRepository.getById(UUID.fromString(id));
+
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
         CoreModuleProperties.HEARTBEAT_INTERVAL.set(sshClient, Duration.ofSeconds(10));
-        ClientSession session = createSession(sshClient, environnement);
+        ClientSession session = createSession(sshClient, terminal.getEnvironment());
 
         ChannelShell channel = session.createShellChannel();
 
-        channelsShell.put(idTerminal, channel);
-        jobScheduler.enqueue(UUID.fromString(idTerminal), () -> terminal(login, idTerminal));
+        addLocalChannelShell(id, channel);
+        String login = terminal.getUser().getLogin();
+        Runnable runnableTask = () -> {
 
+            try {
+                terminal(login, id);
+            } catch (IOException e) {
+                LOGGER.error("Error when try to start terminal", e);
+            }
+
+        };
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(runnableTask);
         return channel;
     }
 
     @Job(name = "Terminal", retries = 0)
-    public void terminal(String login, String idTerminal) throws IOException {
-        ChannelShell channel = channelsShell.get(idTerminal);
+    @Transactional
+    public void terminal(String login, String id) throws IOException {
+        Terminal terminal = terminalRepository.getById(UUID.fromString(id));
+
+        ChannelShell channel = getLocalChannelShell(id);
         channel.setPtyType("xterm");
         InputStream inputStream = null;
         try (
@@ -243,15 +291,13 @@ public class ShellService {
             int i = 0;
             while ((i = inputStream.read(buffer)) != -1) {
                 byte[] message = Arrays.copyOfRange(buffer, 0, i);
-                messagingTemplate.convertAndSendToUser(login, "/queue/terminal-" + idTerminal, message);
+                messagingTemplate.convertAndSendToUser(login, "/queue/terminal-" + terminal.getId().toString(), message);
             }
         } finally {
             if (inputStream != null) {
                 inputStream.close();
             }
-            channel.getClientSession().close();
-            channel.close();
-            channelsShell.remove(idTerminal);
+            deleteLocalChannelShell(id);
         }
     }
 }

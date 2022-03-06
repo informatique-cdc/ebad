@@ -5,7 +5,10 @@ import fr.icdc.ebad.domain.Directory;
 import fr.icdc.ebad.domain.Environnement;
 import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.Terminal;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.domain.util.RetourBatch;
+import fr.icdc.ebad.repository.TerminalRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sshd.client.channel.ChannelShell;
@@ -18,7 +21,6 @@ import org.apache.sshd.server.shell.ProcessShellCommandFactory;
 import org.apache.sshd.server.subsystem.SubsystemFactory;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
-import org.jobrunr.jobs.lambdas.JobLambda;
 import org.jobrunr.scheduling.JobScheduler;
 import org.junit.After;
 import org.junit.Before;
@@ -31,7 +33,13 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.PublicKey;
@@ -42,14 +50,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShellServiceTest {
@@ -65,6 +72,9 @@ public class ShellServiceTest {
     private SimpMessagingTemplate messagingTemplate;
 
     @Mock
+    private TerminalRepository terminalRepository;
+
+    @Mock
     private JobScheduler jobScheduler;
 
     @Rule
@@ -77,7 +87,7 @@ public class ShellServiceTest {
 
     @Before
     public void setup() throws IOException {
-        shellService = new ShellService(ebadProperties, identityService, messagingTemplate, jobScheduler);
+        shellService = new ShellService(ebadProperties, identityService, messagingTemplate, terminalRepository);
         EbadProperties.SshProperties sshProperties = ebadProperties.getSsh();
         sshProperties.setPort(2048);
         setupSSHServer();
@@ -163,10 +173,13 @@ public class ShellServiceTest {
         Norme norme = Norme.builder().commandLine("$1").build();
         Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
         Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
-        String uuid = UUID.randomUUID().toString();
-        ChannelShell channelShell = shellService.startShell(environnement, "user", uuid);
+        UUID uuid = UUID.randomUUID();
+
+        User user = User.builder().login("test").build();
+        when(terminalRepository.getById(uuid)).thenReturn(Terminal.builder().environment(environnement).user(user).id(uuid).build());
+
+        ChannelShell channelShell = shellService.startShell(uuid.toString());
         assertNotNull(channelShell);
-        verify(jobScheduler).enqueue(eq(UUID.fromString(uuid)),any(JobLambda.class));
     }
 
     @Test
@@ -174,13 +187,17 @@ public class ShellServiceTest {
         Norme norme = Norme.builder().commandLine("$1").build();
         Identity identity = Identity.builder().id(1L).login(USERNAME).password(PASSWORD).name("identityName").build();
         Environnement environnement = Environnement.builder().homePath("").id(1L).identity(identity).host("localhost").norme(norme).build();
-        String uuid = UUID.randomUUID().toString();
-        ChannelShell channelShell = shellService.startShell(environnement, "user", uuid);
+        UUID uuid = UUID.randomUUID();
+
+        User user = User.builder().login("user").build();
+        when(terminalRepository.getById(uuid)).thenReturn(Terminal.builder().environment(environnement).user(user).id(uuid).build());
+
+        ChannelShell channelShell = shellService.startShell(uuid.toString());
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
-                shellService.terminal("user",uuid);
+                shellService.terminal("user",uuid.toString());
                 verify(messagingTemplate).convertAndSendToUser(eq("user"), eq("/queue/terminal-" + uuid), anyString());
             } catch (IOException e) {
                 e.printStackTrace();

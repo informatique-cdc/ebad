@@ -242,6 +242,7 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleException(Exception ex) {
+        logger.error(ex.getMessage(), ex);
         return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error", ex));
     }
 
