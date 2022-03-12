@@ -244,30 +244,36 @@ public class ShellService {
     }
 
     @Transactional
-    public ChannelShell startShell(String id) throws IOException, EbadServiceException {
+    public ChannelShell startShell(String id) throws EbadServiceException {
         Terminal terminal = terminalRepository.getById(UUID.fromString(id));
 
         SshClient sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
         CoreModuleProperties.HEARTBEAT_INTERVAL.set(sshClient, Duration.ofSeconds(10));
-        ClientSession session = createSession(sshClient, terminal.getEnvironment());
-
-        ChannelShell channel = session.createShellChannel();
-
-        addLocalChannelShell(id, channel);
         String login = terminal.getUser().getLogin();
-        Runnable runnableTask = () -> {
 
-            try {
-                terminal(login, id);
-            } catch (IOException e) {
-                LOGGER.error("Error when try to start terminal", e);
-            }
+        try {
+            ClientSession session = createSession(sshClient, terminal.getEnvironment());
 
-        };
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.execute(runnableTask);
-        return channel;
+            ChannelShell channel = session.createShellChannel();
+
+            addLocalChannelShell(id, channel);
+            Runnable runnableTask = () -> {
+
+                try {
+                    terminal(login, id);
+                } catch (IOException e) {
+                    LOGGER.error("Error when try to start terminal", e);
+                }
+
+            };
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.execute(runnableTask);
+            return channel;
+        } catch (IOException e) {
+            messagingTemplate.convertAndSendToUser(login, "/queue/terminal-" + terminal.getId().toString(), "ERROR WHEN TRYING TO CONNECT");
+            throw new EbadServiceException("Error when try to start terminal", e);
+        }
     }
 
     @Job(name = "Terminal", retries = 0)
