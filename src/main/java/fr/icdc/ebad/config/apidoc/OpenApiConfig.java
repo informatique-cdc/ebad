@@ -5,14 +5,27 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springdoc.core.SpringDocUtils;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Optional;
+
 @Configuration
 public class OpenApiConfig {
+
+    private final Optional<BuildProperties> buildProperties;
+
+    public OpenApiConfig(Optional<BuildProperties> buildProperties) {
+        this.buildProperties = buildProperties;
+    }
+
     @Bean
     public OpenAPI acustomOpenAPI() {
+        String version = "unknown";
+        if (buildProperties.isPresent()) {
+            version = buildProperties.get().getVersion();
+        }
         String securitySchemeJwt = "jwt";
         String securitySchemeApiKey = "ebad-api-key";
         return new OpenAPI()
@@ -33,6 +46,6 @@ public class OpenApiConfig {
                                         .in(SecurityScheme.In.HEADER)
                         )
                 )
-                .info(new Info().version("2.9.0").title("EBAD API").description("This documentation describe EBAD API."));
+                .info(new Info().version(version).title("EBAD API").description("This documentation describe EBAD API."));
     }
 }
