@@ -1,7 +1,11 @@
 package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Authority;
+import fr.icdc.ebad.domain.UsageApplication;
+import fr.icdc.ebad.domain.UsageApplicationId;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.AuthorityRepository;
 import fr.icdc.ebad.repository.UserRepository;
 import fr.icdc.ebad.security.SecurityUtils;
@@ -44,7 +48,7 @@ public class UserService {
 
     @Transactional
     public Optional<User> activateRegistration(String key) {
-        LOGGER.debug("Activating user for activation key {}", key);
+        LOGGER.debug("Activating user for activation key");
         return userRepository.findOneByActivationKey(key).map(user -> {
             // activate given user for the registration key.
             user.setActivated(true);

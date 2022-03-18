@@ -2,6 +2,7 @@ package fr.icdc.ebad.web.rest;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.ResponseUtil;
@@ -9,7 +10,6 @@ import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
 import fr.icdc.ebad.web.rest.dto.RolesDTO;
 import fr.icdc.ebad.web.rest.dto.UserAccountDto;
 import fr.icdc.ebad.web.rest.dto.UserDto;
-import fr.icdc.ebad.mapper.MapStructMapper;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +23,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -135,7 +142,9 @@ public class UserResource {
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN') && @permissionServiceOpen.canCreateOrUpdateUser()")
     public ResponseEntity<UserDto> changeRoles(@RequestBody RolesDTO roles) throws EbadServiceException {
-        LOGGER.debug("REST request to change role User : {}", roles.getLoginUser());
+        String userLog = roles.getLoginUser().replaceAll("[\n\r\t]", "_");
+
+        LOGGER.debug("REST request to change role User : {}", userLog);
         User user = userService.changeRoles(roles.getLoginUser(), roles.isRoleAdmin(), roles.isRoleUser());
         return ResponseEntity.ok(mapStructMapper.convert(user));
     }
@@ -147,7 +156,8 @@ public class UserResource {
     @Timed
     @PreAuthorize("hasRole('ROLE_ADMIN') or @permissionApplication.canManage(#authorityApplicationDTO.idApplication,principal) or @permissionApplication.canWrite(#authorityApplicationDTO.idApplication, principal)")
     public ResponseEntity<UserDto> changeApplicationAuthority(@RequestBody AuthorityApplicationDTO authorityApplicationDTO) {
-        LOGGER.debug("REST request to change authorityApplication User : {}", authorityApplicationDTO.getLoginUser());
+        String userLog = authorityApplicationDTO.getLoginUser().replaceAll("[\n\r\t]", "_");
+        LOGGER.debug("REST request to change authorityApplication User : {}", userLog);
         User user = userService.changeAutorisationApplication(authorityApplicationDTO);
         if(user == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
