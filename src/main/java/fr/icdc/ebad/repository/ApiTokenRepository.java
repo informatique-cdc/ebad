@@ -12,8 +12,6 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.querydsl.binding.SingleValueBinding;
 
-import java.util.Optional;
-
 public interface ApiTokenRepository extends JpaRepository<ApiToken, Long>, QuerydslPredicateExecutor<ApiToken>, QuerydslBinderCustomizer<QApiToken> {
     @Override
     default void customize(QuerydslBindings bindings, QApiToken root) {
@@ -23,5 +21,4 @@ public interface ApiTokenRepository extends JpaRepository<ApiToken, Long>, Query
     }
 
     Page<ApiToken> findAllByUserLogin(String login, Pageable pageable);
-    Optional<ApiToken> findApiTokenByToken(String key);
 }

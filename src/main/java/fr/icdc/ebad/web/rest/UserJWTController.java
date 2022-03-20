@@ -1,14 +1,13 @@
 package fr.icdc.ebad.web.rest;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.icdc.ebad.domain.User;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.security.jwt.JWTConfigurer;
 import fr.icdc.ebad.security.jwt.TokenProvider;
 import fr.icdc.ebad.service.UserService;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.LoginDto;
 import fr.icdc.ebad.web.rest.dto.UserDto;
-import fr.icdc.ebad.mapper.MapStructMapper;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
@@ -62,27 +61,5 @@ public class UserJWTController {
         User user = userService.getUserWithAuthorities();
         user.setToken(jwt);
         return new ResponseEntity<>(mapStructMapper.convert(user), httpHeaders, HttpStatus.OK);
-    }
-
-
-    /**
-     * Object to return as body in JWT Authentication.
-     */
-    static class JWTToken {
-
-        private String idToken;
-
-        JWTToken(String idToken) {
-            this.idToken = idToken;
-        }
-
-        @JsonProperty("id_token")
-        String getIdToken() {
-            return idToken;
-        }
-
-        void setIdToken(String idToken) {
-            this.idToken = idToken;
-        }
     }
 }

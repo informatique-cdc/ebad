@@ -1,5 +1,6 @@
 package fr.icdc.ebad.config.jwt;
 
+import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.security.jwt.JWTConfigurer;
 import fr.icdc.ebad.security.jwt.TokenProvider;
 import org.apache.commons.compress.utils.Lists;
@@ -28,7 +29,7 @@ import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
-@Profile("jwt")
+@Profile(Constants.SPRING_PROFILE_JWT)
 @Configuration
 @Import(SecurityProblemSupport.class)
 @EnableWebSecurity

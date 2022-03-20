@@ -37,10 +37,6 @@ public class UserAccountDto {
 
     private List<String> roles;
 
-    public UserAccountDto() {
-        login = "";
-        password = "";
-    }
 
     public UserAccountDto(String login, String password, String firstName, String lastName, String email, String langKey,
                           List<String> roles) {
