@@ -1,8 +1,10 @@
 package fr.icdc.ebad.web.rest.dto;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Size;
 
@@ -11,6 +13,8 @@ import javax.validation.constraints.Size;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
+@AllArgsConstructor
 public class ManagedUserDto extends UserAccountDto {
 
     public static final int PASSWORD_MIN_LENGTH = 4;
@@ -20,7 +24,4 @@ public class ManagedUserDto extends UserAccountDto {
     @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH)
     private String password;
 
-    public ManagedUserDto() {
-        // Empty constructor needed for Jackson.
-    }
 }

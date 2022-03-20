@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -43,9 +42,15 @@ public class EbadApplication {
 
         ConfigurableApplicationContext applicationContext = app.run(args);
         Environment env = applicationContext.getEnvironment();
-        APPLICATION_LOGGER.info("Access URLs:\n----------------------------------------------------------\n\t" +
-                "Local: \t\thttp://127.0.0.1:{}\n\t" +
-                "External: \thttp://{}:{}\n----------------------------------------------------------", env.getProperty("server.port"), InetAddress.getLocalHost().getHostAddress(), env.getProperty("server.port"));
+        APPLICATION_LOGGER.info("""
+                Access URLs:
+                ----------------------------------------------------------
+                \tLocal: \t\thttp://127.0.0.1:{}
+                \tExternal: \thttp://{}:{}
+                ----------------------------------------------------------""",
+                env.getProperty("server.port"),
+                InetAddress.getLocalHost().getHostAddress(),
+                env.getProperty("server.port"));
     }
 
     /**

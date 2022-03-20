@@ -2,6 +2,7 @@ package fr.icdc.ebad.domain;
 
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -9,22 +10,8 @@ import java.io.Serializable;
  */
 @Data
 public class ChaineAssociationId implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
-    public long getBatch() {
-        return batch;
-    }
-
-    public void setBatch(long batch) {
-        this.batch = batch;
-    }
-
-    public long getChaine() {
-        return chaine;
-    }
-
-    public void setChaine(long chaine) {
-        this.chaine = chaine;
-    }
 
     private int batchOrder;
 
