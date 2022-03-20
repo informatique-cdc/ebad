@@ -108,7 +108,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-the project needs Java 8 and a PostgreSQL database.
+the project needs Java 15+ and a PostgreSQL database.
 To build the project, Maven 3+ is required.
   
 :warning: You need a github token to get all maven package. Please read this article : https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry :warning:
