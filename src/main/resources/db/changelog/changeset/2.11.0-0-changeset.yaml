@@ -1,0 +1,86 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2.11.0-1-changeset
+      author: dtrouillet
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: environnement_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: k8s_job_id
+                  type: BIGINT
+            tableName: t_environnement_k8s_job
+        - addPrimaryKey:
+            columnNames: k8s_job_id, environnement_id
+            constraintName: t_environnement_k8s_job_pkey
+            tableName: t_environnement_k8s_job
+        - createTable:
+            tableName: t_k8s_job
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: t_k8s_job_pkey
+                  name: id
+                  type: Long
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: manifest
+                  type: VARCHAR(10000)
+              - column:
+                  name: image
+                  type: VARCHAR(255)
+              - column:
+                  name: args
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_by
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+              - column:
+                  name: last_modified_by
+                  type: VARCHAR(50)
+              - column:
+                  name: last_modified_date
+                  type: TIMESTAMP WITHOUT TIME ZONE
+        - addForeignKeyConstraint:
+            baseColumnNames: environnement_id
+            baseTableName: t_environnement_k8s_job
+            constraintName: t_environnement_k8s_job_environment
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: t_environnement
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: k8s_job_id
+            baseTableName: t_environnement_k8s_job
+            constraintName: t_environnement_k8s_job_k8s_job
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: t_k8s_job
+            validate: true
