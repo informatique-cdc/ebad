@@ -37,7 +37,7 @@ public class ChaineService {
     }
 
     @Job(name = "Chain %0, User %1", retries = 0)
-    @Transactional
+    //@Transactional
     public RetourBatch jobRunChaine(Long chaineId, String login) throws EbadServiceException {
         Chaine chaine = getChaine(chaineId);
         return runChaine(chaine, login);
