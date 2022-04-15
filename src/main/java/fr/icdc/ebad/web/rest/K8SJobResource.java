@@ -1,8 +1,10 @@
 package fr.icdc.ebad.web.rest;
 
+import fr.icdc.ebad.domain.K8SJob;
 import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.service.K8SJobService;
 import fr.icdc.ebad.web.rest.dto.BatchDto;
+import fr.icdc.ebad.web.rest.dto.K8SJobDto;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -57,9 +59,10 @@ public class K8SJobResource {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("@permissionBatch.canWrite(#batchDto, principal)")
-    public ResponseEntity<Void> addBatch(@RequestBody @Valid BatchDto batchDto) {
-        LOGGER.debug("REST request to add a new batch");
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<K8SJobDto> addK8SJob(@RequestBody @Valid K8SJobDto k8SJobDto) {
+        LOGGER.debug("REST request to add a new k8SJobDto");
+        K8SJob k8SJob = k8SJobService.saveK8SJob(mapStructMapper.convert(k8SJobDto));
+        return new ResponseEntity<>(mapStructMapper.convert(k8SJob), HttpStatus.OK);
     }
 
     /**

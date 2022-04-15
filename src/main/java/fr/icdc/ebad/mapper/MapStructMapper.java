@@ -1,9 +1,58 @@
 package fr.icdc.ebad.mapper;
 
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.AccreditationRequest;
+import fr.icdc.ebad.domain.Actualite;
+import fr.icdc.ebad.domain.ApiToken;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.domain.Chaine;
+import fr.icdc.ebad.domain.Directory;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.GlobalSetting;
+import fr.icdc.ebad.domain.Identity;
+import fr.icdc.ebad.domain.K8SJob;
+import fr.icdc.ebad.domain.LogBatch;
+import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.Notification;
+import fr.icdc.ebad.domain.Scheduling;
+import fr.icdc.ebad.domain.TypeFichier;
+import fr.icdc.ebad.domain.UsageApplication;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.plugin.dto.NormeDiscoverDto;
-import fr.icdc.ebad.web.rest.dto.*;
-import org.mapstruct.*;
+import fr.icdc.ebad.web.rest.dto.AccreditationRequestDto;
+import fr.icdc.ebad.web.rest.dto.ActualiteDto;
+import fr.icdc.ebad.web.rest.dto.ApiTokenDto;
+import fr.icdc.ebad.web.rest.dto.ApiTokenWithKeyDto;
+import fr.icdc.ebad.web.rest.dto.ApplicationDto;
+import fr.icdc.ebad.web.rest.dto.ApplicationSimpleDto;
+import fr.icdc.ebad.web.rest.dto.BatchDto;
+import fr.icdc.ebad.web.rest.dto.ChaineDto;
+import fr.icdc.ebad.web.rest.dto.ChaineSimpleDto;
+import fr.icdc.ebad.web.rest.dto.CompleteIdentityDto;
+import fr.icdc.ebad.web.rest.dto.DirectoryDto;
+import fr.icdc.ebad.web.rest.dto.EnvironnementCreationDto;
+import fr.icdc.ebad.web.rest.dto.EnvironnementDto;
+import fr.icdc.ebad.web.rest.dto.GlobalSettingKeyValueDto;
+import fr.icdc.ebad.web.rest.dto.K8SJobDto;
+import fr.icdc.ebad.web.rest.dto.LogBatchDto;
+import fr.icdc.ebad.web.rest.dto.NormLabelIdDto;
+import fr.icdc.ebad.web.rest.dto.NormeDto;
+import fr.icdc.ebad.web.rest.dto.NotificationDto;
+import fr.icdc.ebad.web.rest.dto.PublicIdentityDto;
+import fr.icdc.ebad.web.rest.dto.SchedulingDto;
+import fr.icdc.ebad.web.rest.dto.TypeFichierDto;
+import fr.icdc.ebad.web.rest.dto.UsageApplicationDto;
+import fr.icdc.ebad.web.rest.dto.UsageApplicationSimpleDto;
+import fr.icdc.ebad.web.rest.dto.UserDto;
+import fr.icdc.ebad.web.rest.dto.UserSimpleDto;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Builder;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Mappings;
+import org.mapstruct.Named;
 
 import java.util.List;
 import java.util.Set;
@@ -139,5 +188,9 @@ public interface MapStructMapper {
 
     TypeFichier convert(TypeFichierDto typeFichierDto);
 
+    //K8SJob
+    K8SJobDto convert(K8SJob k8SJob);
+
+    K8SJob convert(K8SJobDto k8SJobDto);
 
 }
