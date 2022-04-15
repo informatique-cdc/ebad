@@ -2,7 +2,12 @@ package fr.icdc.ebad.service;
 
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.LogBatch;
+import fr.icdc.ebad.domain.QBatch;
+import fr.icdc.ebad.domain.Scheduling;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.domain.util.RetourBatch;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.repository.LogBatchRepository;
@@ -22,7 +27,13 @@ import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class BatchService {
@@ -75,7 +86,7 @@ public class BatchService {
     }
 
 
-    @Transactional
+    //@Transactional
     @Job(name = "Batch %0, Env %1, Params %2, User %3", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String params, String login, String uuid) throws EbadServiceException {
         addJob(environnementId, batchId);
@@ -91,7 +102,7 @@ public class BatchService {
         }
     }
 
-    @Transactional
+//    @Transactional
     @Job(name = "Batch %0, Env %1, User %2", retries = 0)
     public RetourBatch jobRunBatch(Long batchId, Long environnementId, String login, String uuid) throws EbadServiceException {
         addJob(environnementId, batchId);
@@ -105,7 +116,7 @@ public class BatchService {
     }
 
 
-    @Transactional
+//    @Transactional
     public RetourBatch runBatch(Batch batch, Environnement environnement, String login, String uuid) throws EbadServiceException {
         String params = "";
         if (null != batch.getParams()) {
