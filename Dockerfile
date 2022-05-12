@@ -6,7 +6,7 @@ COPY ${JAR_FILE} app.jar
 
 RUN java -Djarmode=layertools -jar app.jar extract
 
-FROM docker.artifactory.serv.cdc.fr/openjdk:17-jre-slim
+FROM openjdk:17-slim
 
 WORKDIR app
 
