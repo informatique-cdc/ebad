@@ -620,13 +620,13 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <packagingExcludes>WEB-INF/lib/tomcat-*.jar</packagingExcludes>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-war-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <packagingExcludes>WEB-INF/lib/tomcat-*.jar</packagingExcludes>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
@@ -719,12 +719,12 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <executable>false</executable>
                     <layers>
                         <enabled>true</enabled>
                         <configuration>${project.basedir}/src/layers.xml</configuration>
                     </layers>
                     <wait>6000</wait>
-                    <executable>true</executable>
                 </configuration>
             </plugin>
         </plugins>
@@ -754,13 +754,5 @@
             </plugin>
         </plugins>
     </reporting>
-    <repositories>
-        <repository>
-            <id>github-public</id>
-            <url>https://read-public-ebad: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@maven.pkg.github.com/informatique-cdc/ebad-plugin</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
-        </repository>
-    </repositories>
 </project>
 
