@@ -62,7 +62,7 @@
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <pf4j-spring.version>0.7.0</pf4j-spring.version>
         <pf4j.version>3.6.0</pf4j.version>
-        <jobrunr.version>4.0.10</jobrunr.version>
+        <jobrunr.version>5.1.7</jobrunr.version>
         <git.user />
         <git.password />
         <jacoco.agent.ut.arg />
