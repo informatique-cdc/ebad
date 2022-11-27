@@ -37,6 +37,7 @@ spring:
       hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
       hibernate.javax.cache.missing_cache_strategy: create
       hibernate.enable_lazy_load_no_trans: true
+      hibernate.id.db_structure_naming_strategy: legacy
   thymeleaf:
     mode: HTML
     encoding: UTF-8
@@ -68,4 +69,4 @@ org.jobrunr:
     enabled: true
     poll-interval-in-seconds: 5
   dashboard.enabled: true
-
+  

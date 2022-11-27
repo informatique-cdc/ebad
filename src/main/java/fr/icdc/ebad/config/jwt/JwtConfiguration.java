@@ -8,7 +8,6 @@ import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
@@ -24,14 +23,13 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 import java.util.Arrays;
 
 
 @Profile(Constants.SPRING_PROFILE_JWT)
 @Configuration
-@Import(SecurityProblemSupport.class)
+//@Import(SecurityProblemSupport.class)
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Order(3)
@@ -40,15 +38,17 @@ public class JwtConfiguration  {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserDetailsService userDetailsService;
     private final TokenProvider tokenProvider;
-    private final SecurityProblemSupport problemSupport;
+//    private final SecurityProblemSupport problemSupport;
     private final Environment environment;
     private final PasswordEncoder passwordEncoder;
 
-    public JwtConfiguration(AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService, TokenProvider tokenProvider, SecurityProblemSupport problemSupport, Environment environment, PasswordEncoder passwordEncoder) {
+    public JwtConfiguration(AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService, TokenProvider tokenProvider,
+//                            SecurityProblemSupport problemSupport,
+                            Environment environment, PasswordEncoder passwordEncoder) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDetailsService = userDetailsService;
         this.tokenProvider = tokenProvider;
-        this.problemSupport = problemSupport;
+//        this.problemSupport = problemSupport;
         this.environment = environment;
         this.passwordEncoder = passwordEncoder;
     }
@@ -82,8 +82,8 @@ public class JwtConfiguration  {
 
         http
                 .exceptionHandling()
-                .authenticationEntryPoint(problemSupport)
-                .accessDeniedHandler(problemSupport)
+//                .authenticationEntryPoint(problemSupport)
+//                .accessDeniedHandler(problemSupport)
                 .and()
                 .csrf().csrfTokenRepository(cookieCsrfTokenRepository)
                 .and()

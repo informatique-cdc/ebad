@@ -11,7 +11,6 @@ import fr.icdc.ebad.util.TestUtil;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import fr.icdc.ebad.web.rest.dto.NormeDto;
 import fr.icdc.ebad.web.rest.errors.ExceptionTranslator;
-import jakarta.management.RuntimeMBeanException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -36,6 +35,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.management.RuntimeMBeanException;
 import java.util.Locale;
 import java.util.Set;
 
