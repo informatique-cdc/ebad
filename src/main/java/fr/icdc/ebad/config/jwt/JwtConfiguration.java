@@ -3,6 +3,7 @@ package fr.icdc.ebad.config.jwt;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.security.jwt.JWTConfigurer;
 import fr.icdc.ebad.security.jwt.TokenProvider;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.annotation.Bean;
@@ -11,23 +12,22 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
+
 
 @Profile(Constants.SPRING_PROFILE_JWT)
 @Configuration
@@ -35,7 +35,7 @@ import java.util.Arrays;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Order(3)
-public class JwtConfiguration extends WebSecurityConfigurerAdapter {
+public class JwtConfiguration  {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserDetailsService userDetailsService;
@@ -67,13 +67,13 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
 
 
 
-    @Bean
-    public AuthenticationManager customAuthenticationManager() throws Exception {
-        return authenticationManager();
-    }
+//    @Bean
+//    public AuthenticationManager customAuthenticationManager() throws Exception {
+//        return new AuthenticationManager();
+//    }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         CookieCsrfTokenRepository cookieCsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         cookieCsrfTokenRepository.setCookiePath("/");
         cookieCsrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
@@ -90,21 +90,21 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests()
-                .antMatchers("/register").permitAll()
-                .antMatchers("/ws").permitAll()
-                .antMatchers("/news/public").permitAll()
-                .antMatchers("/activate").permitAll()
-                .antMatchers("/authenticate").permitAll()
-                .antMatchers("/account/reset-password/init").permitAll()
-                .antMatchers("/account/reset-password/finish").permitAll()
-                .antMatchers("/csrf").permitAll()
-                .antMatchers("/actuator/**").permitAll()
-                .antMatchers("/swagger-ui.html").permitAll()
-                .antMatchers("/v3/api-docs/**").permitAll()
-                .antMatchers("/v3/api-docs**").permitAll()
-                .antMatchers("/swagger-resources/configuration/ui").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
+                .authorizeHttpRequests()
+                .requestMatchers("/register").permitAll()
+                .requestMatchers("/ws").permitAll()
+                .requestMatchers("/news/public").permitAll()
+                .requestMatchers("/activate").permitAll()
+                .requestMatchers("/authenticate").permitAll()
+                .requestMatchers("/account/reset-password/init").permitAll()
+                .requestMatchers("/account/reset-password/finish").permitAll()
+                .requestMatchers("/csrf").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/v3/api-docs**").permitAll()
+                .requestMatchers("/swagger-resources/configuration/ui").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .cors()
@@ -114,6 +114,8 @@ public class JwtConfiguration extends WebSecurityConfigurerAdapter {
         if(Arrays.stream(environment.getActiveProfiles()).anyMatch("disable-csrf"::equalsIgnoreCase)){
             http.csrf().disable();
         }
+
+        return http.build();
     }
 
 

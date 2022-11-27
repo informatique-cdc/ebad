@@ -10,6 +10,7 @@ import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import jakarta.mail.MessagingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

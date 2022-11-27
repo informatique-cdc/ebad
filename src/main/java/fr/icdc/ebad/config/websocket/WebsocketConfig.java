@@ -1,6 +1,7 @@
 package fr.icdc.ebad.config.websocket;
 
 import fr.icdc.ebad.security.jwt.TokenProvider;
+import jakarta.annotation.Nullable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.MessageChannel;
@@ -14,7 +15,6 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 

@@ -59,10 +59,13 @@ security:
 logging.level:
   fr.icdc.ebad: info
   root: info
-
+  org:
+    springframework:
+      security: DEBUG
 
 org.jobrunr:
   background-job-server:
     enabled: true
     poll-interval-in-seconds: 5
   dashboard.enabled: true
+

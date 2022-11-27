@@ -7,14 +7,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @Order(2)
-public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
+public class ApiSecurityConfig {
 
     private final ApiKeyAuthenticationManager apiKeyAuthenticationManager;
     private final EbadProperties ebadProperties;
@@ -35,11 +35,11 @@ public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
         return requestHeaderAuthenticationFilter;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         // @formatter:off
         http
-                .requestMatcher(request -> {
+                .securityMatcher(request -> {
                     String auth = request.getHeader(ebadProperties.getSecurity().getApiKeyHeaderName());
                     return (auth != null);
                 })
@@ -51,5 +51,6 @@ public class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // @formatter:on
+        return http.build();
     }
 }

@@ -4,7 +4,6 @@ import fr.icdc.ebad.service.util.EbadNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 
 public final class ResponseUtil {
