@@ -604,7 +604,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.0.0</version>
                 <configuration>
                     <forkCount>2</forkCount>
                     <reuseForks>true</reuseForks>
@@ -616,7 +616,7 @@
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
                         <artifactId>surefire-junit4</artifactId>
-                        <version>2.22.2</version>
+                        <version>3.0.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
