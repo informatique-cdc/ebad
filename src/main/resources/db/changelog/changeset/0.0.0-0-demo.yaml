@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: demo-00
+      context: demo
+      author: dtrouillet
+      changes:
+        - sql:
+            sql: insert into T_USER (CREATED_BY,CREATED_DATE, ACTIVATED,  EMAIL, FIRST_NAME, LANG_KEY, LAST_NAME, LOGIN, PASSWORD)  values ('demo', now(), true, 'demo@test.fr', 'demo', 'FR_fr', 'demo', 'demo', '$2a$10$bPgTE7J0KkKC00Ep7i4w4.YhPgBklTDn1W4idlkv9tV5zcc1r54eq');
+        - sql:
+            sql: insert into T_USER_AUTHORITY (USER_ID, AUTHORITY_NAME) values ((select ID from T_USER where LOGIN = 'demo'), 'ROLE_ADMIN');
+        - sql:
+            sql: insert into T_USER_AUTHORITY (USER_ID, AUTHORITY_NAME) values ((select ID from T_USER where LOGIN = 'demo'), 'ROLE_USER');
+        - sql:
+            sql: insert into T_APPLICATION (ID, CREATED_BY, CREATED_DATE, CODE, DATE_FICHIER_PATTERN, DATE_PARAMETRE_PATTERN, NAME) values ( nextval('HIBERNATE_SEQUENCE'), 'demo', now(), 'AA0', 'yyyyMMdd', 'yyyyMMdd', 'appDemo');
+        - sql:
+            sql: insert into T_USAGE_APPLICATION (CAN_MANAGE, CAN_USE, APPLICATION_ID, USER_ID) values (true, true, (select ID from T_APPLICATION where CODE = 'AA0' and NAME = 'appDemo'),(select ID from T_USER where LOGIN = 'demo') );
+        - sql:
+            sql: insert into T_NORME (ID, CREATED_BY, CREATED_DATE, COMMAND_LINE, CTRL_M_DATE, NAME, PATH_SHELL) values (nextval('HIBERNATE_SEQUENCE'), 'demo', now(), '$1', 'ctrml.date', 'demoNorm', '/shell');
+        - sql:
+            sql: insert into T_ENVIRONNEMENT (ID, CREATED_BY, CREATED_DATE,  HOME_PATH, HOST, NAME, PREFIX, APPLICATION_ID, NORME_ID, IDENTITY_ID) values (nextval('HIBERNATE_SEQUENCE'), 'demo', now(), '/home', 'localhost', 'demoEnv', 'A',(select ID from T_APPLICATION where CODE = 'AA0' and NAME = 'appDemo'), (select ID from T_NORME where NAME = 'demoNorm'), (select MAX(ID) from T_IDENTITY));
+        - sql:
+            sql: insert into T_BATCH (ID, CREATED_BY, CREATED_DATE,  NAME, PATH) values (nextval('HIBERNATE_SEQUENCE'), 'demo', now(), 'demoBatch', 'demo.sh');
+        - sql:
+            sql: insert into T_ENVIRONNEMENT_BATCH (ENVIRONNEMENT_ID, BATCH_ID) values (select ID from T_ENVIRONNEMENT where NAME = 'demoEnv', select ID from T_BATCH where NAME = 'demoBatch');
