@@ -38,3 +38,7 @@ databaseChangeLog:
   - include:
       file: changeset/2.10.0-1-changeset.yaml
       relativeToChangelogFile: true
+  - include:
+      file: changeset/0.0.0-0-demo.yaml
+      relativeToChangelogFile: true
+    

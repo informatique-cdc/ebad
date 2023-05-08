@@ -41,6 +41,8 @@ spring:
   thymeleaf:
     mode: HTML
     encoding: UTF-8
+  liquibase:
+    contexts: prod
 #  mail:
 #    host: localhost
 #    port: 5025
