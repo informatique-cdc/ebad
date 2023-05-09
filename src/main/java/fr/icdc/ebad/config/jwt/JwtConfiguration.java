@@ -3,14 +3,13 @@ package fr.icdc.ebad.config.jwt;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.security.jwt.JWTConfigurer;
 import fr.icdc.ebad.security.jwt.TokenProvider;
-import jakarta.annotation.PostConstruct;
 import org.apache.commons.compress.utils.Lists;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -53,16 +53,16 @@ public class JwtConfiguration  {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostConstruct
-    public void init() {
-        try {
-            authenticationManagerBuilder
-                    .userDetailsService(userDetailsService)
-                    .passwordEncoder(passwordEncoder);
-        } catch (Exception e) {
-            throw new BeanInitializationException("Security configuration failed", e);
-        }
-    }
+//    @PostConstruct
+//    public void init() {
+//        try {
+//            authenticationManagerBuilder
+//                    .userDetailsService(userDetailsService)
+//                    .passwordEncoder(passwordEncoder);
+//        } catch (Exception e) {
+//            throw new BeanInitializationException("Security configuration failed", e);
+//        }
+//    }
 
 
 
@@ -73,19 +73,33 @@ public class JwtConfiguration  {
 //    }
 
     @Bean
+    public AuthenticationManager customAuthenticationManager(HttpSecurity http) throws Exception {
+        // Configure AuthenticationManagerBuilder
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+        // Get AuthenticationManager
+        return authenticationManagerBuilder.build();
+    }
+
+    @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         CookieCsrfTokenRepository cookieCsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         cookieCsrfTokenRepository.setCookiePath("/");
         cookieCsrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
         cookieCsrfTokenRepository.setCookieName("XSRF-TOKEN");
         cookieCsrfTokenRepository.setCookieHttpOnly(false);
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+
+
 
         http
                 .exceptionHandling()
 //                .authenticationEntryPoint(problemSupport)
 //                .accessDeniedHandler(problemSupport)
                 .and()
-                .csrf().csrfTokenRepository(cookieCsrfTokenRepository)
+                .csrf()
+                .csrfTokenRepository(cookieCsrfTokenRepository)
+                .csrfTokenRequestHandler(requestHandler)
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -109,6 +123,8 @@ public class JwtConfiguration  {
                 .and()
                 .cors()
                 .and()
+//                .addFilter(new AuthorizationFilter(authenticationManager, userRepository))
+                .authenticationManager(customAuthenticationManager(http))
                 .apply(securityConfigurerAdapter());
 
         if(Arrays.stream(environment.getActiveProfiles()).anyMatch("disable-csrf"::equalsIgnoreCase)){
