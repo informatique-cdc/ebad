@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:~/ebad;MODE=PostgreSQL
+    url: jdbc:h2:~/ebad;MODE=PostgreSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE
     #url: jdbc:h2:file:/data/demo
     driverClassName: org.h2.Driver
     username: sa
