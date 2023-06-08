@@ -147,6 +147,12 @@ We use cypress for end to end tests with other ebad-front project
 
 Add additional notes about how to deploy this on a live system
 
+### Keycloak
+helm install keycloak -f values.yaml oci://registry-1.docker.io/bitnamicharts/keycloak 
+ingress:
+    enabled: true
+    hostname: idp.local
+
 
 ## Built With
 
