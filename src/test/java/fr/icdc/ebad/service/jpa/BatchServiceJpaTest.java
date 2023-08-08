@@ -2,9 +2,19 @@ package fr.icdc.ebad.service.jpa;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import fr.icdc.ebad.config.Constants;
-import fr.icdc.ebad.domain.*;
+import fr.icdc.ebad.domain.Application;
+import fr.icdc.ebad.domain.Authority;
+import fr.icdc.ebad.domain.Batch;
+import fr.icdc.ebad.domain.Environnement;
+import fr.icdc.ebad.domain.Identity;
+import fr.icdc.ebad.domain.Norme;
+import fr.icdc.ebad.domain.QBatch;
+import fr.icdc.ebad.domain.UsageApplication;
+import fr.icdc.ebad.domain.UsageApplicationId;
+import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.BatchRepository;
 import fr.icdc.ebad.service.BatchService;
+import jakarta.persistence.EntityManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +25,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
 
 import static org.junit.Assert.assertEquals;
 

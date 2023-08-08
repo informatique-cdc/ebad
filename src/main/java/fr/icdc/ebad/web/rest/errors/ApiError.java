@@ -93,9 +93,10 @@ public class ApiError {
      * @param cv the ConstraintViolation
      */
     private void addValidationError(ConstraintViolation<?> cv) {
+        PathImpl path = PathImpl.createPathFromString(cv.getPropertyPath().toString());
         this.addValidationError(
                 cv.getRootBeanClass().getSimpleName(),
-                ((PathImpl) cv.getPropertyPath()).getLeafNode().asString(),
+                path.getLeafNode().asString(),
                 cv.getInvalidValue(),
                 cv.getMessage());
     }

@@ -22,6 +22,8 @@ import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.repository.NormeRepository;
 import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import org.jobrunr.scheduling.JobScheduler;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
@@ -35,8 +37,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
