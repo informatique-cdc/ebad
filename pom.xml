@@ -61,7 +61,7 @@
         <usertype-core.version>7.0.0.CR1</usertype-core.version>
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <pf4j-spring.version>0.8.0</pf4j-spring.version>
-        <pf4j.version>3.9.0</pf4j.version>
+        <pf4j.version>3.10.0</pf4j.version>
         <jobrunr.version>4.0.10</jobrunr.version>
         <git.user />
         <git.password />
