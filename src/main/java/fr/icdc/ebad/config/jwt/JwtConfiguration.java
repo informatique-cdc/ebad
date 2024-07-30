@@ -89,6 +89,7 @@ public class JwtConfiguration  {
         cookieCsrfTokenRepository.setCookieName("XSRF-TOKEN");
         cookieCsrfTokenRepository.setCookieHttpOnly(false);
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName(null);
 
 
 
