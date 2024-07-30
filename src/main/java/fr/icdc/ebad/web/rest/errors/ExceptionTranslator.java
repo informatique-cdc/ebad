@@ -50,9 +50,9 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
      * @return the ApiError object
      */
     @Override
-        protected ResponseEntity<Object> handleMissingServletRequestParameter(
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException ex, HttpHeaders headers,
-                HttpStatusCode status, WebRequest request) {
+            HttpStatusCode status, WebRequest request) {
         String error = ex.getParameterName() + " parameter is missing";
         return buildResponseEntity(new ApiError(BAD_REQUEST, error, ex));
     }
@@ -108,12 +108,12 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
      * @param ex the ConstraintViolationException
      * @return the ApiError object
      */
-    @ExceptionHandler(javax.validation.ConstraintViolationException.class)
+    @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleConstraintViolation(
-            javax.validation.ConstraintViolationException ex) {
+            ConstraintViolationException ex) {
         ApiError apiError = new ApiError(BAD_REQUEST);
         apiError.setMessage("Error occured when validate field");
-        apiError.addValidationErrors(ex.getConstraintViolations());
+//        apiError.addValidationErrors(ex.getConstraintViolations());
         return buildResponseEntity(apiError);
     }
 
@@ -188,7 +188,7 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(EbadServiceException.class)
     protected ResponseEntity<Object> handleEbadServiceException(EbadServiceException ex) {
-        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,ex.getMessage(), ex));
+        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), ex));
     }
 
     /**
@@ -196,15 +196,14 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(IllegalStateException.class)
     protected ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
-        return buildResponseEntity(new ApiError(BAD_REQUEST,ex.getMessage(), ex));
+        return buildResponseEntity(new ApiError(BAD_REQUEST, ex.getMessage(), ex));
     }
 
 
     @ExceptionHandler({InsufficientAuthenticationException.class, UserNotActivatedException.class, AccessDeniedException.class})
-    public ResponseEntity<Object> handleInsufficientAuthenticationException(Exception ex){
-        return buildResponseEntity(new ApiError(HttpStatus.FORBIDDEN,messageSource.getMessage(ErrorConstants.ERR_FORBIDDEN, null, LocaleContextHolder.getLocale()), ex));
+    public ResponseEntity<Object> handleInsufficientAuthenticationException(Exception ex) {
+        return buildResponseEntity(new ApiError(HttpStatus.FORBIDDEN, messageSource.getMessage(ErrorConstants.ERR_FORBIDDEN, null, LocaleContextHolder.getLocale()), ex));
     }
-
 
 
     /**
@@ -243,7 +242,7 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleException(Exception ex) {
         logger.error(ex.getMessage(), ex);
-        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error", ex));
+        return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex));
     }
 
 

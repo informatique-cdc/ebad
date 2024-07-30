@@ -11,7 +11,6 @@ import fr.icdc.ebad.util.TestUtil;
 import fr.icdc.ebad.web.rest.dto.ApplicationDto;
 import fr.icdc.ebad.web.rest.dto.NormeDto;
 import fr.icdc.ebad.web.rest.errors.ExceptionTranslator;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
@@ -162,7 +161,7 @@ public class ExceptionTranslatorTest {
     @WithMockUser(roles = {"ADMIN"})
     public void testHandleEntityNotFound() throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put("/norms").content("{\"name\": \"toto\"}").contentType("application/json");
-        when(normeService.saveNorme(any())).thenThrow(EntityNotFoundException.class);
+        when(normeService.saveNorme(any())).thenThrow(javax.persistence.EntityNotFoundException.class);
         restMvc.perform(builder)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.apierror.message", is("Unexpected error")));

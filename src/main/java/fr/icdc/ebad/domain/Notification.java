@@ -14,9 +14,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.joda.time.DateTime;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
+
+import java.time.LocalDateTime;
 
 /**
  * Entite des notifications permettant d'enregistrer des notications
@@ -39,7 +41,7 @@ public class Notification {
     @CreatedDate
     @Column(nullable = false, name = "created_date")
     @Convert(converter= Jsr310JpaConverters.LocalDateConverter.class)
-    private DateTime createdDate = DateTime.now();
+    private LocalDateTime createdDate = LocalDateTime.now();
 
     @NotNull
     @Column(nullable = false, name = "is_read")
