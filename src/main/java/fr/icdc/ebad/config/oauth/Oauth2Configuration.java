@@ -1,16 +1,23 @@
 package fr.icdc.ebad.config.oauth;
 
+import fr.icdc.ebad.config.properties.EbadProperties;
+import fr.icdc.ebad.repository.AuthorityRepository;
+import fr.icdc.ebad.repository.UserRepository;
+import fr.icdc.ebad.security.EbadUserDetailsService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -25,10 +32,17 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class Oauth2Configuration {
 
-    private final OauthJwtAuthConverter jwtAuthConverter;
-    public Oauth2Configuration(OauthJwtAuthConverter jwtAuthConverter) {
+//    private final OauthJwtAuthConverter jwtAuthConverter;
+    private final EbadUserDetailsService userDetailsService;
+    private final UserRepository userRepository;
+    private final AuthorityRepository authorityRepository;
+    private final EbadProperties ebadProperties;
 
-        this.jwtAuthConverter = jwtAuthConverter;
+    public Oauth2Configuration(EbadUserDetailsService userDetailsService, UserRepository userRepository, AuthorityRepository authorityRepository, EbadProperties ebadProperties) {
+        this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
+        this.authorityRepository = authorityRepository;
+        this.ebadProperties = ebadProperties;
     }
 
     @Bean
@@ -75,7 +89,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt().jwtAuthenticationConverter(jwtAuthConverter))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt().jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .cors();
         return http.build();
 
@@ -101,6 +115,11 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //        userInfoTokenServices.setPrincipalExtractor(ebadPrincipalExtractor());
 //        return userInfoTokenServices;
 //    }
+
+    @Bean
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        return new CustomJwtAuthenticationConverter(userDetailsService, userRepository, authorityRepository, ebadProperties);
+    }
 
 
 }
