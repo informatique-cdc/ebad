@@ -3,7 +3,6 @@ package fr.icdc.ebad.security.permission;
 import fr.icdc.ebad.domain.Application;
 import fr.icdc.ebad.domain.Identity;
 import fr.icdc.ebad.repository.IdentityRepository;
-import liquibase.pro.packaged.A;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +24,10 @@ import static fr.icdc.ebad.config.Constants.ROLE_USER;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
