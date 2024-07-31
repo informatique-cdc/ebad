@@ -40,7 +40,7 @@ public class Notification {
     @NotNull
     @CreatedDate
     @Column(nullable = false, name = "created_date")
-    @Convert(converter= Jsr310JpaConverters.LocalDateConverter.class)
+    @Convert(converter= Jsr310JpaConverters.LocalDateTimeConverter.class)
     private LocalDateTime createdDate = LocalDateTime.now();
 
     @NotNull
