@@ -1,12 +1,11 @@
 package fr.icdc.ebad.web.rest.dto;
 
 
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.Size;
 
 /**
  * View Model extending the UserAccountDto, which is meant to be used in the user management UI.
