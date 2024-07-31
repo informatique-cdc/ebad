@@ -21,13 +21,13 @@
     <servers>
         <server>
             <id>github-public</id>
-            <username>${env.USERNAME}</username>
-            <password>${env.PASSWORD}</password>
+            <username>${env.GITHUB_USERNAME}</username>
+            <password>${env.GITHUB_pASSWORD}</password>
         </server>
         <server>
             <id>github</id>
-            <username>${env.USERNAME}</username>
-            <password>${env.PASSWORD}</password>
+            <username>${env.GITHUB_USERNAME}</username>
+            <password>${env.GITHUB_PASSWORD}</password>
         </server>
     </servers>
 </settings>
