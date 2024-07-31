@@ -14,6 +14,7 @@ import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import fr.icdc.ebad.web.rest.dto.AccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.AuthorityApplicationDTO;
+import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.MessagingException;
 
 
 @Service
@@ -60,7 +60,7 @@ public class AccreditationRequestService {
                 .wantUse(isWantUse)
                 .build();
 
-        AccreditationRequest result = accreditationRequestRepository.save(accreditationRequest);
+        AccreditationRequest result = accreditationRequestRepository.saveAndFlush(accreditationRequest);
 
         AccreditationRequestDto[] sendNotif = {mapStructMapper.convert(result)};
         application.getUsageApplications()
@@ -108,7 +108,7 @@ public class AccreditationRequestService {
         AccreditationRequest accreditationRequest = accreditationRequestRepository.findByIdAndState(idAccreditationRequest, StateRequest.SENT).orElseThrow(EbadServiceException::new);
         if (!isAccepted) {
             accreditationRequest.setState(StateRequest.REJECTED);
-            accreditationRequestRepository.save(accreditationRequest);
+            accreditationRequestRepository.saveAndFlush(accreditationRequest);
         } else {
 
             AuthorityApplicationDTO authorityApplicationDTO = new AuthorityApplicationDTO();
@@ -118,7 +118,7 @@ public class AccreditationRequestService {
             authorityApplicationDTO.setAddUser(accreditationRequest.isWantUse());
             if (null != userService.changeAutorisationApplication(authorityApplicationDTO)) {
                 accreditationRequest.setState(StateRequest.ACCEPTED);
-                accreditationRequestRepository.save(accreditationRequest);
+                accreditationRequestRepository.saveAndFlush(accreditationRequest);
             }
         }
 
