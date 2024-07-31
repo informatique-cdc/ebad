@@ -165,7 +165,7 @@ public class ChaineServiceTest {
     public void testGetChaine() {
         Chaine chaine = new Chaine();
         chaine.setId(1L);
-        when(chaineRepository.getById(chaine.getId())).thenReturn(chaine);
+        when(chaineRepository.getReferenceById(chaine.getId())).thenReturn(chaine);
 
         Chaine result = chaineService.getChaine(chaine.getId());
 
