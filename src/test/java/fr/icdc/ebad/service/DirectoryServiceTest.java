@@ -11,7 +11,6 @@ import fr.icdc.ebad.web.rest.dto.DirectoryDto;
 import fr.icdc.ebad.web.rest.dto.FilesDto;
 import org.apache.commons.io.IOUtils;
 import org.apache.sshd.sftp.client.SftpClient;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,6 +24,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,7 +140,7 @@ public class DirectoryServiceTest {
     }
 
     private long unixTimestampForDaysAgo(int days) {
-        return new DateTime().minusDays(days).getMillis() / 1000;
+        return LocalDateTime.now().minusDays(days).toInstant(ZoneOffset.UTC).toEpochMilli() / 1000;
     }
 
     @Test
