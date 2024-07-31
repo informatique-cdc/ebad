@@ -4,12 +4,12 @@ import fr.icdc.ebad.domain.Notification;
 import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.repository.NotificationRepository;
 import fr.icdc.ebad.security.SecurityUtils;
-import org.joda.time.DateTime;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -32,7 +32,7 @@ public class NotificationService {
         }
         Notification notification = new Notification();
         notification.setContent(message);
-        notification.setCreatedDate(DateTime.now());
+        notification.setCreatedDate(LocalDateTime.now());
         notification.setReceiver(user);
         notification.setDanger(isDanger);
         Notification result = notificationRepository.save(notification);

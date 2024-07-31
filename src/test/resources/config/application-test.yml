@@ -15,6 +15,7 @@ spring:
     driverClassName: org.h2.Driver
     username:
     password:
+  security.oauth2.resourceserver.jwt.jwk-set-uri: http://localhost
 
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect

@@ -5,7 +5,6 @@ import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import fr.icdc.ebad.domain.QUser;
 import fr.icdc.ebad.domain.User;
-import org.joda.time.DateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -17,6 +16,7 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.querydsl.binding.SingleValueBinding;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +40,7 @@ public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredi
 
     Optional<User> findOneByActivationKey(String activationKey);
 
-    List<User> findAllByActivatedIsFalseAndCreatedDateBefore(DateTime dateTime);
+    List<User> findAllByActivatedIsFalseAndCreatedDateBefore(LocalDateTime dateTime);
 
     Optional<User> findOneByEmail(String email);
 
