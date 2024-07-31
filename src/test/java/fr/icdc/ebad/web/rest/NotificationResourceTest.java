@@ -1,5 +1,7 @@
 package fr.icdc.ebad.web.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.icdc.ebad.config.Constants;
 import fr.icdc.ebad.domain.Notification;
 import fr.icdc.ebad.repository.NotificationRepository;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,11 +49,16 @@ public class NotificationResourceTest {
     private NotificationResource notificationResource;
 
     private MockMvc restMvc;
+    private ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        this.restMvc = MockMvcBuilders.standaloneSetup(notificationResource).build();
+        this.restMvc = MockMvcBuilders
+                .standaloneSetup(notificationResource)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build();
     }
 
     @Test

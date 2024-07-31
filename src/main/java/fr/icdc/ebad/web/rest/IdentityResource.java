@@ -2,15 +2,16 @@ package fr.icdc.ebad.web.rest;
 
 import com.querydsl.core.types.Predicate;
 import fr.icdc.ebad.domain.Identity;
+import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.service.IdentityService;
 import fr.icdc.ebad.web.ResponseUtil;
 import fr.icdc.ebad.web.rest.dto.CompleteIdentityDto;
 import fr.icdc.ebad.web.rest.dto.PublicIdentityDto;
-import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.web.rest.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -22,9 +23,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController

@@ -26,7 +26,6 @@ import fr.icdc.ebad.repository.NormeRepository;
 import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import org.jobrunr.scheduling.JobScheduler;
-import org.joda.time.format.DateTimeFormat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +44,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -218,7 +220,12 @@ public class EnvironnementServiceTest {
         Environnement environnement = Environnement.builder().id(1L).homePath("/home").norme(norme).application(application).build();
         when(shellService.runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenReturn(retourBatch);
         when(environnementRepository.getById(eq(environnement.getId()))).thenReturn(environnement);
-        environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
+
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+        LocalDate parsedDate = LocalDate.parse("01022018", formatter);
+
+        environnementService.changeDateTraiement(1L, Date.from(parsedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         verify(shellService).runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"));
     }
@@ -234,7 +241,11 @@ public class EnvironnementServiceTest {
         when(shellService.runCommandNew(eq(environnement), eq("echo 01022018 > /home/date.tr"))).thenThrow(new EbadServiceException());
         when(environnementRepository.getById(eq(environnement.getId()))).thenReturn(environnement);
 
-        environnementService.changeDateTraiement(1L, DateTimeFormat.forPattern("ddMMyyyy").parseDateTime("01022018").toDate());
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+        LocalDate parsedDate = LocalDate.parse("01022018", formatter);
+
+        environnementService.changeDateTraiement(1L, Date.from(parsedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
     @Test

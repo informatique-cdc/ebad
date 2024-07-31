@@ -1,12 +1,13 @@
 package fr.icdc.ebad.web.rest.dto;
 
 import lombok.Data;
-import org.joda.time.DateTime;
+
+import java.time.LocalDateTime;
 
 @Data
 public class NotificationDto {
     private Long id;
     private String content;
-    private DateTime createdDate = DateTime.now();
+    private LocalDateTime createdDate = LocalDateTime.now();
     private boolean read = false;
 }
