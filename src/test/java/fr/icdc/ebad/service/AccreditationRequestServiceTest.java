@@ -10,6 +10,7 @@ import fr.icdc.ebad.mapper.MapStructMapper;
 import fr.icdc.ebad.repository.AccreditationRequestRepository;
 import fr.icdc.ebad.repository.ApplicationRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import jakarta.mail.MessagingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -113,11 +113,11 @@ public class AccreditationRequestServiceTest {
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(accreditationRequest.getApplication()));
         when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").email("test@test.fr").build()));
 
-        when(accreditationRequestRepository.save(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
+        when(accreditationRequestRepository.saveAndFlush(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
         doNothing().when(notificationService).createNotification(any(), any(), eq(false));
         AccreditationRequest result = accreditationRequestService.requestNewAccreditation(1L, true, false);
 
-        verify(accreditationRequestRepository).save(eq(accreditationRequest));
+        verify(accreditationRequestRepository).saveAndFlush(eq(accreditationRequest));
         verify(messagingTemplate).convertAndSendToUser(any(), eq("/queue/accreditations"), any());
         verify(mailService).sendMailAccreditation(eq("modo@test.fr"));
 
@@ -150,14 +150,14 @@ public class AccreditationRequestServiceTest {
         when(applicationRepository.findById(eq(1L))).thenReturn(Optional.of(accreditationRequest.getApplication()));
         when(userService.getUser(any())).thenReturn(Optional.of(User.builder().login("testlogin").email("test@test.fr").build()));
 
-        when(accreditationRequestRepository.save(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
+        when(accreditationRequestRepository.saveAndFlush(eq(accreditationRequest))).thenReturn(accreditationRequestWithId);
 
         doThrow(MessagingException.class).when(mailService).sendMailAccreditation(eq("modo@test.fr"));
 
         doNothing().when(notificationService).createNotification(any(), any(), eq(false));
         AccreditationRequest result = accreditationRequestService.requestNewAccreditation(1L, true, false);
 
-        verify(accreditationRequestRepository).save(eq(accreditationRequest));
+        verify(accreditationRequestRepository).saveAndFlush(eq(accreditationRequest));
         verify(messagingTemplate).convertAndSendToUser(any(), eq("/queue/accreditations"), any());
         verify(mailService).sendMailAccreditation(eq("modo@test.fr"));
 
@@ -323,7 +323,7 @@ public class AccreditationRequestServiceTest {
         when(accreditationRequestRepository.findByIdAndState(eq(1L), eq(StateRequest.SENT))).thenReturn(Optional.of(accreditationRequest));
         accreditationRequestService.answerToRequest(1L, false);
 
-        verify(accreditationRequestRepository).save(eq(accreditationRequestRejected));
+        verify(accreditationRequestRepository).saveAndFlush(eq(accreditationRequestRejected));
     }
 
     @Test
@@ -357,7 +357,7 @@ public class AccreditationRequestServiceTest {
 
         accreditationRequestService.answerToRequest(1L, true);
 
-        verify(accreditationRequestRepository).save(eq(accreditationRequestAccepted));
+        verify(accreditationRequestRepository).saveAndFlush(eq(accreditationRequestAccepted));
 
         verify(userService).changeAutorisationApplication(argThat(authorityApplicationDTO ->
                 "testlogin".equals(authorityApplicationDTO.getLoginUser())
