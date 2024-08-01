@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2.11.0-0-changeset
+      author: dtrouillet
+      changes:
+        - sql:
+            sql: update T_USER  set PASSWORD = '$2y$10$MTbH9pg7B8zTpg9D1pMkb.cA2ZMAJwqMQwTdR9cDdRcAC4d6odjdy'  where PASSWORD = '$2a$10$bPgTE7J0KkKC00Ep7i4w4.YhPgBklTDn1W4idlkv9tV5zcc1r54eq';
