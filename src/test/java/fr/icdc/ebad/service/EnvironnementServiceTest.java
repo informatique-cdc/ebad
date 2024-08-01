@@ -167,7 +167,7 @@ public class EnvironnementServiceTest {
         verify(batchRepository, times(1)).deleteAll(eq(environnement.getBatchs()));
         verify(directoryRepository, times(1)).deleteByEnvironnement(eq(environnement));
         verify(environnementRepository, times(1)).delete(eq(environnement));
-        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(jobScheduler, times(1)).deleteRecurringJob(eq("10"));
         verify(schedulingRepository, times(1)).delete(eq(scheduling));
     }
 
@@ -204,7 +204,7 @@ public class EnvironnementServiceTest {
         verify(batchRepository, times(0)).deleteAll(eq(environnement.getBatchs()));
         verify(directoryRepository, times(1)).deleteByEnvironnement(eq(environnement));
         verify(environnementRepository, times(1)).delete(eq(environnement));
-        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(jobScheduler, times(1)).deleteRecurringJob(eq("10"));
         verify(schedulingRepository, times(1)).delete(eq(scheduling));
 
     }

@@ -297,7 +297,7 @@ public class BatchServiceTest {
         verify(logBatchRepository).deleteAllByBatchId(eq(1L));
         verify(logBatchRepository).deleteAllByBatchId(eq(2L));
 
-        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(jobScheduler, times(1)).deleteRecurringJob(eq("10"));
         verify(schedulingRepository, times(1)).delete(eq(scheduling));
 
         verify(batchRepository).delete(batch1);
@@ -440,7 +440,7 @@ public class BatchServiceTest {
         batchService.deleteBatch(1L);
         verify(logBatchRepository).deleteAllByBatchId(1L);
         verify(batchRepository).deleteById(1L);
-        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(jobScheduler, times(1)).deleteRecurringJob(eq("10"));
         verify(schedulingRepository, times(1)).delete(eq(scheduling));
 
     }
@@ -459,7 +459,7 @@ public class BatchServiceTest {
 
         verify(logBatchRepository).deleteAllByBatchId(1L);
         verify(batchRepository).deleteById(1L);
-        verify(jobScheduler, times(1)).delete(eq("10"));
+        verify(jobScheduler, times(1)).deleteRecurringJob(eq("10"));
         verify(schedulingRepository, times(1)).delete(eq(scheduling));
     }
 

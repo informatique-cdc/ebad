@@ -65,7 +65,7 @@ public class SchedulingService {
     @Transactional
     public void remove(Long schedulingId) {
         Scheduling scheduling = schedulingRepository.getById(schedulingId);
-        jobScheduler.delete(String.valueOf(scheduling.getId()));
+        jobScheduler.deleteRecurringJob(String.valueOf(scheduling.getId()));
         schedulingRepository.delete(scheduling);
     }
 
