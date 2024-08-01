@@ -15,6 +15,6 @@ ebad:
   security:
     authentication:
       jwt:
-        secret: my-secret-token-to-change-in-production
+        secret: my-secret-token-to-change-in-production-my-secret-token-to-change-in-production
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
