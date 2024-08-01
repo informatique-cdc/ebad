@@ -77,7 +77,7 @@ public class NormResourceTest {
 
         normeList.add(norme1);
         normeList.add(norme2);
-        Page<Norme> normePage = new PageImpl<>(normeList);
+        Page<Norme> normePage = new PageImpl<>(normeList, Pageable.ofSize(normeList.size()), normeList.size());
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms");
 
         when(normeService.getAllNormes(any(Predicate.class), any(Pageable.class))).thenReturn(normePage);
@@ -105,7 +105,7 @@ public class NormResourceTest {
 
         normeList.add(norme1);
         normeList.add(norme2);
-        Page<Norme> normePage = new PageImpl<>(normeList);
+        Page<Norme> normePage = new PageImpl<>(normeList, Pageable.ofSize(normeList.size()), normeList.size());
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/norms/name");
 
         when(normeService.getAllNormes(any(Predicate.class), any(Pageable.class))).thenReturn(normePage);

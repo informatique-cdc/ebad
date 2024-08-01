@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.http.MediaType;
@@ -93,7 +94,7 @@ public class TypeFichierResourceTest {
         typeFichiers.add(typeFichier1);
         typeFichiers.add(typeFichier2);
 
-        Page<TypeFichier> typeFichierPage = new PageImpl<>(typeFichiers);
+        Page<TypeFichier> typeFichierPage = new PageImpl<>(typeFichiers, Pageable.ofSize(typeFichiers.size()), typeFichiers.size());
 
         when(typeFichierService.getTypeFichierFromApplication(any(), any(), eq(1L))).thenReturn(typeFichierPage);
         when(permissionApplication.canRead(eq(1L), any())).thenReturn(true);

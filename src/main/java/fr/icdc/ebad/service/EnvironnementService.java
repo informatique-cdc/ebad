@@ -24,6 +24,7 @@ import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.service.util.EbadServiceException;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
+import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.JobScheduler;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
@@ -154,7 +155,7 @@ public class EnvironnementService {
     public void deleteScheduledJobFromEnvironment(Long environmentId){
         List<Scheduling> schedulings = schedulingRepository.findAllByEnvironnementId(environmentId);
         schedulings.forEach(scheduling -> {
-            jobScheduler.delete(String.valueOf(scheduling.getId()));
+            jobScheduler.deleteRecurringJob(String.valueOf(scheduling.getId()));
             schedulingRepository.delete(scheduling);
         });
     }

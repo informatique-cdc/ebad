@@ -13,6 +13,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.core.env.Environment;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -20,11 +21,14 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import static org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO;
+
 @SpringBootApplication
 @ComponentScan(excludeFilters={@ComponentScan.Filter(type= FilterType.ASSIGNABLE_TYPE, value=SpringDocDataRestConfiguration.class)})
 @EnableConfigurationProperties(EbadProperties.class)
 @EnableAsync
 @EnableScheduling
+@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 public class EbadApplication {
     private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(EbadApplication.class);
 

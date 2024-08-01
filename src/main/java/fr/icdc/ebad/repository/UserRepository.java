@@ -58,10 +58,10 @@ public interface UserRepository extends JpaRepository<User, Long>, QuerydslPredi
     @Query("select user from User user left join user.usageApplications usageApplication left join usageApplication.application application left join application.environnements environnement left join environnement.batchs batch where batch.id = :batch and user.login = :login and usageApplication.canManage = true")
     User findManagerFromBatch(@Param("batch") Long batch, @Param("login") String login);
 
-    @Query("select user from User user left join  user.usageApplications usageApplication on user.id = usageApplication.user left join usageApplication.application application where application.id = :application and user.login = :login and usageApplication.canUse = true")
+    @Query("select user from User user left join  user.usageApplications usageApplication on user.id = usageApplication.user.id left join usageApplication.application application where application.id = :application and user.login = :login and usageApplication.canUse = true")
     User findUserFromApplication(@Param("application") Long application, @Param("login") String login);
 
-    @Query("select user from User user left join  user.usageApplications usageApplication on user.id = usageApplication.user left join usageApplication.application application where application.id = :application and user.login = :login and usageApplication.canManage = true")
+    @Query("select user from User user left join  user.usageApplications usageApplication on user.id = usageApplication.user.id left join usageApplication.application application where application.id = :application and user.login = :login and usageApplication.canManage = true")
     User findManagerFromApplication(@Param("application") Long application, @Param("login") String login);
 
     @Query("select user from User user left join  user.usageApplications usageApplication left join usageApplication.application application left join application.environnements environnement where environnement.id = :env and user.login = :login and usageApplication.canUse = true")
