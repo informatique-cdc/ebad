@@ -126,7 +126,7 @@ public class IdentityResourceTest {
         identities.add(identity2);
         identities.add(identity3);
 
-        Page<Identity>  identityPage = new PageImpl<>(identities);
+        Page<Identity>  identityPage = new PageImpl<>(identities, Pageable.ofSize(identities.size()), identities.size());
         when(identityService.findWithoutApp(any(Predicate.class), any(Pageable.class))).thenReturn(identityPage);
 
         restMvc.perform(
@@ -162,7 +162,7 @@ public class IdentityResourceTest {
         identities.add(identity2);
         identities.add(identity3);
 
-        Page<Identity>  identityPage = new PageImpl<>(identities);
+        Page<Identity>  identityPage = new PageImpl<>(identities, Pageable.ofSize(identities.size()), identities.size());
         when(identityService.findAllByApplication(eq(1L), any(Predicate.class), any(Pageable.class))).thenReturn(identityPage);
 
         restMvc.perform(

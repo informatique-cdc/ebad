@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -86,7 +87,7 @@ public class LogsResourceTest {
         logBatches.add(logBatch1);
         logBatches.add(logBatch2);
 
-        PageImpl<LogBatch> logBatchPage = new PageImpl<>(logBatches);
+        PageImpl<LogBatch> logBatchPage = new PageImpl<>(logBatches, Pageable.ofSize(logBatches.size()), logBatches.size());
 
         when(logBatchService.getAllLogBatchWithPageable(any(), any())).thenReturn(logBatchPage);
 
@@ -114,7 +115,7 @@ public class LogsResourceTest {
         logBatches.add(logBatch1);
         logBatches.add(logBatch2);
 
-        PageImpl<LogBatch> logBatchPage = new PageImpl<>(logBatches);
+        PageImpl<LogBatch> logBatchPage = new PageImpl<>(logBatches, Pageable.ofSize(logBatches.size()), logBatches.size());
 
         when(logBatchService.getAllLogBatchWithPageable(any(), any())).thenReturn(logBatchPage);
         when(permissionEnvironnement.canRead(eq(1L), any())).thenReturn(true);
@@ -142,7 +143,7 @@ public class LogsResourceTest {
         logBatches.add(logBatch1);
         logBatches.add(logBatch2);
 
-        PageImpl<LogBatch> logBatchPage = new PageImpl<>(logBatches);
+        PageImpl<LogBatch> logBatchPage = new PageImpl<>(logBatches, Pageable.ofSize(logBatches.size()), logBatches.size());
 
         when(logBatchService.getAllLogBatchWithPageable(any(), any())).thenReturn(logBatchPage);
         when(permissionEnvironnement.canRead(eq(1L), any())).thenReturn(true);

@@ -14,6 +14,7 @@ import fr.icdc.ebad.repository.LogBatchRepository;
 import fr.icdc.ebad.repository.SchedulingRepository;
 import fr.icdc.ebad.security.SecurityUtils;
 import fr.icdc.ebad.service.util.EbadServiceException;
+import org.jobrunr.jobs.JobId;
 import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.scheduling.JobScheduler;
 import org.slf4j.Logger;
@@ -254,7 +255,7 @@ public class BatchService {
     public void deleteScheduledJobFromBatch(Long batchId){
         List<Scheduling> schedulings = schedulingRepository.findAllByBatchId(batchId);
         schedulings.forEach(scheduling -> {
-            jobScheduler.delete(String.valueOf(scheduling.getId()));
+            jobScheduler.deleteRecurringJob(String.valueOf(scheduling.getId()));
             schedulingRepository.delete(scheduling);
         });
     }

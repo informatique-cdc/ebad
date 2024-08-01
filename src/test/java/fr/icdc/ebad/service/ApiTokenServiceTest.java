@@ -48,7 +48,7 @@ public class ApiTokenServiceTest {
         ApiToken apiToken2 = ApiToken.builder().id(2L).build();
         apiTokens.add(apiToken1);
         apiTokens.add(apiToken2);
-        Page<ApiToken> apiTokenPage = new PageImpl<>(apiTokens);
+        Page<ApiToken> apiTokenPage = new PageImpl<>(apiTokens, Pageable.ofSize(apiTokens.size()), apiTokens.size());
         when(apiTokenRepository.findAllByUserLogin(eq("myLogin"), eq(pageable))).thenReturn(apiTokenPage);
 
         Page<ApiToken> results = apiTokenService.findTokenByUser("myLogin", pageable);

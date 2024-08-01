@@ -9,6 +9,7 @@ import fr.icdc.ebad.domain.User;
 import fr.icdc.ebad.service.AccreditationRequestService;
 import fr.icdc.ebad.web.rest.dto.CreationAccreditationRequestDto;
 import fr.icdc.ebad.web.rest.dto.ResponseAccreditationRequestDto;
+import fr.icdc.ebad.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -38,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,6 +57,9 @@ public class AccreditationRequestResourceTest {
     private AccreditationRequestResource accreditationRequestResource;
 
     @Autowired
+    private ExceptionTranslator exceptionTranslator;
+
+    @Autowired
     private WebApplicationContext context;
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -64,6 +70,7 @@ public class AccreditationRequestResourceTest {
         this.restMvc = MockMvcBuilders
                 .standaloneSetup(accreditationRequestResource)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setControllerAdvice(exceptionTranslator)
                 .build();
         objectMapper.registerModule(new JavaTimeModule());
     }
@@ -93,12 +100,13 @@ public class AccreditationRequestResourceTest {
         accreditationRequestList.add(accreditationRequest1);
         accreditationRequestList.add(accreditationRequest2);
 
-        Page<AccreditationRequest> accreditationRequestPage = new PageImpl<>(accreditationRequestList);
+        Page<AccreditationRequest> accreditationRequestPage = new PageImpl<>(accreditationRequestList, Pageable.ofSize(2), 2);
+
 
         when(accreditationRequestService.getAllAccreditationRequestToAnswer(any())).thenReturn(accreditationRequestPage);
 
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/accreditation-requests/need-answer");
-        restMvc.perform(builder)
+        restMvc.perform(builder).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -139,7 +147,7 @@ public class AccreditationRequestResourceTest {
         accreditationRequestList.add(accreditationRequest1);
         accreditationRequestList.add(accreditationRequest2);
 
-        Page<AccreditationRequest> accreditationRequestPage = new PageImpl<>(accreditationRequestList);
+        Page<AccreditationRequest> accreditationRequestPage = new PageImpl<>(accreditationRequestList, Pageable.ofSize(accreditationRequestList.size()), accreditationRequestList.size());
 
         when(accreditationRequestService.getMyAccreditationRequest(any())).thenReturn(accreditationRequestPage);
 
