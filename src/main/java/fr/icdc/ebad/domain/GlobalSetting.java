@@ -24,10 +24,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class GlobalSetting {
     @Id
-    @Column(name = "key")
+    @Column(name = "`key`")
     private String key;
 
-    @Column(name = "value", nullable = false)
+    @Column(name = "`value`", nullable = false)
     private String value;
 
     @Column(name = "label", nullable = false)

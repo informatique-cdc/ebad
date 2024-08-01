@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.http.MediaType;
@@ -103,7 +104,7 @@ public class ApplicationResourceTest {
         Application application2 = new Application();
         application2.setId(2L);
         applications.add(application2);
-        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications, Pageable.ofSize(applications.size()), applications.size());
 
         when(applicationService.findApplication(any(), any())).thenReturn(applicationPage);
 
@@ -131,7 +132,7 @@ public class ApplicationResourceTest {
         Application application2 = new Application();
         application2.setId(2L);
         applications.add(application2);
-        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications, Pageable.ofSize(applications.size()), applications.size());
 
         when(applicationService.getAllApplicationsUsed(any(), eq("user"))).thenReturn(applicationPage);
         when(userRepository.findUserFromApplication(anyLong(), anyString())).thenReturn(new User());
@@ -160,7 +161,8 @@ public class ApplicationResourceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications, Pageable.ofSize(applications.size()), applications.size());
+
 
         when(applicationService.getAllApplicationsManaged(any(), eq("dtrouillet"))).thenReturn(applicationPage);
         when(userRepository.findManagerFromApplication(eq(1L), eq("dtrouillet"))).thenReturn(new User());
@@ -188,7 +190,7 @@ public class ApplicationResourceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications, Pageable.ofSize(applications.size()), applications.size());
 
         when(applicationService.getAllApplications(any(), any())).thenReturn(applicationPage);
         restMvc.perform(builder)

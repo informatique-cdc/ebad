@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -140,7 +141,7 @@ public class SchedulingResourceTest {
         schedulings.add(scheduling1);
         schedulings.add(scheduling2);
 
-        PageImpl<Scheduling> page = new PageImpl<>(schedulings);
+        PageImpl<Scheduling> page = new PageImpl<>(schedulings, Pageable.ofSize(schedulings.size()), schedulings.size());
 
         when(permissionEnvironnement.canRead(eq(2L), any())).thenReturn(true);
         when(schedulingService.listByEnvironment(eq(2L), any())).thenReturn(page);
@@ -191,7 +192,7 @@ public class SchedulingResourceTest {
         schedulings.add(scheduling1);
         schedulings.add(scheduling2);
 
-        PageImpl<Scheduling> page = new PageImpl<>(schedulings);
+        PageImpl<Scheduling> page = new PageImpl<>(schedulings, Pageable.ofSize(schedulings.size()), schedulings.size());
 
         when(schedulingService.listAll(any())).thenReturn(page);
         restMvc.perform(builder)

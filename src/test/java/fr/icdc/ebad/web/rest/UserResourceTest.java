@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -108,7 +109,7 @@ public class UserResourceTest {
         User user2 = new User();
         user2.setId(2L);
         users.add(user2);
-        PageImpl<User> userPage = new PageImpl<>(users);
+        PageImpl<User> userPage = new PageImpl<>(users, Pageable.ofSize(users.size()), users.size());
 
         when(userService.getAllUsers(any(), any())).thenReturn(userPage);
 
