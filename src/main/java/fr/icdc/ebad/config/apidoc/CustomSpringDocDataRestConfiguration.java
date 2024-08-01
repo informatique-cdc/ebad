@@ -1,6 +1,7 @@
 package fr.icdc.ebad.config.apidoc;
 
 import com.querydsl.core.types.Predicate;
+import org.springdoc.core.SpringDocConfigProperties;
 import org.springdoc.core.customizers.DataRestDelegatingMethodParameterCustomizer;
 import org.springdoc.core.customizers.DelegatingMethodParameterCustomizer;
 import org.springdoc.core.providers.RepositoryRestConfigurationProvider;
@@ -62,7 +63,7 @@ public class CustomSpringDocDataRestConfiguration {
         QuerydslPredicateOperationCustomizer queryDslQuerydslPredicateOperationCustomizer(Optional<QuerydslBindingsFactory> querydslBindingsFactory) {
             if (querydslBindingsFactory.isPresent()) {
                 getConfig().addRequestWrapperToIgnore(Predicate.class);
-                return new QuerydslPredicateOperationCustomizer(querydslBindingsFactory.get());
+                return new QuerydslPredicateOperationCustomizer(querydslBindingsFactory.get(), new SpringDocConfigProperties());
             }
             return null;
         }
