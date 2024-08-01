@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -100,7 +101,7 @@ public class DirectoryResourceTest {
         Directory directory2 = Directory.builder().id(3L).name("directory2").build();
         directoryList.add(directory1);
         directoryList.add(directory2);
-        Page<Directory> directoryPage = new PageImpl<>(directoryList);
+        Page<Directory> directoryPage = new PageImpl<>(directoryList, Pageable.ofSize(directoryList.size()), directoryList.size());
 
         when(directoryService.findDirectoryFromEnvironnement(any(), any(), eq(1L))).thenReturn(directoryPage);
         when(permissionEnvironnement.canRead(eq(1L), any())).thenReturn(true);

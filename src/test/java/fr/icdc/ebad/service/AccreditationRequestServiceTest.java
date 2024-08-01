@@ -19,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -196,7 +197,7 @@ public class AccreditationRequestServiceTest {
         accreditationRequestList.add(accreditationRequest2);
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        when(accreditationRequestRepository.findAll(any(Predicate.class), eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList));
+        when(accreditationRequestRepository.findAll(any(Predicate.class), eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList, Pageable.ofSize(accreditationRequestList.size()), accreditationRequestList.size()));
 
         Page<AccreditationRequest> result = accreditationRequestService.getAllAccreditationRequestToAnswer(pageRequest);
 
@@ -221,7 +222,7 @@ public class AccreditationRequestServiceTest {
         application2.setId(2L);
         applications.add(application2);
 
-        PageImpl<Application> applicationPage = new PageImpl<>(applications);
+        PageImpl<Application> applicationPage = new PageImpl<>(applications, Pageable.ofSize(applications.size()), applications.size());
         when(applicationRepository.findAllManagedByUser(any(), any())).thenReturn(applicationPage);
 
 
@@ -248,7 +249,7 @@ public class AccreditationRequestServiceTest {
         accreditationRequestList.add(accreditationRequest2);
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        when(accreditationRequestRepository.findAll(any(Predicate.class), eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList));
+        when(accreditationRequestRepository.findAll(any(Predicate.class), eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList, Pageable.ofSize(accreditationRequestList.size()), accreditationRequestList.size()));
 
         Page<AccreditationRequest> result = accreditationRequestService.getAllAccreditationRequestToAnswer(pageRequest);
 
@@ -286,7 +287,7 @@ public class AccreditationRequestServiceTest {
         accreditationRequestList.add(accreditationRequest2);
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        when(accreditationRequestRepository.findAll(any(Predicate.class), eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList));
+        when(accreditationRequestRepository.findAll(any(Predicate.class), eq(pageRequest))).thenReturn(new PageImpl<>(accreditationRequestList, Pageable.ofSize(accreditationRequestList.size()), accreditationRequestList.size()));
 
         Page<AccreditationRequest> result = accreditationRequestService.getMyAccreditationRequest(pageRequest);
 

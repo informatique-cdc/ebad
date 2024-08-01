@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.http.MediaType;
@@ -96,7 +97,7 @@ public class ChaineResourceTest {
         chaines.add(chaine1);
         chaines.add(chaine2);
 
-        Page<Chaine> chainePage = new PageImpl<>(chaines);
+        Page<Chaine> chainePage = new PageImpl<>(chaines, Pageable.ofSize(chaines.size()), chaines.size());
 
         when(chaineService.getAllChaineFromEnvironmentWithPageable(any(), any(), argThat((environnement -> environnement.getId().equals(1L))))).thenReturn(chainePage);
         when(permissionEnvironnement.canRead(eq(1L), any())).thenReturn(true);

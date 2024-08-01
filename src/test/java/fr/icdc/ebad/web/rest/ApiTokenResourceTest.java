@@ -74,7 +74,7 @@ public class ApiTokenResourceTest {
         ApiToken apiToken2 = ApiToken.builder().id(2L).build();
         apiTokens.add(apiToken1);
         apiTokens.add(apiToken2);
-        Page<ApiToken> apiTokenPage = new PageImpl<>(apiTokens);
+        Page<ApiToken> apiTokenPage = new PageImpl<>(apiTokens, Pageable.ofSize(apiTokens.size()), apiTokens.size());
         when(apiTokenService.findTokenByUser(eq("user"), ArgumentMatchers.any(Pageable.class))).thenReturn(apiTokenPage);
 
         restMvc.perform(builder)

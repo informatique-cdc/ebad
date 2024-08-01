@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -76,7 +77,7 @@ public class NewResourceTest {
         Actualite actualite2 = new Actualite();
         actualite2.setId(2L);
         actualites.add(actualite2);
-        Page<Actualite> actualitePage = new PageImpl<>(actualites);
+        Page<Actualite> actualitePage = new PageImpl<>(actualites, Pageable.ofSize(actualites.size()), actualites.size());
         when(newService.getAllActualites(ArgumentMatchers.any())).thenReturn(actualitePage);
 
         restMvc.perform(builder)
@@ -100,7 +101,7 @@ public class NewResourceTest {
         Actualite actualite2 = new Actualite();
         actualite2.setId(2L);
         actualites.add(actualite2);
-        Page<Actualite> actualitePage = new PageImpl<>(actualites);
+        Page<Actualite> actualitePage = new PageImpl<>(actualites, Pageable.ofSize(actualites.size()), actualites.size());
 
         when(newService.getAllActualitesPubliees(ArgumentMatchers.any())).thenReturn(actualitePage);
 

@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.querydsl.QuerydslPredicateArgumentResolver;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -77,7 +78,7 @@ public class EnvironnementResourceTest {
         List<Environnement> environnementList = new ArrayList<>();
         environnementList.add(environnement1);
         environnementList.add(environnement2);
-        Page<Environnement> environnementPage = new PageImpl<>(environnementList);
+        Page<Environnement> environnementPage = new PageImpl<>(environnementList, Pageable.ofSize(environnementList.size()), environnementList.size());
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/environments?applicationId=1");
         when(environnementService.getEnvironmentFromApp(eq(1L), any(Predicate.class), any())).thenReturn(environnementPage);
         when(permissionApplication.canRead(eq(1L), any())).thenReturn(true);
