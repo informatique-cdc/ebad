@@ -1,7 +1,7 @@
-INSERT INTO t_global_setting (key, value, description, label) VALUES ('APPLICATION_IMPORT_ENABLED', false, 'Allow to import applications from plugin', 'Application import enabled');
-INSERT INTO t_global_setting (key, value, description, label) VALUES ('ENVIRONMENT_IMPORT_ENABLED', false, 'Allow to import environments from plugin', 'Environment import enabled');
-INSERT INTO t_global_setting (key, value, description, label) VALUES ('ENVIRONMENT_CREATE_ENABLED', true, 'Allow to create new environment', 'Environment creation enabled');
-INSERT INTO t_global_setting (key, value, description, label) VALUES ('APPLICATION_CREATE_ENABLED', true, 'Allow to create new application', 'Application creation enabled');
+INSERT INTO t_global_setting (`key`, `value`, description, label) VALUES ('APPLICATION_IMPORT_ENABLED', false, 'Allow to import applications from plugin', 'Application import enabled');
+INSERT INTO t_global_setting (`key`, `value`, description, label) VALUES ('ENVIRONMENT_IMPORT_ENABLED', false, 'Allow to import environments from plugin', 'Environment import enabled');
+INSERT INTO t_global_setting (`key`, `value`, description, label) VALUES ('ENVIRONMENT_CREATE_ENABLED', true, 'Allow to create new environment', 'Environment creation enabled');
+INSERT INTO t_global_setting (`key`, `value`, description, label) VALUES ('APPLICATION_CREATE_ENABLED', true, 'Allow to create new application', 'Application creation enabled');
 
 INSERT INTO t_authority (name) VALUES ('ROLE_USER');
 INSERT INTO t_authority (name)VALUES ('ROLE_ADMIN');
