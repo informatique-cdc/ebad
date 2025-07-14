@@ -346,7 +346,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.34</version>
+            <version>1.18.38</version>
             <scope>provided</scope>
         </dependency>
 
@@ -593,7 +593,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.34</version>
+                            <version>1.18.38</version>
                         </path>
                         <path>
                             <groupId>org.projectlombok</groupId>
