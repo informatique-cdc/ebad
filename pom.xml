@@ -223,7 +223,7 @@
         <dependency>
             <groupId> org.hibernate.orm</groupId>
             <artifactId>hibernate-envers</artifactId>
-            <version>6.5.2.Final</version>
+            <version>7.1.7.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>
